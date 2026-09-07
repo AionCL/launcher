@@ -25,6 +25,8 @@ namespace AionCL
             Run("Launch command dry-run", TestLaunchCommand);
             RunAsync("ZIP extraction", TestZipExtraction).GetAwaiter().GetResult();
             RunAsync("Server configuration scenarios", RegressionTests.ServerScenarios).GetAwaiter().GetResult();
+            RunAsync("Korean pack install remove cache and cancellation", RegressionTests.KoreanPackScenarios).GetAwaiter().GetResult();
+            RunAsync("Client and launcher update discovery", RegressionTests.UpdateScenarios).GetAwaiter().GetResult();
             RunAsync("Install resume repair and generated files", RegressionTests.InstallScenarios).GetAwaiter().GetResult();
 
             Console.WriteLine();

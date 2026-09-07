@@ -23,12 +23,14 @@ public sealed class LauncherConfig {
     public string clientBaseVersion { get; set; }
     public string manifestUrl { get; set; }
     public string serverConfigUrl { get; set; }
+    public string updateFeedUrl { get; set; }
     public int maxParallelDownloads { get; set; }
     public int requestTimeoutSeconds { get; set; }
     public string gameExecutable { get; set; }
     public string launchArguments { get; set; }
     public void Validate() {
-        if (product != "AionCL" || clientBaseVersion != "2.4.0" || maxParallelDownloads < 1 || maxParallelDownloads > 3 || requestTimeoutSeconds < 5 || requestTimeoutSeconds > 120) throw new InvalidDataException("Configuration launcher invalide.");
+        if (product != "AionCL" || !Regex.IsMatch(clientBaseVersion ?? "", "^2\\.4\\.[0-9]+$") || maxParallelDownloads < 1 || maxParallelDownloads > 3 || requestTimeoutSeconds < 5 || requestTimeoutSeconds > 120) throw new InvalidDataException("Configuration launcher invalide.");
+        if (!String.IsNullOrEmpty(updateFeedUrl)) Safety.Https(updateFeedUrl);
         Safety.Https(manifestUrl); if (!String.IsNullOrEmpty(serverConfigUrl)) Safety.Https(serverConfigUrl);
         Safety.Relative(gameExecutable);
         if (String.IsNullOrEmpty(launchArguments) || !launchArguments.Contains("{ip}") || !launchArguments.Contains("{port}") || launchArguments.IndexOfAny(new[] {'\r','\n','\0'}) >= 0) throw new InvalidDataException("Profil de lancement invalide.");
@@ -49,7 +51,7 @@ public sealed class Manifest {
         var paths = new HashSet<string>(StringComparer.OrdinalIgnoreCase); var names = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
         long bytes = 0, compressed = 0; int count = 0;
         checked { foreach (var p in packages) {
-            if (p == null || !Regex.IsMatch(p.name ?? "", "^aioncl-client-" + Regex.Escape(version) + "-[0-9]{3}\\.zip$") || !names.Add(p.name) || p.size <= 0 || p.size >= 2147483648L || p.files == null || p.files.Length == 0 || p.files.Length != p.fileCount || p.mirrors == null || p.mirrors.Length == 0) throw new InvalidDataException("Package invalide.");
+            if (p == null || !Regex.IsMatch(p.name ?? "", "^aioncl-client-2\\.4\\.[0-9]+-[0-9]{3}\\.zip$") || !names.Add(p.name) || p.size <= 0 || p.size >= 2147483648L || p.files == null || p.files.Length == 0 || p.files.Length != p.fileCount || p.mirrors == null || p.mirrors.Length == 0) throw new InvalidDataException("Package invalide.");
             Safety.Hash(p.sha256); foreach (var url in p.mirrors) Safety.Https(url);
             long packageBytes = 0;
             foreach (var f in p.files) {
@@ -79,6 +81,7 @@ public sealed class ServerConfig {
 }
 public enum ClientState { Absent, Potential, Valid, Incomplete }
 public sealed class FileIssue { public string Path; public string Package; public string Reason; }
+public sealed class VerificationProgress { public string Path; public int Completed; public int Total; }
 public sealed class TransferProgress { public string Package; public long Bytes; public long Total; public double BytesPerSecond; }
 // Future patch planning and launcher self-update remain independent contracts.
 public sealed class InstallPlan { public ManifestResult Target; public Package[] Packages; }
@@ -248,7 +251,7 @@ public static class Installation {
                     if (IsMutable(f.path))
                         continue;
 
-                    var path = Safety.Under(root, f.path);
+                    var path = VoiceMode.FilePath(root, f.path);
 
                     if (!File.Exists(path) ||
                         new FileInfo(path).Length != f.size)
@@ -285,9 +288,12 @@ public static class Installation {
     public static async Task<List<FileIssue>> Verify(
         string root,
         Manifest manifest,
-        CancellationToken token)
+        CancellationToken token,
+        IProgress<VerificationProgress> progress = null)
     {
         var result = new List<FileIssue>();
+        int total = manifest.packages.SelectMany(p => p.files).Count(f => !IsMutable(f.path));
+        int completed = 0;
 
         foreach (var p in manifest.packages)
         {
@@ -299,7 +305,8 @@ public static class Installation {
                 if (IsMutable(f.path))
                     continue;
 
-                string path = Safety.Under(root, f.path);
+                string path = VoiceMode.FilePath(root, f.path);
+                if (progress != null) progress.Report(new VerificationProgress { Path = f.path, Completed = completed, Total = total });
 
                 string reason =
                     !File.Exists(path)
@@ -324,8 +331,11 @@ public static class Installation {
                         Reason = reason
                     });
                 }
+                completed++;
             }
         }
+
+        if (progress != null) progress.Report(new VerificationProgress { Path = "", Completed = completed, Total = total });
 
         return result;
     }
@@ -347,6 +357,7 @@ public static class Installation {
         }
     }
     public static async Task Install(string root, InstallPlan plan, LauncherConfig config, Network network, IProgress<TransferProgress> progress, Action<string> log, CancellationToken token) {
+        if (Directory.Exists(Safety.Under(root, ".aioncl/voice-original"))) VoiceMode.RequireGameClosed();
         plan.Target.Manifest.Validate(config.clientBaseVersion);
         string metadata = Safety.Under(root, ".aioncl"); Directory.CreateDirectory(metadata);
         using (var installLock = new FileStream(Safety.Under(metadata, "install.lock"), FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.None)) {
@@ -361,7 +372,7 @@ public static class Installation {
             foreach (var p in plan.Packages) { log("Extraction : " + p.name); await Extract(Safety.Under(cache, p.name), p, stage, token).ConfigureAwait(false); }
             // Commit is recoverable, not an atomic directory swap. No version marker until final verification.
             foreach (var f in plan.Packages.SelectMany(p => p.files)) {
-                token.ThrowIfCancellationRequested(); string destination = Safety.Under(root, f.path); string staged = Safety.Under(stage, f.path);
+                token.ThrowIfCancellationRequested(); string destination = VoiceMode.FilePath(root, f.path); string staged = Safety.Under(stage, f.path);
                 Directory.CreateDirectory(Path.GetDirectoryName(destination));
                 if (File.Exists(destination)) File.Replace(staged, destination, null); else File.Move(staged, destination);
             }
@@ -411,6 +422,58 @@ public sealed class ServerService {
             var task = client.ConnectAsync(address, port);
             if (await Task.WhenAny(task, Task.Delay(5000, token)).ConfigureAwait(false) != task) { token.ThrowIfCancellationRequested(); throw new IOException("Connexion au serveur : delai depasse."); } await task.ConfigureAwait(false);
         }
+    }
+}
+public static class VoiceMode {
+    static readonly string[] Languages = { "FRA", "ENG", "DEU" };
+    static string Original(string language) { return "L10N/" + language + "/sounds/voice"; }
+    static string Backup(string language) { return ".aioncl/voice-original/" + language; }
+    public static void RequireGameClosed() {
+        foreach (var p in Process.GetProcesses()) using (p) {
+            if (p.ProcessName.Equals("aionclassic", StringComparison.OrdinalIgnoreCase) || p.ProcessName.Equals("aion", StringComparison.OrdinalIgnoreCase))
+                throw new InvalidOperationException("Close Aion before changing voices or repairing files.");
+        }
+    }
+    public static string FilePath(string root, string relative) {
+        foreach (string language in Languages) {
+            string prefix = Original(language) + "/";
+            if (relative.StartsWith(prefix, StringComparison.OrdinalIgnoreCase) && Directory.Exists(Safety.Under(root, Backup(language)))) {
+                if (Directory.Exists(Safety.Under(root, Original(language)))) throw new IOException("Voice folders conflict. Original files preserved; see .aioncl/voice-original.");
+                return Safety.Under(root, Backup(language) + "/" + relative.Substring(prefix.Length));
+            }
+        }
+        return Safety.Under(root, relative);
+    }
+    public static void Apply(string root, string language, bool korean) {
+        RequireGameClosed(); ApplyFiles(root, language, korean);
+    }
+    internal static void ApplyFiles(string root, string language, bool korean) {
+        if (!Languages.Contains(language)) throw new InvalidDataException("Unsupported voice language.");
+        string metadata = Safety.Under(root, ".aioncl"); Directory.CreateDirectory(metadata);
+        using (var gate = new FileStream(Safety.Under(root, ".aioncl/install.lock"), FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.None)) {
+            string original = Safety.Under(root, Original(language)), backup = Safety.Under(root, Backup(language));
+            if (korean) {
+                if (!Directory.Exists(Safety.Under(root, "Sounds/voice"))) throw new IOException("Base voice files are missing.");
+                if (Directory.Exists(backup)) { if (Directory.Exists(original)) throw new IOException("Voice folders conflict; no files overwritten."); return; }
+                if (!Directory.Exists(original)) throw new IOException("Localized voice files are missing. Repair the game first.");
+                CheckTree(original); Directory.CreateDirectory(Path.GetDirectoryName(backup)); Directory.Move(original, backup);
+            } else if (Directory.Exists(backup)) {
+                if (Directory.Exists(original)) throw new IOException("Voice folders conflict; no files overwritten.");
+                CheckTree(backup); Directory.CreateDirectory(Path.GetDirectoryName(original)); Directory.Move(backup, original);
+            }
+        }
+    }
+    static void CheckTree(string root) {
+        Safety.NoLinks(root);
+        foreach (string entry in Directory.EnumerateFileSystemEntries(root)) { Safety.NoLinks(entry); if (Directory.Exists(entry)) CheckTree(entry); }
+    }
+}
+public static class GameLanguage {
+    public static string Apply(string arguments, string language) {
+        if (language != "FRA" && language != "ENG" && language != "DEU") throw new InvalidDataException("Unsupported game language.");
+        var pattern = new Regex(@"(?<!\S)-lang:[A-Za-z]{3}(?!\S)");
+        if (pattern.Matches(arguments ?? "").Count != 1) throw new InvalidDataException("Expected one game language argument.");
+        return pattern.Replace(arguments, "-lang:" + language);
     }
 }
 public sealed class GameLauncher {

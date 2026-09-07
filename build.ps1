@@ -1,5 +1,6 @@
 param(
-    [switch]$Tests
+    [switch]$Tests,
+    [string]$OutputDirectory
 )
 
 $ErrorActionPreference = 'Stop'
@@ -13,6 +14,7 @@ if (!(Test-Path $compiler)) {
 }
 
 $out = Join-Path $root 'out'
+if ($OutputDirectory) { $out = [IO.Path]::GetFullPath($OutputDirectory) }
 New-Item -ItemType Directory -Force -Path $out | Out-Null
 
 $coreFile    = Join-Path $root 'src\Core.cs'
@@ -52,7 +54,16 @@ Write-Host "Program : $programFile"
     "/out:$launcherExe" `
     @references `
     $coreFile `
-    $programFile
+    (Join-Path $root 'src\Updates.cs') `
+    (Join-Path $root 'src\UpdateUi.cs') `
+    (Join-Path $root 'src\KoreanPack.cs') `
+    (Join-Path $root 'src\HitFont.cs') `
+    $programFile `
+    (Join-Path $root 'src\LauncherUi.cs') `
+    (Join-Path $root 'src\Localization.cs') `
+    "/resource:$(Join-Path $root 'assets\classic-battle.jpg'),AionCL.classic-battle.jpg" `
+    "/resource:$(Join-Path $root 'config\korean-pack.json'),AionCL.korean-pack.json" `
+    "/resource:$(Join-Path $root 'assets\japanese-hit-font.pak'),AionCL.hit-font.pak"
 
 if ($LASTEXITCODE -ne 0) {
     throw 'Launcher compilation failed.'
@@ -82,6 +93,9 @@ if ($Tests) {
         "/out:$testsExe" `
         @references `
         $coreFile `
+        (Join-Path $root 'src\Updates.cs') `
+        (Join-Path $root 'src\KoreanPack.cs') `
+        (Join-Path $root 'src\HitFont.cs') `
         $testsFile `
         (Join-Path $root 'tests\RegressionTests.cs')
 

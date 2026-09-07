@@ -33,34 +33,37 @@ namespace AionCL
         }
     }
 
-    public sealed class MainForm : Form
+    public sealed partial class MainForm : Form
     {
         private LauncherConfig config;
         private ManifestResult manifest;
         private CancellationTokenSource cts;
+        private bool busy;
 
         private readonly TextBox pathBox = new TextBox();
-        private readonly Button browseButton = new Button();
-        private readonly Button installButton = new Button();
-        private readonly Button verifyButton = new Button();
-        private readonly Button playButton = new Button();
-        private readonly Button cancelButton = new Button();
+        private readonly Button browseButton = new LauncherButton();
+        private readonly Button installButton = new LauncherButton();
+        private readonly Button verifyButton = new LauncherButton();
+        private readonly Button playButton = new LauncherButton();
+        private readonly Button cancelButton = new LauncherButton();
 
         private readonly Label statusLabel = new Label();
         private readonly Label versionLabel = new Label();
         private readonly ProgressBar progressBar = new ProgressBar();
         private readonly TextBox logBox = new TextBox();
 
-        public MainForm()
+        public MainForm() : this(false) {}
+
+        public MainForm(bool preview)
         {
             Text = "AionCL - Classic 2.4";
-            Width = 900;
-            Height = 620;
+            ClientSize = new Size(1280, 720);
+            MinimumSize = new Size(1100, 680);
             StartPosition = FormStartPosition.CenterScreen;
 
             BuildUi();
 
-            Shown += async delegate
+            if (!preview) Shown += async delegate
             {
                 await InitializeAsync();
             };
@@ -70,107 +73,6 @@ namespace AionCL
                 if (cts != null)
                     cts.Cancel();
             };
-        }
-
-        private void BuildUi()
-        {
-            var pathLabel = new Label
-            {
-                Left = 20,
-                Top = 25,
-                Width = 150,
-                Text = "Dossier du client"
-            };
-
-            pathBox.Left = 20;
-            pathBox.Top = 50;
-            pathBox.Width = 690;
-
-            browseButton.Left = 720;
-            browseButton.Top = 48;
-            browseButton.Width = 130;
-            browseButton.Text = "Parcourir";
-            browseButton.Click += Browse;
-
-            versionLabel.Left = 20;
-            versionLabel.Top = 95;
-            versionLabel.Width = 500;
-            versionLabel.Text = "Version : inconnue";
-
-            statusLabel.Left = 20;
-            statusLabel.Top = 125;
-            statusLabel.Width = 820;
-            statusLabel.Text = "Initialisation...";
-
-            progressBar.Left = 20;
-            progressBar.Top = 160;
-            progressBar.Width = 830;
-            progressBar.Height = 25;
-
-            installButton.Left = 20;
-            installButton.Top = 205;
-            installButton.Width = 180;
-            installButton.Height = 40;
-            installButton.Text = "INSTALLER";
-            installButton.Enabled = false;
-            installButton.Click += async delegate
-            {
-                await InstallAsync();
-            };
-
-            verifyButton.Left = 215;
-            verifyButton.Top = 205;
-            verifyButton.Width = 180;
-            verifyButton.Height = 40;
-            verifyButton.Text = "VÉRIFIER / RÉPARER";
-            verifyButton.Enabled = false;
-            verifyButton.Click += async delegate
-            {
-                await VerifyAsync();
-            };
-
-            playButton.Left = 410;
-            playButton.Top = 205;
-            playButton.Width = 180;
-            playButton.Height = 40;
-            playButton.Text = "JOUER";
-            playButton.Enabled = false;
-            playButton.Click += async delegate
-            {
-                await PlayAsync();
-            };
-
-            cancelButton.Left = 605;
-            cancelButton.Top = 205;
-            cancelButton.Width = 180;
-            cancelButton.Height = 40;
-            cancelButton.Text = "ANNULER";
-            cancelButton.Enabled = false;
-            cancelButton.Click += delegate
-            {
-                if (cts != null)
-                    cts.Cancel();
-            };
-
-            logBox.Left = 20;
-            logBox.Top = 270;
-            logBox.Width = 830;
-            logBox.Height = 280;
-            logBox.Multiline = true;
-            logBox.ReadOnly = true;
-            logBox.ScrollBars = ScrollBars.Vertical;
-
-            Controls.Add(pathLabel);
-            Controls.Add(pathBox);
-            Controls.Add(browseButton);
-            Controls.Add(versionLabel);
-            Controls.Add(statusLabel);
-            Controls.Add(progressBar);
-            Controls.Add(installButton);
-            Controls.Add(verifyButton);
-            Controls.Add(playButton);
-            Controls.Add(cancelButton);
-            Controls.Add(logBox);
         }
 
         private async Task InitializeAsync()
@@ -198,6 +100,7 @@ namespace AionCL
                     );
 
                 config.Validate();
+                await CheckUpdates(true);
 
                 Log("Chargement du manifest distant...");
 
@@ -206,7 +109,7 @@ namespace AionCL
                 {
                     cts = new CancellationTokenSource();
 
-                    manifest = await network.ManifestAsync(
+                    if (manifest == null) manifest = await network.ManifestAsync(
                         config,
                         cts.Token
                     );
@@ -231,13 +134,14 @@ namespace AionCL
                 verifyButton.Enabled = true;
 
                 RefreshClientState();
+                updateTimer.Start();
             }
             catch (Exception ex)
             {
                 statusLabel.Text = "Erreur d'initialisation";
                 Log(ex.Message);
                 MessageBox.Show(
-                    ex.Message,
+                    TranslateMessage(ex.Message),
                     "AionCL",
                     MessageBoxButtons.OK,
                     MessageBoxIcon.Error
@@ -250,12 +154,13 @@ namespace AionCL
             using (var dialog = new FolderBrowserDialog())
             {
                 dialog.Description =
-                    "Choisir le dossier d'installation AionCL";
+                    TranslateMessage("Choisir le dossier d'installation AionCL");
 
                 if (dialog.ShowDialog(this) ==
                     DialogResult.OK)
                 {
                     pathBox.Text = dialog.SelectedPath;
+                    SaveClientPath();
                     RefreshClientState();
                 }
             }
@@ -263,6 +168,9 @@ namespace AionCL
 
         private void RefreshClientState()
         {
+            if (busy) return;
+            RefreshKoreanButton();
+            RefreshUpdateUi();
             if (manifest == null ||
                 String.IsNullOrWhiteSpace(pathBox.Text))
             {
@@ -278,8 +186,7 @@ namespace AionCL
                         manifest
                     );
 
-                statusLabel.Text =
-                    "État du client : " + state;
+                statusLabel.Text = ClientStateText(state);
 
                 playButton.Enabled =
                     state == ClientState.Valid;
@@ -346,8 +253,18 @@ namespace AionCL
                     var planner =
                         new FullInstallPlanner();
 
-                    InstallPlan plan =
-                        planner.Plan(null, manifest);
+                    InstallPlan plan = planner.Plan(null, manifest);
+                    string versionPath = Safety.Under(pathBox.Text, ".aioncl/version.json");
+                    if(File.Exists(versionPath)) {
+                        var local=Json.Parse<LocalVersion>(File.ReadAllText(versionPath));
+                        if(local!=null&&Updates.Newer(local.version,manifest.Manifest.clientVersion))throw new InvalidOperationException("A newer client is installed. Check for updates before installing.");
+                        statusLabel.Text=L("Recherche des fichiers à mettre à jour…","Checking files for updates…","Dateien für das Update werden geprüft…");
+                        progressBar.Style=ProgressBarStyle.Marquee;
+                        var issues=await Installation.Verify(pathBox.Text,manifest.Manifest,cts.Token);
+                        var names=issues.Select(issue=>issue.Package).ToArray();
+                        plan.Packages=manifest.Manifest.packages.Where(p=>names.Contains(p.name)).ToArray();
+                        progressBar.Style=ProgressBarStyle.Continuous;
+                    }
 
                     await Installation.Install(
                         pathBox.Text,
@@ -377,8 +294,8 @@ namespace AionCL
                 Log(ex.ToString());
 
                 MessageBox.Show(
-                    ex.Message,
-                    "Échec de l'installation",
+                    TranslateMessage(ex.Message),
+                    TranslateMessage("Échec de l'installation"),
                     MessageBoxButtons.OK,
                     MessageBoxIcon.Error
                 );
@@ -393,21 +310,51 @@ namespace AionCL
         {
             if (!EnsurePath())
                 return;
+            var localMarker=Safety.Under(pathBox.Text,".aioncl/version.json");
+            if(File.Exists(localMarker)) {
+                var localVersion=Json.Parse<LocalVersion>(File.ReadAllText(localMarker));
+                if(localVersion!=null&&Updates.Newer(localVersion.version,manifest.Manifest.clientVersion)) {
+                    MessageBox.Show(this,L("Client plus récent : recherchez les mises à jour avant de vérifier.","Newer client installed: check for updates before verifying.","Neuerer Client installiert: vor der Prüfung nach Updates suchen."),"AionCL");return;
+                }
+            }
 
             SetBusy(true);
 
             cts = new CancellationTokenSource();
+            string outcome = null;
+            bool reporting = true;
 
             try
             {
                 Log("Vérification complète...");
+                statusLabel.Text = L("Vérification des fichiers en cours…", "Verifying game files…", "Spieldateien werden geprüft…");
+                progressBar.Value = 0;
+                progressBar.Style = ProgressBarStyle.Marquee;
+                var progress = new Progress<VerificationProgress>(delegate(VerificationProgress p) {
+                    if (!reporting || IsDisposed) return;
+                    statusLabel.Text = L("Vérification", "Verifying", "Prüfung") + " : " + p.Completed + " / " + p.Total + Environment.NewLine + p.Path;
+                    progressBar.Style = ProgressBarStyle.Continuous;
+                    progressBar.Value = p.Total == 0 ? 100 : (int)(100L * p.Completed / p.Total);
+                });
 
                 var issues =
                     await Installation.Verify(
                         pathBox.Text,
                         manifest.Manifest,
-                        cts.Token
+                        cts.Token,
+                        progress
                     );
+                reporting = false;
+                if(hitFont.Installed(pathBox.Text,selectedLanguage)&&!hitFont.Valid(pathBox.Text,selectedLanguage))throw new InvalidDataException("Japan hit font modified: existing file preserved.");
+                if (koreanPack.HasPack(pathBox.Text, selectedLanguage)) {
+                    statusLabel.Text = L("Vérification du pack coréen…", "Verifying Korean voice pack…", "Koreanisches Stimmenpaket wird geprüft…");
+                    progressBar.Style = ProgressBarStyle.Marquee;
+                    if (!await koreanPack.Valid(pathBox.Text, selectedLanguage, cts.Token))
+                        throw new InvalidDataException(L("Le pack coréen est incomplet ou modifié. Consultez le journal avant de le réinstaller.", "The Korean pack is incomplete or modified. Check the log before reinstalling.", "Das koreanische Paket ist unvollständig oder verändert. Vor Neuinstallation das Protokoll prüfen."));
+                }
+                progressBar.Style = ProgressBarStyle.Continuous;
+                progressBar.Value = 100;
+                outcome = L("Vérification terminée : tous les fichiers sont valides.", "Verification complete: all files are valid.", "Prüfung abgeschlossen: Alle Dateien sind gültig.");
 
                 if (issues.Count == 0)
                 {
@@ -443,7 +390,10 @@ namespace AionCL
                         var names = issues.Select(issue => issue.Package).ToArray();
                         var plan = new InstallPlan { Target = manifest, Packages = manifest.Manifest.packages.Where(p => names.Contains(p.name)).ToArray() };
                         Log("Reparation des packages concernes...");
+                        progressBar.Style = ProgressBarStyle.Marquee;
+                        statusLabel.Text = L("Réparation des fichiers en cours…", "Repairing game files…", "Spieldateien werden repariert…");
                         await Installation.Install(pathBox.Text, plan, config, network, null, Log, cts.Token);
+                        outcome = L("Vérification et réparation terminées.", "Verification and repair complete.", "Prüfung und Reparatur abgeschlossen.");
                     }
                 }
 
@@ -452,21 +402,26 @@ namespace AionCL
             catch (OperationCanceledException)
             {
                 Log("Vérification annulée.");
+                outcome = L("Vérification interrompue. Le contrôle complet reste à faire.", "Verification interrupted. A full check is still required.", "Prüfung unterbrochen. Eine vollständige Prüfung steht noch aus.");
             }
             catch (Exception ex)
             {
+                outcome = L("Échec de la vérification. Consultez le journal.", "Verification failed. See the log.", "Prüfung fehlgeschlagen. Siehe Protokoll.");
                 Log(ex.ToString());
 
                 MessageBox.Show(
-                    ex.Message,
-                    "Erreur de vérification",
+                    TranslateMessage(ex.Message),
+                    TranslateMessage("Erreur de vérification"),
                     MessageBoxButtons.OK,
                     MessageBoxIcon.Error
                 );
             }
             finally
             {
+                reporting = false;
+                progressBar.Style = ProgressBarStyle.Continuous;
                 SetBusy(false);
+                if (outcome != null) statusLabel.Text = outcome;
             }
         }
 
@@ -529,6 +484,10 @@ namespace AionCL
                             ip
                         );
 
+                    if (!File.Exists(Safety.Under(pathBox.Text, "L10N/" + selectedLanguage + "/" + selectedLanguage + ".pak")))
+                        throw new InvalidOperationException(L("Les fichiers de cette langue sont absents. Vérifiez / réparez le client.", "Files for this language are missing. Verify / repair the game.", "Die Sprachdateien fehlen. Bitte das Spiel prüfen / reparieren."));
+                    command.Arguments = GameLanguage.Apply(command.Arguments, selectedLanguage);
+
                     Log(
                         "Lancement : " +
                         command.FileName +
@@ -536,6 +495,7 @@ namespace AionCL
                         command.Arguments
                     );
 
+                    VoiceMode.Apply(pathBox.Text, selectedLanguage, false);
                     game.StartGame(command);
                 }
             }
@@ -544,8 +504,8 @@ namespace AionCL
                 Log(ex.ToString());
 
                 MessageBox.Show(
-                    ex.Message,
-                    "Impossible de lancer Aion",
+                    TranslateMessage(ex.Message),
+                    TranslateMessage("Impossible de lancer Aion"),
                     MessageBoxButtons.OK,
                     MessageBoxIcon.Error
                 );
@@ -561,7 +521,7 @@ namespace AionCL
             if (String.IsNullOrWhiteSpace(pathBox.Text))
             {
                 MessageBox.Show(
-                    "Choisis d'abord un dossier client.",
+                    TranslateMessage("Choisis d'abord un dossier client."),
                     "AionCL",
                     MessageBoxButtons.OK,
                     MessageBoxIcon.Information
@@ -571,11 +531,17 @@ namespace AionCL
             }
 
             Directory.CreateDirectory(pathBox.Text);
+            SaveClientPath();
             return true;
         }
 
         private void SetBusy(bool busy)
         {
+            this.busy = busy;
+            languageBox.Enabled = !busy;
+            koreanVoices.Enabled = !busy;
+            hitFontButton.Enabled = !busy;
+            RefreshUpdateUi();
             pathBox.Enabled = !busy;
             browseButton.Enabled = !busy;
             installButton.Enabled = !busy &&
@@ -602,6 +568,7 @@ namespace AionCL
                 return;
             }
 
+            message = TranslateMessage(message);
             logBox.AppendText(
                 "[" +
                 DateTime.Now.ToString("HH:mm:ss") +

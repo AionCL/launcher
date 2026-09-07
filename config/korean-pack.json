@@ -1,0 +1,422 @@
+﻿[
+    {
+        "path":  "cutscene/dc1/voice/zvoice.pak",
+        "sha256":  "EB33184F58B1235DEA5BDC3C89E3D0352F3E30B6AE33CBB9F28F70E30BE283F6",
+        "size":  592485
+    },
+    {
+        "path":  "cutscene/df1/voice/zvoice.pak",
+        "sha256":  "82F7F42DBB110EC80BAA1CF90020F1C4CB5A3EBCDDC2F6B926F60FFE7F9D1A30",
+        "size":  65419
+    },
+    {
+        "path":  "cutscene/df3/voice/zvoice.pak",
+        "sha256":  "60E8863E0EC848674AAF9E0E04311EBEE73AD944EBBC01A1ACB38B3F7A7349FB",
+        "size":  2310423
+    },
+    {
+        "path":  "cutscene/df4/voice/zvoice.pak",
+        "sha256":  "F82B0400BCDFEEDCC8804F98E3DD99CCF18D466BFC3DB8C939388AFFF58D0C45",
+        "size":  1579146
+    },
+    {
+        "path":  "cutscene/df5/voice/zvoice.pak",
+        "sha256":  "7F02904E9856C1F8177EEC439B66DD009375BEDD053FAA12742589F121ABDF56",
+        "size":  511929
+    },
+    {
+        "path":  "cutscene/housing/voice/zvoice.pak",
+        "sha256":  "94E78123A4BBAC80AEDAE3056921C73DAEC1401029A474E73AF7C83D0555C53D",
+        "size":  1966641
+    },
+    {
+        "path":  "cutscene/id/voice/zvoice.pak",
+        "sha256":  "AE41159D8F88AB11D41A326DFAF04685A889EED83281A0FE589E2ED051E9C2B5",
+        "size":  30529161
+    },
+    {
+        "path":  "cutscene/lc1/voice/zvoice.pak",
+        "sha256":  "2A39B0683F252B2FB0BAA247FAD53FAF81A546EC29B21996FA100DF5EAF705B0",
+        "size":  285150
+    },
+    {
+        "path":  "cutscene/ldf7/voice/zvoice.pak",
+        "sha256":  "BA6B860F78F7575D2D8F6F211D19B4729B3921989F74A28A79C0A601E0C17664",
+        "size":  1054221
+    },
+    {
+        "path":  "cutscene/ldf8/voice/zvoice.pak",
+        "sha256":  "46DEBCA9BDEE8997628DA253F0E3B683BCCB378766E611B3806A352E2F1F6DE0",
+        "size":  821277
+    },
+    {
+        "path":  "cutscene/lf1/voice/zvoice.pak",
+        "sha256":  "4088A41BDE329598DF3DBACC51338F64A680D9D8434566C38E518466984F5F6D",
+        "size":  96273
+    },
+    {
+        "path":  "cutscene/lf3/voice/zvoice.pak",
+        "sha256":  "6EE87488BEC9A50939BC447B22D716F8787684AF4303C67D97B970EFEBA3685B",
+        "size":  2568416
+    },
+    {
+        "path":  "cutscene/lf4/voice/zvoice.pak",
+        "sha256":  "00AEDBF8BC9BD5F8C508A02C216FC658998C383189DAE06BB862BFC8C0500EF6",
+        "size":  3108718
+    },
+    {
+        "path":  "cutscene/lf5/voice/zvoice.pak",
+        "sha256":  "8D9C84FC97338294CD0056616B378B5B52BFA7622481111788FACB3D6B7B4FB5",
+        "size":  521865
+    },
+    {
+        "path":  "gossip/zgossip.pak",
+        "sha256":  "49F63DB5DEF7733895CB1AC8EE60E2EA5DA53C7CFF7B3262F87D41EF6128C114",
+        "size":  63064091
+    },
+    {
+        "path":  "npc/zpak_000.pak",
+        "sha256":  "22BA797BCC8EE058A6A9869DD3A3563AA4F4D57F5A6C65903636750AEE2F410D",
+        "size":  4203021
+    },
+    {
+        "path":  "npc/zpak_001.pak",
+        "sha256":  "1D8EBD44CCB0A0F0F5BF26D15DDB6C5F1B106AE73B82AD7E294A668486252636",
+        "size":  3233847
+    },
+    {
+        "path":  "npc/zpak_002.pak",
+        "sha256":  "E8BE1CB367944814BBE19613E089384DCCF65E074D915FE0E027566630E38FC2",
+        "size":  3885320
+    },
+    {
+        "path":  "npc/zpak_003.pak",
+        "sha256":  "CC463A0E915B2E847702905233AF1D5EE2DE84625085998122D636BC8532FE05",
+        "size":  4153290
+    },
+    {
+        "path":  "npc/zpak_004.pak",
+        "sha256":  "25CD94829C54A76E2D5D8646A265709BBF975DAA752884B48D368F29279D6BDE",
+        "size":  4561227
+    },
+    {
+        "path":  "npc/zpak_005.pak",
+        "sha256":  "5703B14EB6CC31D8238549339E393A6F4165A203403FA52C2A950370705496D8",
+        "size":  4119546
+    },
+    {
+        "path":  "npc/zpak_006.pak",
+        "sha256":  "CF1D606E30629DD919247D2C5E19934138D0BF99EE86CE196359F64CCC3812D1",
+        "size":  3843450
+    },
+    {
+        "path":  "npc/zpak_007.pak",
+        "sha256":  "3DD35D1B68C9027BF7ADAE926B92DCA37D09C3A7ACF588F5DFD3741CE88EE0C3",
+        "size":  3422386
+    },
+    {
+        "path":  "npc/zpak_008.pak",
+        "sha256":  "936A3CBB3075779ECC06A6F5722B8FB12B18E12B21BE47FE5F66F6F2F170A1EF",
+        "size":  2740427
+    },
+    {
+        "path":  "npc/zpak_009.pak",
+        "sha256":  "2DB24B9CB9739E59FA64E7AC7BA25A16BCE5CD7ECD3F028734320E1073452F52",
+        "size":  3506242
+    },
+    {
+        "path":  "npc/zpak_010.pak",
+        "sha256":  "4E010069FEF81EE6A35826F66CD250BF54CB1A8A74BC90DC4956E68BFF3C84E1",
+        "size":  3730490
+    },
+    {
+        "path":  "npc/zpak_011.pak",
+        "sha256":  "D5DCDF56B79B92F1FE495C18DFD8335FCEFA5290BB1459004A35815B184F721B",
+        "size":  4499182
+    },
+    {
+        "path":  "npc/zpak_012.pak",
+        "sha256":  "D1367207EAA2D7E007963762B4039521A86A0755041065C56F0248A30EB908C3",
+        "size":  3697358
+    },
+    {
+        "path":  "npc/zpak_013.pak",
+        "sha256":  "85CE390C3329F7BA6062E5F5EFD68349FDA396E0023302651395EE6EE236CEC2",
+        "size":  2841258
+    },
+    {
+        "path":  "npc/zpak_014.pak",
+        "sha256":  "676871F03F6362026C2622350F2F87E8CDD49741CAD34C739D33139C2CC5F4DF",
+        "size":  3772767
+    },
+    {
+        "path":  "npc/zpak_015.pak",
+        "sha256":  "0ADD690C17C3C2776CF0C93327AF39AAA898372FCBF55FC5BF4C336656A57623",
+        "size":  3064424
+    },
+    {
+        "path":  "npc/zpak_016.pak",
+        "sha256":  "95AD20CEDA45842DDD6F649D977B43F737579CF1D35FFB2F454BC12AF1F53673",
+        "size":  4562380
+    },
+    {
+        "path":  "npc/zpak_017.pak",
+        "sha256":  "015AF5A36701CC3DCF5F9186768009064FB37FBEADF27DECD213F22D99B61890",
+        "size":  23226296
+    },
+    {
+        "path":  "npc/zpak_018.pak",
+        "sha256":  "97B2455F92A7BC92B5134BD66B4B5936AB96658FCDF1036FB99791C8274B28A2",
+        "size":  21682061
+    },
+    {
+        "path":  "npc/zpak_019.pak",
+        "sha256":  "C5BBD91A71E9FDCDF15B634957EA5F99D88EFB1D699A44DCC053C9FB6C2AD7F2",
+        "size":  3743605
+    },
+    {
+        "path":  "npc/zpak_020.pak",
+        "sha256":  "AFF0CA10D5DA9DE60644B3A3F97D7707FB0CB043B0A936F79049D3E1537E1E72",
+        "size":  4268518
+    },
+    {
+        "path":  "npc/zpak_021.pak",
+        "sha256":  "BADBFEB3B4EBB1C4A0FA35DB515CC3774ACFBF1A101DFA89D45746807F2820A4",
+        "size":  4653171
+    },
+    {
+        "path":  "npc/zpak_022.pak",
+        "sha256":  "32DB195342C897DF5E87AD2DAD9763924880B2C4123BC09132356BAD49C3ACFE",
+        "size":  4663959
+    },
+    {
+        "path":  "npc/zpak_023.pak",
+        "sha256":  "3B927716A75636DC706D0AD878B61B35DAFE2BEEADCBABB206AE95E477DED23B",
+        "size":  4189674
+    },
+    {
+        "path":  "npc/zpak_024.pak",
+        "sha256":  "6D696BA3490DBCFC1BA401B33A801F2606373FAB2299D2DC01359F18D9D8D61E",
+        "size":  4688459
+    },
+    {
+        "path":  "npc/zpak_025.pak",
+        "sha256":  "449A28D2566EE35C61DFE898D5232BB665ED7666FE7BC5C977808ADA81C5C9B0",
+        "size":  8549340
+    },
+    {
+        "path":  "npc/zpak_026.pak",
+        "sha256":  "33A579F60E6797F4B54699BBE06B3F44E23D1F0665F3B8C6D4F78CA63A5C4D4F",
+        "size":  5137076
+    },
+    {
+        "path":  "npc/zpak_027.pak",
+        "sha256":  "5F5018F7B0DE70513F176A1097ADFC3C655E58A85C7B62BD1467766740A9BB3B",
+        "size":  4648619
+    },
+    {
+        "path":  "npc/zpak_028.pak",
+        "sha256":  "FFAEFBCD405A5C5BFCA2A8F24EF6FDAD876C0A18BDCED6D7059AE6B44E9D16DD",
+        "size":  6568627
+    },
+    {
+        "path":  "npc/zpak_029.pak",
+        "sha256":  "D5C4431322BC9A469A333BDD196DD652FE285C19852CA2B90F80BC683D7ED6CB",
+        "size":  11715392
+    },
+    {
+        "path":  "npc/zpak_030.pak",
+        "sha256":  "1B191AC200EC1C9F3B11291B1782E407697D669AB97023921A0D3E30E7E36FD0",
+        "size":  6582589
+    },
+    {
+        "path":  "npc/zpak_031.pak",
+        "sha256":  "49BF76E5E231D6FA78825089936C379729A11BCFF6E02B5C56E5B19B9B4FE83A",
+        "size":  9617102
+    },
+    {
+        "path":  "npc/zpak_032.pak",
+        "sha256":  "459A045F8C403484642B07892F2963DA0AF10C6DC6C65E753CAAA209596443A3",
+        "size":  9706002
+    },
+    {
+        "path":  "npc/zpak_033.pak",
+        "sha256":  "B0C36DA21D056AFC1D52B447DFFDE40DAACC7EDFB5FC1A215F81C3005EB350E3",
+        "size":  5550518
+    },
+    {
+        "path":  "npc/zpak_034.pak",
+        "sha256":  "06A7BE0FB9BFB4828481D93F40EC66BDFC272EDFD8AB2D7EAA3D1C8B8E7EEF7F",
+        "size":  4879295
+    },
+    {
+        "path":  "npc/zpak_035.pak",
+        "sha256":  "B7D3CEBC747AB5ACC4F54C87CBEB4BA9C7CA986BB7C6DED80B206BF9E1B92B4F",
+        "size":  8473024
+    },
+    {
+        "path":  "npc/zpak_036.pak",
+        "sha256":  "F4DDBFA9A4AB94071469502BB58911D4883133D2C56AA504B70D11736524D4FB",
+        "size":  5326035
+    },
+    {
+        "path":  "npc/zpak_037.pak",
+        "sha256":  "CD748FBEEC14CA6BB3129A84BA2AB07748A3B676EA8FF0DB6CA1C7DEFD657084",
+        "size":  8748362
+    },
+    {
+        "path":  "npc/zpak_038.pak",
+        "sha256":  "49BE1D8F72A217624A2AE8924BFD1BB32ECF5074C10AD4E05193201A4D8759A8",
+        "size":  5276142
+    },
+    {
+        "path":  "npc/zpak_039.pak",
+        "sha256":  "8D117053F589E76E0AAB33205325B33010FE1AF4F8CD2962AC3705735CC207C1",
+        "size":  15787974
+    },
+    {
+        "path":  "npc/zpak_040.pak",
+        "sha256":  "13BEDAF792327F343BB779C2501C3B3A5A9D12121AC545A86642EB9BCEEE37FA",
+        "size":  5116431
+    },
+    {
+        "path":  "npc/zpak_041.pak",
+        "sha256":  "77ADACF488417F00D3FE914627DEE32987761C8BE1C300EDBE68FC9A16F1C413",
+        "size":  4986101
+    },
+    {
+        "path":  "npc/zpak_042.pak",
+        "sha256":  "1E884439F8F3BA413D2B21732902B7C592C42012F85088C9EAD6F7886E384CFE",
+        "size":  5742085
+    },
+    {
+        "path":  "npc/zpak_043.pak",
+        "sha256":  "5933D69F10E55BB89CDFA4CB6D62D1C2122BAD53B3FF5A87C5655F65854BA2D3",
+        "size":  5032716
+    },
+    {
+        "path":  "npc/zpak_044.pak",
+        "sha256":  "4255924E8F78465898E09A32602ABD839BA494C49495375EF58EC8207D2FC16B",
+        "size":  17825892
+    },
+    {
+        "path":  "npc/zpak_045.pak",
+        "sha256":  "E4D07A505B6A6E699E546D58CA3C6EFF3F997D7286339A626C8FF0FFE35310AF",
+        "size":  5449611
+    },
+    {
+        "path":  "npc/zpak_046.pak",
+        "sha256":  "D485333D59CC2EE74C32B74B53B8EB2EE6AEED287DFE4677AD3AACEE6E5D3D09",
+        "size":  5065616
+    },
+    {
+        "path":  "npc/zpak_047.pak",
+        "sha256":  "74D03102A12FEF9CBCECB19C9CEC5332DBA69C6634E9CF79807AA7E170A3CD9A",
+        "size":  10930311
+    },
+    {
+        "path":  "npc/zpak_048.pak",
+        "sha256":  "E5BEDCC6A8830FC37D73FA499AFA37D051B12A4124F9643EBBE63689F9E1CD07",
+        "size":  4887435
+    },
+    {
+        "path":  "npc/zpak_049.pak",
+        "sha256":  "99D8FC08194E99A56BFF752ADB31116656F3BBDB5056F2C32CBF9375DBC3CF27",
+        "size":  5185959
+    },
+    {
+        "path":  "npc/zpak_050.pak",
+        "sha256":  "B5CD540E74C1B5E3C8429D29D5E8350CB3D27865E9DB922C88DC231A87ADC153",
+        "size":  4757549
+    },
+    {
+        "path":  "npc/zpak_051.pak",
+        "sha256":  "EE675B270C33E93DF247109C4521DF498711A98BC8FC7886399F6064C5730364",
+        "size":  4904214
+    },
+    {
+        "path":  "npc/zpak_052.pak",
+        "sha256":  "673EFA2FD8E8CFEF8E808D5FCC1EABC608D3D03D9219E327D20595E3CF64B57E",
+        "size":  4859616
+    },
+    {
+        "path":  "npc/zpak_053.pak",
+        "sha256":  "85F77E112419EC1006A95D48E7FD2D9F2193C884776B9A0C4A5E0B9B0087E310",
+        "size":  12414662
+    },
+    {
+        "path":  "npc/zpak_054.pak",
+        "sha256":  "8884C5479FDD1436283EB237771921FFA274F364ADF7A745CC6BDF03235DDE51",
+        "size":  4814939
+    },
+    {
+        "path":  "npc/zpak_055.pak",
+        "sha256":  "EC2AEAD6B33C56AA0C6B47B67514B968AC13048A4A298254E391C473DE00BCC8",
+        "size":  3144714
+    },
+    {
+        "path":  "npc/zpak_056.pak",
+        "sha256":  "0C7B382866AC383D9CA348F2E555EDB27E5344EA9A6EB9371666AAD99D65C6F1",
+        "size":  5302030
+    },
+    {
+        "path":  "npc/zpak_057.pak",
+        "sha256":  "C41A671032219F91B0C05CA461C4E66107A153D99645EA7E54310B82660AB5E0",
+        "size":  5413840
+    },
+    {
+        "path":  "npc/zpak_058.pak",
+        "sha256":  "0500FB13D41B80BF23803A467FED40FDBDD3A260E0C58BF7FA30E3384EB8AE51",
+        "size":  5419196
+    },
+    {
+        "path":  "npc/zpak_059.pak",
+        "sha256":  "515F6A609E3DCA954BE6B28A2BB9D02799AEFC40E2F5CB6222FBFC0FBA5644A2",
+        "size":  5087057
+    },
+    {
+        "path":  "npc/zpak_060.pak",
+        "sha256":  "E01D62DF4A02AD9DDD16D2A073B016BDCB82FA92DDAB9370C2CED1DAB7CC01C7",
+        "size":  2191241
+    },
+    {
+        "path":  "system/zsystem.pak",
+        "sha256":  "BC0AEB1E484A1A77C81CC0E032CFEE142FCAF9903C6A3220891BB1C08883FE58",
+        "size":  8064085
+    },
+    {
+        "path":  "voice/attack/zattack.pak",
+        "sha256":  "7D1ADBC0D6B939AE2DB5A8FCDD53F02658E01FB9D17B2BD81D756525E5A1F057",
+        "size":  5916278
+    },
+    {
+        "path":  "voice/cast/zcast.pak",
+        "sha256":  "982F7949307646C00672212C66B05432063CAD17BCCCDA583EF43EC439B54C44",
+        "size":  27761690
+    },
+    {
+        "path":  "voice/damage/zdamage.pak",
+        "sha256":  "4C88384CF82380F1F1ECC2C34273AB80FFFFF751241B2319C51A1D5C8C7DA073",
+        "size":  4956440
+    },
+    {
+        "path":  "voice/defence/zdefence.pak",
+        "sha256":  "2BF7473086F757AF117D615E27E186EC944B316F3B50FA572614D8A971CBC976",
+        "size":  1256397
+    },
+    {
+        "path":  "voice/login/zlogin.pak",
+        "sha256":  "368618E82FAF3BBBB8E2E158D06C939385F52D379A6754B2B29253C523BD6FDF",
+        "size":  1443112
+    },
+    {
+        "path":  "voice/motion/zmotion.pak",
+        "sha256":  "DDD9E1DFFEC43C7C6F3FEA905592F03897289D2F20D5D3A64B7DB88FF42521CF",
+        "size":  1007333
+    },
+    {
+        "path":  "voice/social/zsocial.pak",
+        "sha256":  "3AD123A136D2F829FFE1C2130F99980201CDCB51B810413B3D401F3EBFB85336",
+        "size":  54508458
+    }
+]

@@ -11,6 +11,8 @@ foreach ($name in @('AionCL.Launcher.exe', 'AionCL.Launcher.exe.config', 'launch
     Copy-Item -LiteralPath (Join-Path $root "out\$name") -Destination $stage
 }
 Copy-Item -LiteralPath (Join-Path $root 'DISTRIBUTION.md') -Destination $stage
+Copy-Item -LiteralPath (Join-Path $root 'RECETTE.md') -Destination $stage
+Copy-Item -LiteralPath (Join-Path $root 'UPDATES.md') -Destination $stage
 $zip = Join-Path $root "out\AionCL-Launcher-$stamp.zip"
 Compress-Archive -Path (Join-Path $stage '*') -DestinationPath $zip
 Get-FileHash -LiteralPath $zip -Algorithm SHA256 | Format-List
