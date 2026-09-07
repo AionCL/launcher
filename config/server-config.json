@@ -1,0 +1,8 @@
+{
+  "version": 1,
+  "serverName": "AionCL",
+  "loginHost": "aioncl.freeddns.org",
+  "loginPort": 2106,
+  "gamePort": 7777,
+  "maintenance": false
+}

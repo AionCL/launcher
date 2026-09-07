@@ -1,0 +1,11 @@
+/.local/
+/out/
+/bin/
+/obj/
+*.user
+*.local.json
+*.log
+.env*
+*.pfx
+*.pem
+*.key

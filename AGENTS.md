@@ -1,0 +1,2 @@
+﻿# Reprise du travail
+Avant de travailler sur ce launcher, lire `.local/SUIVI-LAUNCHER.md` si présent, puis vérifier git status et l’état réel des résultats/processus mentionnés. Actualiser le suivi après chaque étape significative et avant de rendre la main. Préserver les fichiers préexistants non suivis. Ne pas lancer d’opérations lourdes de packaging client et ne pas publier sans autorisation explicite.
