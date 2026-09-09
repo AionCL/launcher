@@ -79,6 +79,25 @@ public sealed class ServerConfig {
         var server = Json.Parse<ServerConfig>(text); server.Validate(); return server;
     }
 }
+
+// Exact, reviewed local shop patch variants. Never trust a local allowlist.
+// Bound to the original manifest hash: future client versions use their own files.
+public static class ShopPatchIntegrity {
+    static readonly string[][] Variants = new string[][] {
+        new string[] { "l10n/FRA/FRA.pak", "986cc2759fa226c11241520da71fd5adff066a541fcb808dc90b426dc55b0e50", "69d6e7c7348ba3cd5e27b6402aea2d4175cadb51db2889aa09065395395941df", "673" },
+        new string[] { "l10n/ENG/ENG.pak", "1e6caa894d0460f08de6af777e170c84ff49be5689ac1eabf79f81706bd26b07", "43c96391822b34bd5b3d1d7c65dc2d9724a7ec4f11b070e0f8eea2b2cdf46d1d", "672" },
+        new string[] { "l10n/DEU/DEU.pak", "0a4ff72890de41d45cbff051d04da0e530be96c581d42a35be9547c19726e03d", "037593bcd90b17d858f39ded24584096cb6c5b81d532e8db15e27e97d0403242", "672" },
+        new string[] { "L10N/FRA/data/data.pak", "b508fab73d5fc16de32cf1e64242e63a42c2b4e60b5eb603a37ef84cbdbeda12", "6d956bd7dd062ce533bab510f82da498b9d946c734a5c0600a2673c0c8457962", "54314257" },
+        new string[] { "L10N/ENG/data/data.pak", "0b3050ee0d28d90f81e300a6145dbdd467b0327477d69c589384acc575adf220", "e91c76afee98397438115c7568907be4c11597e6f9b3fb45133d68c37509bb3f", "50881368" },
+        new string[] { "L10N/DEU/data/data.pak", "d53264795c17094bdae218e38a8aa24ee57d7a890f878d89898071b9b2b01630", "647198922a02147a30fbdc319cbf968d11be6585dc0de6fbd457cc01c0896fd9", "53771604" },
+    };
+    public static bool Matches(string path, ClientFile original) {
+        var variant = Variants.FirstOrDefault(v => String.Equals(v[0], original.path, StringComparison.OrdinalIgnoreCase) && String.Equals(v[1], original.sha256, StringComparison.OrdinalIgnoreCase));
+        if (variant == null) return false;
+        return Safety.Matches(path, Int64.Parse(variant[3], CultureInfo.InvariantCulture), variant[2], CancellationToken.None).GetAwaiter().GetResult();
+    }
+}
+
 public enum ClientState { Absent, Potential, Valid, Incomplete }
 public sealed class FileIssue { public string Path; public string Package; public string Reason; }
 public sealed class VerificationProgress { public string Path; public int Completed; public int Total; }
@@ -252,6 +271,7 @@ public static class Installation {
                         continue;
 
                     var path = VoiceMode.FilePath(root, f.path);
+                    if (ShopPatchIntegrity.Matches(path, f)) continue;
 
                     if (!File.Exists(path) ||
                         new FileInfo(path).Length != f.size)
@@ -309,6 +329,7 @@ public static class Installation {
                 if (progress != null) progress.Report(new VerificationProgress { Path = f.path, Completed = completed, Total = total });
 
                 string reason =
+                    ShopPatchIntegrity.Matches(path, f) ? null :
                     !File.Exists(path)
                         ? "absent"
                         : new FileInfo(path).Length != f.size
@@ -373,6 +394,8 @@ public static class Installation {
             // Commit is recoverable, not an atomic directory swap. No version marker until final verification.
             foreach (var f in plan.Packages.SelectMany(p => p.files)) {
                 token.ThrowIfCancellationRequested(); string destination = VoiceMode.FilePath(root, f.path); string staged = Safety.Under(stage, f.path);
+                // Preserve a verified shop variant when another file in its package is repaired.
+                if (ShopPatchIntegrity.Matches(destination, f)) continue;
                 Directory.CreateDirectory(Path.GetDirectoryName(destination));
                 if (File.Exists(destination)) File.Replace(staged, destination, null); else File.Move(staged, destination);
             }
