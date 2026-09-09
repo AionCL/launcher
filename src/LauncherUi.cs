@@ -26,13 +26,13 @@ public sealed partial class MainForm {
 
     private void BuildUi() {
         DoubleBuffered = true; AutoScaleMode = AutoScaleMode.None;
-        ClientSize = new Size(1180, 720); MinimumSize = new Size(1120, 759);
-        Font = new Font("Segoe UI", 10F); ForeColor = Color.FromArgb(231,235,241); BackColor = Color.FromArgb(16,19,26);
-        using (var stream = typeof(MainForm).Assembly.GetManifestResourceStream("AionCL.classic-battle.jpg")) {
+        ClientSize = new Size(1200, 760); MinimumSize = new Size(1136, 759);
+        Font = new Font("Segoe UI", 10F); ForeColor = Color.FromArgb(231,235,241); BackColor = Color.FromArgb(12,16,23);
+        using (var stream = typeof(MainForm).Assembly.GetManifestResourceStream("AionCL.classic-wings.jpg")) {
             if (stream != null) using (var source = Image.FromStream(stream)) portal = new Bitmap(source);
         }
-        var brand = LabelAt(this,"AION",28,20,150,48,28,ForeColor); brand.Font = new Font("Georgia",28);
-        edition = LabelAt(this,"CLASSIC  /  2.4",180,37,140,22,9,muted);
+        var brand = LabelAt(this,"AIONCL",28,20,185,48,28,ForeColor); brand.Font = new Font("Georgia",28);
+        edition = LabelAt(this,"CLASSIC  /  2.4",226,37,140,22,9,muted);
         homeButton = ButtonAt(this,"",370,26,120,42,false); homeButton.Click += delegate { storyPage="home"; ApplyLanguage(); };
         helpButton = ButtonAt(this,"",498,26,100,42,false); helpButton.Click += delegate { storyPage="help"; ApplyLanguage(); };
         journalButton = ButtonAt(this,"",606,26,110,42,false); journalButton.Click += delegate { ShowJournal(); };
@@ -41,7 +41,7 @@ public sealed partial class MainForm {
         heading = LabelAt(storyPanel,"AION CLASSIC",0,0,550,22,9,accent);
         storyTitle = LabelAt(storyPanel,"",0,29,580,36,20,ForeColor);
         storyBody = LabelAt(storyPanel,"",0,78,590,126,10,muted);
-        installPanel = new Panel { BackColor = Color.FromArgb(23,28,38) }; Controls.Add(installPanel);
+        installPanel = new SurfacePanel { BackColor = Color.FromArgb(20,27,37) }; Controls.Add(installPanel);
         clientTitle = LabelAt(installPanel,"",24,24,280,32,17,ForeColor);
         versionLabel.SetBounds(24,66,282,25); versionLabel.ForeColor=muted; installPanel.Controls.Add(versionLabel);
         pathLabel = LabelAt(installPanel,"",24,104,280,25,9,muted);
@@ -83,25 +83,50 @@ public sealed partial class MainForm {
     private void LayoutLauncher() {
         if(footer==null) return;
         int w=ClientSize.Width,h=ClientSize.Height;
-        footer.SetBounds(0,h-128,w,128);
-        installPanel.SetBounds(w-358,170,330,h-322);
-        int imageWidth = Math.Min(512, w - 438);
-        int imageHeight = portal == null ? imageWidth * 300 / 640 : imageWidth * portal.Height / portal.Width;
-        artwork.SetBounds(28 + (w - 414 - imageWidth) / 2, 170, imageWidth, imageHeight);
-        storyPanel.SetBounds(28,artwork.Bottom+24,w-414,footer.Top-artwork.Bottom-30);
-        storyTitle.Width=storyPanel.Width; storyBody.Width=storyPanel.Width;
-        playButton.SetBounds(w-358,24,330,76);
-        progressBar.Width=w-414; statusLabel.Width=progressBar.Width;
-        cancelButton.Left=progressBar.Right-cancelButton.Width;
-        if(updatePanel!=null){updatePanel.SetBounds(28,90,w-56,60);checkUpdatesButton.Left=updatePanel.Width-390;launcherUpdateButton.Left=updatePanel.Width-212;updateNotice.Width=updatePanel.Width-420;}
+        homeButton.SetBounds(w-384,26,112,40); helpButton.SetBounds(w-260,26,104,40); journalButton.SetBounds(w-144,26,116,40);
+        const int margin=28, gap=28, side=352;
+        int leftWidth=w-margin*2-gap-side;
+        footer.SetBounds(0,h-124,w,124);
+        installPanel.SetBounds(w-margin-side,164,side,footer.Top-180);
+        clientTitle.SetBounds(24,20,side-48,34);
+        versionLabel.SetBounds(24,60,side-48,28);
+        pathLabel.SetBounds(24,102,side-48,24);
+        pathBox.SetBounds(24,130,side-104,30);
+        browseButton.SetBounds(side-72,127,48,36);
+        languageLabel.SetBounds(24,178,side-48,24);
+        languageBox.SetBounds(24,206,side-48,32);
+        koreanVoices.SetBounds(24,248,side-48,36);
+        hitFontButton.SetBounds(24,290,side-48,36);
+        installButton.SetBounds(24,334,side-48,36);
+        verifyButton.SetBounds(24,378,side-48,36);
+        int imageWidth = Math.Min(leftWidth, (h-440)*16/9);
+        int imageHeight = portal == null ? imageWidth * 9 / 16 : imageWidth * portal.Height / portal.Width;
+        artwork.SetBounds(margin+(leftWidth-imageWidth)/2,164,imageWidth,imageHeight);
+        storyPanel.SetBounds(margin,artwork.Bottom+20,leftWidth,footer.Top-artwork.Bottom-24);
+        storyTitle.SetBounds(0,26,leftWidth,40);
+        storyBody.SetBounds(0,76,leftWidth,Math.Max(60,storyPanel.Height-76));
+        playButton.SetBounds(w-margin-side,24,side,76);
+        progressBar.SetBounds(margin,24,leftWidth,6);
+        cancelButton.SetBounds(margin+leftWidth-168,48,168,44);
+        statusLabel.SetBounds(margin,46,leftWidth-188,66);
+        if(updatePanel!=null) {
+            updatePanel.SetBounds(margin,90,w-margin*2,54);
+            int downloadWidth=Math.Max(220,TextRenderer.MeasureText(launcherUpdateButton.Text,launcherUpdateButton.Font).Width+32);
+            int checkWidth=Math.Max(242,TextRenderer.MeasureText(checkUpdatesButton.Text,checkUpdatesButton.Font).Width+32);
+            bool showDownload=releases!=null&&Updates.Newer(releases.launcher.version,Updates.LauncherVersion);
+            launcherUpdateButton.SetBounds(updatePanel.Width-downloadWidth-8,7,downloadWidth,40);
+            checkUpdatesButton.SetBounds(updatePanel.Width-8-checkWidth-(showDownload?downloadWidth+10:0),7,checkWidth,40);
+            updateNotice.SetBounds(16,6,checkUpdatesButton.Left-30,42);
+            updateNotice.TextAlign=ContentAlignment.MiddleLeft;
+        }
     }
     private Label LabelAt(Control p,string t,int x,int y,int w,int h,float size,Color c) {
         var l=new Label { Text=t,Bounds=new Rectangle(x,y,w,h),ForeColor=c,BackColor=Color.Transparent,Font=new Font("Segoe UI",size) }; p.Controls.Add(l); return l;
     }
     private Button ButtonAt(Control p,string t,int x,int y,int w,int h,bool primary) { var b=new LauncherButton(); StyleButton(b,t,p,x,y,w,h,primary); return b; }
     private void StyleButton(Button b,string text,Control p,int x,int y,int w,int h,bool primary) {
-        b.Text=text;b.SetBounds(x,y,w,h);b.FlatStyle=FlatStyle.Flat;b.FlatAppearance.BorderColor=Color.FromArgb(62,76,93);b.FlatAppearance.MouseOverBackColor=Color.FromArgb(46,62,78);
-        b.BackColor=primary?Color.FromArgb(51,108,131):Color.FromArgb(29,37,49);b.ForeColor=Color.White;b.Cursor=Cursors.Hand;b.UseVisualStyleBackColor=false;p.Controls.Add(b);
+        b.Font=new Font("Segoe UI",10F);b.Text=text;b.SetBounds(x,y,w,h);b.FlatStyle=FlatStyle.Flat;b.FlatAppearance.BorderColor=Color.FromArgb(62,76,93);b.FlatAppearance.MouseOverBackColor=Color.FromArgb(46,62,78);
+        b.BackColor=primary?Color.FromArgb(37,125,147):Color.FromArgb(27,37,49);b.ForeColor=Color.White;b.Cursor=Cursors.Hand;b.UseVisualStyleBackColor=false;p.Controls.Add(b);
     }
     private void ApplyLanguage() {
         changingLanguage=true;
@@ -187,13 +212,32 @@ public sealed partial class MainForm {
         }
     }
 }
+public sealed class SurfacePanel:Panel {
+    public SurfacePanel(){DoubleBuffered=true;}
+    internal static System.Drawing.Drawing2D.GraphicsPath Outline(Rectangle r,int radius) {
+        var path=new System.Drawing.Drawing2D.GraphicsPath();int d=radius*2;
+        path.AddArc(r.Left,r.Top,d,d,180,90);path.AddArc(r.Right-d,r.Top,d,d,270,90);
+        path.AddArc(r.Right-d,r.Bottom-d,d,d,0,90);path.AddArc(r.Left,r.Bottom-d,d,d,90,90);path.CloseFigure();return path;
+    }
+    protected override void OnPaintBackground(PaintEventArgs e) {
+        e.Graphics.Clear(Parent==null?BackColor:Parent.BackColor);
+        e.Graphics.SmoothingMode=System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
+        using(var shape=Outline(new Rectangle(0,0,Width-1,Height-1),12))
+        using(var fill=new SolidBrush(BackColor))
+        using(var edge=new Pen(Color.FromArgb(38,49,63))) { e.Graphics.FillPath(fill,shape);e.Graphics.DrawPath(edge,shape); }
+    }
+}
 public sealed class LauncherButton:Button {
     bool hovered;
     protected override void OnMouseEnter(EventArgs e){hovered=true;Invalidate();base.OnMouseEnter(e);}
     protected override void OnMouseLeave(EventArgs e){hovered=false;Invalidate();base.OnMouseLeave(e);}
     protected override void OnPaint(PaintEventArgs e){
-        using(var b=new SolidBrush(Enabled?(hovered?FlatAppearance.MouseOverBackColor:BackColor):Color.FromArgb(25,30,39)))e.Graphics.FillRectangle(b,ClientRectangle);
-        using(var p=new Pen(Enabled?FlatAppearance.BorderColor:Color.FromArgb(44,51,64)))e.Graphics.DrawRectangle(p,0,0,Width-1,Height-1);
+        e.Graphics.Clear(Parent==null?BackColor:Parent.BackColor);
+        e.Graphics.SmoothingMode=System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
+        using(var shape=SurfacePanel.Outline(new Rectangle(1,1,Width-3,Height-3),7)) {
+            using(var b=new SolidBrush(Enabled?(hovered?FlatAppearance.MouseOverBackColor:BackColor):Color.FromArgb(25,30,39)))e.Graphics.FillPath(b,shape);
+            using(var p=new Pen(Enabled?FlatAppearance.BorderColor:Color.FromArgb(44,51,64)))e.Graphics.DrawPath(p,shape);
+        }
         TextRenderer.DrawText(e.Graphics,Text,Font,new Rectangle(5,0,Width-10,Height),Enabled?ForeColor:Color.FromArgb(124,137,155),TextFormatFlags.VerticalCenter|TextFormatFlags.HorizontalCenter|TextFormatFlags.SingleLine);
         if(Focused&&ShowFocusCues)ControlPaint.DrawFocusRectangle(e.Graphics,Rectangle.Inflate(ClientRectangle,-4,-4));
     }

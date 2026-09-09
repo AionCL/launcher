@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Diagnostics;
 using System.Drawing;
 using System.IO;
@@ -39,6 +39,7 @@ public sealed partial class MainForm {
         if(ClientUpdateAvailable()){available+=L("Mise à jour du jeu : ","Game update: ","Spielupdate: ")+manifest.Manifest.clientVersion;installButton.Text=L("METTRE À JOUR LE JEU","UPDATE GAME","SPIEL AKTUALISIEREN");}
         else if(!busy)installButton.Text=L("Installer / reprendre","Install / resume","Installieren / fortsetzen");
         updateNotice.Text=checkingUpdates?L("Recherche des mises à jour…","Checking for updates…","Suche nach Updates…"):available.Length>0?available:updateError!=null?L("Recherche indisponible. Réessayez avec le bouton.","Update check unavailable. Retry with the button.","Updatesuche nicht verfügbar. Erneut versuchen."):releases==null?L("Mises à jour du jeu et du launcher","Game and launcher updates","Spiel- und Launcherupdates"):L("Vous êtes à jour","You are up to date","Du bist auf dem neuesten Stand")+" · Launcher "+Updates.LauncherVersion;
+        LayoutLauncher();
     }
     private async Task CheckUpdates(bool startup) {
         if(config==null||checkingUpdates||(!startup&&busy))return;
