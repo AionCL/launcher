@@ -102,6 +102,7 @@ public enum ClientState { Absent, Potential, Valid, Incomplete }
 public sealed class FileIssue { public string Path; public string Package; public string Reason; }
 public sealed class VerificationProgress { public string Path; public int Completed; public int Total; }
 public sealed class TransferProgress { public string Package; public long Bytes; public long Total; public double BytesPerSecond; }
+public sealed class ExtractionProgress { public string Package; public int PackageIndex; public int PackageTotal; public int FileIndex; public int FileTotal; }
 // Future patch planning and launcher self-update remain independent contracts.
 public sealed class InstallPlan { public ManifestResult Target; public Package[] Packages; }
 public interface IClientUpdatePlanner { InstallPlan Plan(string installedVersion, ManifestResult target); }
@@ -360,13 +361,16 @@ public static class Installation {
 
         return result;
     }
-    public static async Task Extract(string archive, Package package, string stage, CancellationToken token) {
+    public static async Task Extract(string archive, Package package, string stage, CancellationToken token, IProgress<ExtractionProgress> progress = null, int packageIndex = 1, int packageTotal = 1) {
         if (!await Safety.Matches(archive, package.size, package.sha256, token).ConfigureAwait(false)) throw new InvalidDataException("Archive non validee.");
         using (var zip = ZipFile.OpenRead(archive)) {
             var expected = package.files.ToDictionary(f => f.path, StringComparer.Ordinal); var seen = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
             if (zip.Entries.Count != expected.Count) throw new InvalidDataException("Inventaire ZIP incorrect.");
+            int fileIndex = 0;
             foreach (var entry in zip.Entries) {
                 token.ThrowIfCancellationRequested(); string path = Safety.Under(stage, entry.FullName); ClientFile file;
+                fileIndex++;
+                if (progress != null) progress.Report(new ExtractionProgress { Package = package.name, PackageIndex = packageIndex, PackageTotal = packageTotal, FileIndex = fileIndex - 1, FileTotal = zip.Entries.Count });
                 if (!expected.TryGetValue(entry.FullName, out file) || !seen.Add(entry.FullName) || entry.Length != file.size || ((entry.ExternalAttributes >> 16) & 0xF000) == 0xA000) throw new InvalidDataException("Entree ZIP interdite.");
                 Directory.CreateDirectory(Path.GetDirectoryName(path));
                 using (var input = entry.Open()) using (var output = new FileStream(path, FileMode.Create, FileAccess.Write, FileShare.None, 131072, true)) {
@@ -375,9 +379,10 @@ public static class Installation {
                 }
                 if (!await Safety.Matches(path, file.size, file.sha256, token).ConfigureAwait(false)) throw new InvalidDataException("Fichier extrait corrompu.");
             }
+            if (progress != null) progress.Report(new ExtractionProgress { Package = package.name, PackageIndex = packageIndex, PackageTotal = packageTotal, FileIndex = fileIndex, FileTotal = zip.Entries.Count });
         }
     }
-    public static async Task Install(string root, InstallPlan plan, LauncherConfig config, Network network, IProgress<TransferProgress> progress, Action<string> log, CancellationToken token) {
+    public static async Task Install(string root, InstallPlan plan, LauncherConfig config, Network network, IProgress<TransferProgress> progress, Action<string> log, CancellationToken token, IProgress<ExtractionProgress> extractionProgress = null) {
         if (Directory.Exists(Safety.Under(root, ".aioncl/voice-original"))) VoiceMode.RequireGameClosed();
         plan.Target.Manifest.Validate(config.clientBaseVersion);
         string metadata = Safety.Under(root, ".aioncl"); Directory.CreateDirectory(metadata);
@@ -390,7 +395,8 @@ public static class Installation {
             using (var semaphore = new SemaphoreSlim(config.maxParallelDownloads)) {
                 await Task.WhenAll(plan.Packages.Select(async p => { await semaphore.WaitAsync(token).ConfigureAwait(false); try { log("Telechargement / validation : " + p.name); await downloader.Get(p, cache, progress, token).ConfigureAwait(false); } finally { semaphore.Release(); } })).ConfigureAwait(false);
             }
-            foreach (var p in plan.Packages) { log("Extraction : " + p.name); await Extract(Safety.Under(cache, p.name), p, stage, token).ConfigureAwait(false); }
+            int packageIndex = 0;
+            foreach (var p in plan.Packages) { packageIndex++; log("Extraction : " + p.name); await Extract(Safety.Under(cache, p.name), p, stage, token, extractionProgress, packageIndex, plan.Packages.Length).ConfigureAwait(false); }
             // Commit is recoverable, not an atomic directory swap. No version marker until final verification.
             foreach (var f in plan.Packages.SelectMany(p => p.files)) {
                 token.ThrowIfCancellationRequested(); string destination = VoiceMode.FilePath(root, f.path); string staged = Safety.Under(stage, f.path);

@@ -246,6 +246,13 @@ namespace AionCL
                                 ) +
                                 "/s";
                         });
+                var extractionProgress = new Progress<ExtractionProgress>(delegate(ExtractionProgress p) {
+                    progressBar.Style = ProgressBarStyle.Continuous;
+                    int packagePercent = p.PackageTotal == 0 ? 100 : (int)(100L * (p.PackageIndex - 1) / p.PackageTotal);
+                    int filePercent = p.FileTotal == 0 ? 100 : (int)(100L * p.FileIndex / p.FileTotal);
+                    progressBar.Value = Math.Max(0, Math.Min(100, packagePercent + filePercent / Math.Max(1, p.PackageTotal)));
+                    statusLabel.Text = L("Extraction du client…", "Extracting client…", "Client wird entpackt…") + Environment.NewLine + p.Package + " (" + p.PackageIndex + " / " + p.PackageTotal + ")" + Environment.NewLine + p.FileIndex + " / " + p.FileTotal;
+                });
 
                 using (var network =
                     new Network(config.requestTimeoutSeconds))
@@ -273,7 +280,8 @@ namespace AionCL
                         network,
                         progress,
                         Log,
-                        cts.Token
+                        cts.Token,
+                        extractionProgress
                     );
                 }
 
