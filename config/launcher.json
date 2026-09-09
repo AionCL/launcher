@@ -8,5 +8,5 @@
   "maxParallelDownloads": 2,
   "requestTimeoutSeconds": 30,
   "gameExecutable": "bin64/aionclassic.bin",
-  "launchArguments": "-ip:{ip} -port:{port} -cc:2 -lang:FRA -loginex -nokicks -ncg -noauthgg -charnamemenu -disable-xigncode -DEVMODE"
+  "launchArguments": "-ip:{ip} -port:{port} -cc:2 -lang:FRA -loginex -ingamewebshop -nokicks -ncg -noauthgg -charnamemenu -disable-xigncode -DEVMODE"
 }
