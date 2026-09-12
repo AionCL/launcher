@@ -6,7 +6,7 @@
     "manifestUrl": "https://github.com/AionCL/client-2.4/releases/download/v2.4.1-shop-beta.1/install-manifest.json"
   },
   "launcher": {
-    "version": "1.1.0",
-    "downloadPage": "https://github.com/AionCL/launcher/releases"
+    "version": "1.1.1",
+    "downloadPage": "https://github.com/AionCL/launcher/releases/tag/launcher-v1.1.1-shop-disabled"
   }
 }
