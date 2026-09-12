@@ -18,7 +18,7 @@ public sealed class UpdateFeed {
     }
 }
 public static class Updates {
-    public const string LauncherVersion = "1.1.0";
+    public const string LauncherVersion = "1.1.1";
     public static Version Version(string value) {
         Version parsed;
         if(!Regex.IsMatch(value??"",@"^[0-9]+\.[0-9]+\.[0-9]+$")||!System.Version.TryParse(value,out parsed))throw new InvalidDataException("Invalid release version.");return parsed;
