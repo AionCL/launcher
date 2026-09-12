@@ -1,6 +1,6 @@
 {
   "product": "AionCL",
-  "launcherVersion": "1.1.1",
+  "launcherVersion": "1.1.2",
   "updateFeedUrl": "https://raw.githubusercontent.com/AionCL/launcher/main/config/updates.json",
   "clientBaseVersion": "2.4.0",
   "manifestUrl": "https://github.com/AionCL/client-2.4/releases/download/v2.4.0/install-manifest.json",
@@ -8,5 +8,5 @@
   "maxParallelDownloads": 2,
   "requestTimeoutSeconds": 30,
   "gameExecutable": "bin64/aionclassic.bin",
-  "launchArguments": "-ip:{ip} -port:{port} -cc:2 -lang:FRA -loginex -nokicks -ncg -noauthgg -charnamemenu -disable-xigncode -DEVMODE"
+  "launchArguments": "-ip:{ip} -port:{port} -cc:2 -lang:FRA -loginex -nokicks -ncg -noauthgg -charnamemenu -disable-xigncode -DEVMODE -ingamewebshop"
 }
