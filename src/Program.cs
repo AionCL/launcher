@@ -52,10 +52,13 @@ namespace AionCL
         private readonly CheckBox authRemember = new CheckBox();
         private readonly Label authOtpHint = new Label();
         private readonly Button authButton = new LauncherButton();
+        private readonly Button authManualButton = new LauncherButton();
         private readonly Button authBrowserButton = new LauncherButton();
         private readonly Button authRevokeButton = new LauncherButton();
         private readonly Label authStatus = new Label();
         private readonly LauncherAuth launcherAuth = new LauncherAuth();
+        private string directAuthUser;
+        private string directAuthPassword;
 
         private readonly Label statusLabel = new Label();
         private readonly Label versionLabel = new Label();
@@ -167,6 +170,34 @@ namespace AionCL
             authButton.Enabled=false; authStatus.Text=TranslateMessage("Connexion sécurisée…");
             try { bool ok=await launcherAuth.Login(config.portalUrl.TrimEnd('/')+"/api/launcher/login",authUser.Text,authPassword.Text,authOtp.Text,authRemember.Checked,CancellationToken.None); if(ok){authPassword.Clear(); authOtp.Clear();} authStatus.Text=ok?TranslateMessage("Launcher authentifié."):TranslateMessage("Connexion refusée. Vérifie le mot de passe et le code OTP."); }
             catch(Exception ex){authPassword.Clear();authStatus.Text=TranslateMessage("Service indisponible.");Log(ex.Message);} finally {authButton.Enabled=true;}
+        }
+        private async Task ManualAuthenticateAsync() {
+            using (var dialog = new Form { Text = TranslateMessage("Connexion Aion directe"), ClientSize = new Size(390, 250), StartPosition = FormStartPosition.CenterParent, MinimizeBox = false, MaximizeBox = false }) {
+                var user = new TextBox { Left = 24, Top = 24, Width = 342 };
+                var password = new TextBox { Left = 24, Top = 64, Width = 342, UseSystemPasswordChar = true };
+                var otp = new TextBox { Left = 24, Top = 104, Width = 342 };
+                var remember = new CheckBox { Left = 24, Top = 144, Width = 342, Text = TranslateMessage("Mémoriser les identifiants dans Windows") };
+                var submit = new Button { Left = 24, Top = 184, Width = 342, Height = 36, Text = TranslateMessage("Se connecter et utiliser le client") };
+                dialog.Controls.AddRange(new Control[] {
+                    new Label { Left = 24, Top = 7, Width = 342, Text = TranslateMessage("Identifiant") }, user,
+                    new Label { Left = 24, Top = 47, Width = 342, Text = TranslateMessage("Mot de passe") }, password,
+                    new Label { Left = 24, Top = 87, Width = 342, Text = TranslateMessage("Code OTP (si activé)") }, otp,
+                    remember, submit
+                });
+                submit.Click += async delegate {
+                    submit.Enabled = false;
+                    try {
+                        if (String.IsNullOrWhiteSpace(user.Text) || String.IsNullOrWhiteSpace(password.Text)) throw new InvalidOperationException("Identifiant et mot de passe requis.");
+                        bool ok = await launcherAuth.Login(config.portalUrl.TrimEnd('/') + "/api/launcher/login", user.Text.Trim(), password.Text, otp.Text, remember.Checked, CancellationToken.None);
+                        if (!ok) throw new InvalidOperationException("Connexion refusée. Vérifie le mot de passe et le code OTP.");
+                        directAuthUser = user.Text.Trim();
+                        directAuthPassword = password.Text;
+                        authStatus.Text = TranslateMessage("Identifiants directs prêts pour ce lancement.");
+                        dialog.DialogResult = DialogResult.OK;
+                    } catch (Exception ex) { MessageBox.Show(dialog, TranslateMessage(ex.Message), "AionCL", MessageBoxButtons.OK, MessageBoxIcon.Warning); } finally { submit.Enabled = true; }
+                };
+                dialog.ShowDialog(this);
+            }
         }
         private async Task BrowserAuthenticateAsync() {
             if(config==null)return; authBrowserButton.Enabled=false; authStatus.Text=TranslateMessage("Ouverture du portail…");
@@ -469,8 +500,10 @@ namespace AionCL
             // the Aion login screen.
             var existingLauncherToken = launcherAuth.Token;
             string gameTicket = null;
-            if (!String.IsNullOrEmpty(existingLauncherToken))
+            if (String.IsNullOrEmpty(directAuthUser) || String.IsNullOrEmpty(directAuthPassword))
             {
+                if (!String.IsNullOrEmpty(existingLauncherToken))
+                {
                 bool sessionActive;
                 try
                 {
@@ -507,6 +540,7 @@ namespace AionCL
                 {
                     authStatus.Text = TranslateMessage("Ticket ingame indisponible. Réessaie la connexion via le navigateur.");
                     return;
+                }
                 }
             }
 
@@ -568,10 +602,12 @@ namespace AionCL
                         throw new InvalidOperationException(L("Les fichiers de cette langue sont absents. Vérifiez / réparez le client.", "Files for this language are missing. Verify / repair the game.", "Die Sprachdateien fehlen. Bitte das Spiel prüfen / reparieren."));
                     command.Arguments = GameLanguage.Apply(command.Arguments, selectedLanguage);
 
-                    // The browser flow issues a dedicated, revocable launcher token.
-                    // Aion's -loginex client reads it from SessKey and sends it in
-                    // CM_NP_LOGIN; never put the web password in game arguments.
-                    if (!String.IsNullOrEmpty(gameTicket))
+                    // Explicit direct mode follows the native Aion launcher contract.
+                    // Credentials are held only in memory and are never persisted by
+                    // this mode unless the user separately checks Windows storage.
+                    if (!String.IsNullOrEmpty(directAuthUser) && !String.IsNullOrEmpty(directAuthPassword)) {
+                        command.Arguments += " -account:" + QuoteArgument(directAuthUser) + " -password:" + QuoteArgument(directAuthPassword);
+                    } else if (!String.IsNullOrEmpty(gameTicket))
                         command.Arguments += " -st /SessKey:\"" + gameTicket + "\"";
 
                     Log(
@@ -606,10 +642,22 @@ namespace AionCL
             if (String.IsNullOrEmpty(arguments)) return arguments;
             const string marker = "/SessKey:\"";
             var start = arguments.IndexOf(marker, StringComparison.OrdinalIgnoreCase);
-            if (start < 0) return arguments;
-            var valueStart = start + marker.Length;
-            var end = arguments.IndexOf('"', valueStart);
-            return end < 0 ? arguments.Substring(0, valueStart) + "[redacted]" : arguments.Substring(0, valueStart) + "[redacted]" + arguments.Substring(end);
+            var redacted = arguments;
+            if (start >= 0) {
+                var valueStart = start + marker.Length;
+                var end = arguments.IndexOf('"', valueStart);
+                redacted = end < 0 ? arguments.Substring(0, valueStart) + "[redacted]" : arguments.Substring(0, valueStart) + "[redacted]" + arguments.Substring(end);
+            }
+            var password = redacted.IndexOf(" -password:", StringComparison.OrdinalIgnoreCase);
+            if (password < 0) return redacted;
+            var startPassword = password + 11;
+            var endPassword = redacted.IndexOf(' ', startPassword);
+            return endPassword < 0 ? redacted.Substring(0, startPassword) + "[redacted]" : redacted.Substring(0, startPassword) + "[redacted]" + redacted.Substring(endPassword);
+        }
+
+        private static string QuoteArgument(string value) {
+            if (String.IsNullOrEmpty(value)) return "\"\"";
+            return "\"" + value.Replace("\\", "\\\\").Replace("\"", "\\\"") + "\"";
         }
 
         private bool EnsurePath()
