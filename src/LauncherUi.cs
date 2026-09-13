@@ -94,7 +94,7 @@ public sealed partial class MainForm {
             int contentW = Math.Max(760, w - margin * 2);
             int imageW = contentW;
             int imageH = portal == null ? 220 : Math.Min(230, imageW * portal.Height / portal.Width);
-            updatePanel?.SetBounds(margin, 84, contentW, 54);
+            if (updatePanel != null) updatePanel.SetBounds(margin, 84, contentW, 54);
             artwork.SetBounds(margin, 154, imageW, imageH);
             artwork.Visible = true;
             storyPanel.Visible = false;
