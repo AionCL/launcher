@@ -50,6 +50,7 @@ namespace AionCL
         private readonly TextBox authPassword = new TextBox();
         private readonly TextBox authOtp = new TextBox();
         private readonly CheckBox authRemember = new CheckBox();
+        private readonly Label authOtpHint = new Label();
         private readonly Button authButton = new LauncherButton();
         private readonly Label authStatus = new Label();
         private readonly LauncherAuth launcherAuth = new LauncherAuth();

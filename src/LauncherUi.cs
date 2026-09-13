@@ -69,6 +69,7 @@ public sealed partial class MainForm {
         authUser.SetBounds(24,420,132,28); authUser.BackColor=BackColor; authUser.ForeColor=ForeColor; installPanel.Controls.Add(authUser);
         authPassword.SetBounds(164,420,142,28); authPassword.BackColor=BackColor; authPassword.ForeColor=ForeColor; authPassword.UseSystemPasswordChar=true; installPanel.Controls.Add(authPassword);
         authOtp.SetBounds(24,454,100,28); authOtp.BackColor=BackColor; authOtp.ForeColor=ForeColor; authOtp.MaxLength=20; installPanel.Controls.Add(authOtp);
+        authOtpHint.Text="OTP (si activé)"; authOtpHint.ForeColor=muted; authOtpHint.BackColor=installPanel.BackColor; authOtpHint.SetBounds(24,442,110,16); installPanel.Controls.Add(authOtpHint);
         authRemember.Text="Mémoriser"; authRemember.ForeColor=muted; authRemember.BackColor=installPanel.BackColor; authRemember.SetBounds(132,454,100,28); installPanel.Controls.Add(authRemember);
         StyleButton(authButton,"Se connecter",installPanel,24,488,282,32,false); authButton.Click += async delegate { await AuthenticateAsync(); };
         authStatus.SetBounds(24,524,282,38); authStatus.ForeColor=muted; installPanel.Controls.Add(authStatus);
@@ -140,7 +141,7 @@ public sealed partial class MainForm {
         languageBox.SelectedIndex=selectedLanguage=="ENG"?1:selectedLanguage=="DEU"?2:0;
         homeButton.Text=L("Accueil","Home","Start"); helpButton.Text=L("Aide","Help","Hilfe"); journalButton.Text=L("Journal","Log","Protokoll");
         homeButton.BackColor=storyPage=="home"?Color.FromArgb(44,61,75):BackColor; helpButton.BackColor=storyPage=="help"?Color.FromArgb(44,61,75):BackColor;
-        clientTitle.Text=L("Votre jeu","Your game","Dein Spiel");pathLabel.Text=L("DOSSIER DU CLIENT","GAME FOLDER","SPIELORDNER");languageLabel.Text=L("LANGUE DU JEU ET DU LAUNCHER","GAME & LAUNCHER LANGUAGE","SPIEL- UND LAUNCHERSPRACHE"); authButton.Text=L("Se connecter","Sign in","Anmelden");
+        clientTitle.Text=L("Votre jeu","Your game","Dein Spiel");pathLabel.Text=L("DOSSIER DU CLIENT","GAME FOLDER","SPIELORDNER");languageLabel.Text=L("LANGUE DU JEU ET DU LAUNCHER","GAME & LAUNCHER LANGUAGE","SPIEL- UND LAUNCHERSPRACHE"); authButton.Text=L("Se connecter","Sign in","Anmelden"); authOtpHint.Text=L("OTP (si activé)","OTP (if enabled)","OTP (falls aktiviert)");
         installButton.Text=L("Installer / reprendre","Install / resume","Installieren / fortsetzen");verifyButton.Text=L("Vérifier / réparer","Verify / repair","Prüfen / reparieren");cancelButton.Text=L("Interrompre","Interrupt","Unterbrechen"); playButton.Text=L("▶   JOUER","▶   PLAY","▶   SPIELEN");
         browseButton.AccessibleName=L("Choisir le dossier client","Choose game folder","Spielordner auswählen");
         storyTitle.Text=storyPage=="home"?L("Votre aventure reprend ici.","Your adventure continues here.","Dein Abenteuer geht weiter."):L("Prêt à rejoindre Atréia ?","Ready to enter Atreia?","Bereit für Atreia?");
