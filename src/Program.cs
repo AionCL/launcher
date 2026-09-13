@@ -48,6 +48,8 @@ namespace AionCL
         private readonly Button cancelButton = new LauncherButton();
         private readonly TextBox authUser = new TextBox();
         private readonly TextBox authPassword = new TextBox();
+        private readonly TextBox authOtp = new TextBox();
+        private readonly CheckBox authRemember = new CheckBox();
         private readonly Button authButton = new LauncherButton();
         private readonly Label authStatus = new Label();
         private readonly LauncherAuth launcherAuth = new LauncherAuth();
@@ -105,6 +107,8 @@ namespace AionCL
                     );
 
                 config.Validate();
+                var saved = launcherAuth.SavedCredentials;
+                if (saved != null) { authUser.Text = saved.Item1; authPassword.Text = saved.Item2; authRemember.Checked = true; }
                 await CheckUpdates(true);
 
                 Log("Chargement du manifest distant...");
@@ -157,7 +161,7 @@ namespace AionCL
         private async Task AuthenticateAsync() {
             if(config==null || String.IsNullOrWhiteSpace(authUser.Text) || String.IsNullOrWhiteSpace(authPassword.Text)) { authStatus.Text=TranslateMessage("Identifiants requis."); return; }
             authButton.Enabled=false; authStatus.Text=TranslateMessage("Connexion sécurisée…");
-            try { bool ok=await launcherAuth.Login(config.portalUrl.TrimEnd('/')+"/api/launcher/login",authUser.Text,authPassword.Text,CancellationToken.None); authPassword.Clear(); authStatus.Text=ok?TranslateMessage("Launcher authentifié."):TranslateMessage("Connexion refusée."); }
+            try { bool ok=await launcherAuth.Login(config.portalUrl.TrimEnd('/')+"/api/launcher/login",authUser.Text,authPassword.Text,authOtp.Text,authRemember.Checked,CancellationToken.None); authPassword.Clear(); authOtp.Clear(); authStatus.Text=ok?TranslateMessage("Launcher authentifié."):TranslateMessage("Connexion refusée."); }
             catch(Exception ex){authPassword.Clear();authStatus.Text=TranslateMessage("Service indisponible.");Log(ex.Message);} finally {authButton.Enabled=true;}
         }
 
