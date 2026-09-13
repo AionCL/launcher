@@ -106,8 +106,13 @@ public sealed partial class MainForm {
             int contentW = Math.Max(760, w - compactMargin * 2);
             int imageW = contentW;
             int imageH = portal == null ? 220 : Math.Min(230, imageW * portal.Height / portal.Width);
-            if (updatePanel != null) updatePanel.SetBounds(compactMargin, 84, contentW, 54);
-            artwork.SetBounds(compactMargin, 154, imageW, imageH);
+            if (updatePanel != null) {
+                updatePanel.SetBounds(compactMargin, 84, contentW, 104);
+                updateNotice.SetBounds(16,6,contentW-32,38);
+                checkUpdatesButton.SetBounds(16,54,Math.Min(220,contentW/2-24),40);
+                launcherUpdateButton.SetBounds(Math.Min(244,contentW/2+4),54,Math.Min(220,contentW/2-24),40);
+            }
+            artwork.SetBounds(compactMargin, updatePanel == null ? 154 : updatePanel.Bottom + 14, imageW, imageH);
             artwork.Visible = true;
             storyPanel.Visible = false;
             int panelTop = artwork.Bottom + 14;

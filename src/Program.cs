@@ -71,7 +71,7 @@ namespace AionCL
         {
             Text = "AionCL - Classic 2.4";
             ClientSize = new Size(1280, 720);
-            MinimumSize = new Size(1100, 680);
+            MinimumSize = new Size(900, 600);
             StartPosition = FormStartPosition.CenterScreen;
 
             BuildUi();
