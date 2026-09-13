@@ -90,16 +90,16 @@ public sealed partial class MainForm {
         homeButton.SetBounds(w-384,26,112,40); helpButton.SetBounds(w-260,26,104,40); journalButton.SetBounds(w-144,26,116,40);
         bool compact = w < 1080 || h < 700;
         if (compact) {
-            int margin = 18;
-            int contentW = Math.Max(760, w - margin * 2);
+            int compactMargin = 18;
+            int contentW = Math.Max(760, w - compactMargin * 2);
             int imageW = contentW;
             int imageH = portal == null ? 220 : Math.Min(230, imageW * portal.Height / portal.Width);
-            if (updatePanel != null) updatePanel.SetBounds(margin, 84, contentW, 54);
-            artwork.SetBounds(margin, 154, imageW, imageH);
+            if (updatePanel != null) updatePanel.SetBounds(compactMargin, 84, contentW, 54);
+            artwork.SetBounds(compactMargin, 154, imageW, imageH);
             artwork.Visible = true;
             storyPanel.Visible = false;
             int panelTop = artwork.Bottom + 14;
-            installPanel.SetBounds(margin, panelTop, contentW, 620);
+            installPanel.SetBounds(compactMargin, panelTop, contentW, 620);
             int controlW = contentW - 48;
             clientTitle.SetBounds(24,20,controlW,34);
             versionLabel.SetBounds(24,60,controlW,28);
@@ -111,9 +111,9 @@ public sealed partial class MainForm {
             koreanVoices.SetBounds(24,248,controlW,36); hitFontButton.SetBounds(24,290,controlW,36);
             installButton.SetBounds(24,334,controlW,36); verifyButton.SetBounds(24,378,controlW,36);
             authManualButton.SetBounds(24,420,controlW,36); authBrowserButton.SetBounds(24,464,controlW,36); authRevokeButton.SetBounds(24,508,controlW,30); authStatus.SetBounds(24,548,controlW,56);
-            footer.SetBounds(margin, installPanel.Bottom + 14, contentW, 124);
+            footer.SetBounds(compactMargin, installPanel.Bottom + 14, contentW, 124);
             progressBar.SetBounds(18,24,contentW-36,6); statusLabel.SetBounds(18,46,contentW-206,66); cancelButton.SetBounds(contentW-186,48,168,44); playButton.SetBounds(contentW-348,24,330,76);
-            AutoScrollMinSize = new Size(contentW + margin * 2, footer.Bottom + margin);
+            AutoScrollMinSize = new Size(contentW + compactMargin * 2, footer.Bottom + compactMargin);
             return;
         }
         storyPanel.Visible = true;
