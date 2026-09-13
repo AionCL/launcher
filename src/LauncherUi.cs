@@ -28,7 +28,7 @@ public sealed partial class MainForm {
 
     private void BuildUi() {
         DoubleBuffered = true; AutoScaleMode = AutoScaleMode.None;
-        ClientSize = new Size(1100, 700); MinimumSize = new Size(1100, 700); MaximumSize = new Size(1100, 700); AutoScroll = true;
+        ClientSize = new Size(1100, 640); MinimumSize = new Size(1100, 640); MaximumSize = new Size(1100, 640); AutoScroll = true;
         Font = new Font("Segoe UI", 10F); ForeColor = Color.FromArgb(231,235,241); BackColor = Color.FromArgb(12,16,23);
         using (var stream = typeof(MainForm).Assembly.GetManifestResourceStream("AionCL.classic-wings.jpg")) {
             if (stream != null) using (var source = Image.FromStream(stream)) portal = new Bitmap(source);
