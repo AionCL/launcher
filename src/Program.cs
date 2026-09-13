@@ -46,6 +46,11 @@ namespace AionCL
         private readonly Button verifyButton = new LauncherButton();
         private readonly Button playButton = new LauncherButton();
         private readonly Button cancelButton = new LauncherButton();
+        private readonly TextBox authUser = new TextBox();
+        private readonly TextBox authPassword = new TextBox();
+        private readonly Button authButton = new LauncherButton();
+        private readonly Label authStatus = new Label();
+        private readonly LauncherAuth launcherAuth = new LauncherAuth();
 
         private readonly Label statusLabel = new Label();
         private readonly Label versionLabel = new Label();
@@ -147,6 +152,13 @@ namespace AionCL
                     MessageBoxIcon.Error
                 );
             }
+        }
+
+        private async Task AuthenticateAsync() {
+            if(config==null || String.IsNullOrWhiteSpace(authUser.Text) || String.IsNullOrWhiteSpace(authPassword.Text)) { authStatus.Text=TranslateMessage("Identifiants requis."); return; }
+            authButton.Enabled=false; authStatus.Text=TranslateMessage("Connexion sécurisée…");
+            try { bool ok=await launcherAuth.Login(config.portalUrl.TrimEnd('/')+"/api/launcher/login",authUser.Text,authPassword.Text,CancellationToken.None); authPassword.Clear(); authStatus.Text=ok?TranslateMessage("Launcher authentifié."):TranslateMessage("Connexion refusée."); }
+            catch(Exception ex){authPassword.Clear();authStatus.Text=TranslateMessage("Service indisponible.");Log(ex.Message);} finally {authButton.Enabled=true;}
         }
 
         private void Browse(object sender, EventArgs e)

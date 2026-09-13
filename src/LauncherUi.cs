@@ -66,6 +66,10 @@ public sealed partial class MainForm {
         };
         StyleButton(installButton,"",installPanel,24,319,282,32,false); installButton.Enabled=false; installButton.Click += async delegate { await InstallAsync(); };
         StyleButton(verifyButton,"",installPanel,24,360,282,30,false); verifyButton.Enabled=false; verifyButton.Click += async delegate { await VerifyAsync(); };
+        authUser.SetBounds(24,420,132,28); authUser.BackColor=BackColor; authUser.ForeColor=ForeColor; installPanel.Controls.Add(authUser);
+        authPassword.SetBounds(164,420,142,28); authPassword.BackColor=BackColor; authPassword.ForeColor=ForeColor; authPassword.UseSystemPasswordChar=true; installPanel.Controls.Add(authPassword);
+        StyleButton(authButton,"Se connecter",installPanel,24,454,282,32,false); authButton.Click += async delegate { await AuthenticateAsync(); };
+        authStatus.SetBounds(24,490,282,38); authStatus.ForeColor=muted; installPanel.Controls.Add(authStatus);
         footer=new Panel { BackColor=Color.FromArgb(12,15,21) }; Controls.Add(footer);
         progressBar.SetBounds(28,23,650,5); footer.Controls.Add(progressBar);
         statusLabel.SetBounds(28,44,650,46); statusLabel.ForeColor=muted; footer.Controls.Add(statusLabel);
@@ -99,6 +103,7 @@ public sealed partial class MainForm {
         hitFontButton.SetBounds(24,290,side-48,36);
         installButton.SetBounds(24,334,side-48,36);
         verifyButton.SetBounds(24,378,side-48,36);
+        authUser.SetBounds(24,420,(side-58)/2,30); authPassword.SetBounds(34+(side-58)/2,420,(side-58)/2,30); authButton.SetBounds(24,458,side-48,36); authStatus.SetBounds(24,500,side-48,36);
         int imageWidth = Math.Min(leftWidth, (h-440)*16/9);
         int imageHeight = portal == null ? imageWidth * 9 / 16 : imageWidth * portal.Height / portal.Width;
         artwork.SetBounds(margin+(leftWidth-imageWidth)/2,164,imageWidth,imageHeight);
@@ -133,7 +138,7 @@ public sealed partial class MainForm {
         languageBox.SelectedIndex=selectedLanguage=="ENG"?1:selectedLanguage=="DEU"?2:0;
         homeButton.Text=L("Accueil","Home","Start"); helpButton.Text=L("Aide","Help","Hilfe"); journalButton.Text=L("Journal","Log","Protokoll");
         homeButton.BackColor=storyPage=="home"?Color.FromArgb(44,61,75):BackColor; helpButton.BackColor=storyPage=="help"?Color.FromArgb(44,61,75):BackColor;
-        clientTitle.Text=L("Votre jeu","Your game","Dein Spiel");pathLabel.Text=L("DOSSIER DU CLIENT","GAME FOLDER","SPIELORDNER");languageLabel.Text=L("LANGUE DU JEU ET DU LAUNCHER","GAME & LAUNCHER LANGUAGE","SPIEL- UND LAUNCHERSPRACHE");
+        clientTitle.Text=L("Votre jeu","Your game","Dein Spiel");pathLabel.Text=L("DOSSIER DU CLIENT","GAME FOLDER","SPIELORDNER");languageLabel.Text=L("LANGUE DU JEU ET DU LAUNCHER","GAME & LAUNCHER LANGUAGE","SPIEL- UND LAUNCHERSPRACHE"); authButton.Text=L("Se connecter","Sign in","Anmelden");
         installButton.Text=L("Installer / reprendre","Install / resume","Installieren / fortsetzen");verifyButton.Text=L("Vérifier / réparer","Verify / repair","Prüfen / reparieren");cancelButton.Text=L("Interrompre","Interrupt","Unterbrechen"); playButton.Text=L("▶   JOUER","▶   PLAY","▶   SPIELEN");
         browseButton.AccessibleName=L("Choisir le dossier client","Choose game folder","Spielordner auswählen");
         storyTitle.Text=storyPage=="home"?L("Votre aventure reprend ici.","Your adventure continues here.","Dein Abenteuer geht weiter."):L("Prêt à rejoindre Atréia ?","Ready to enter Atreia?","Bereit für Atreia?");
