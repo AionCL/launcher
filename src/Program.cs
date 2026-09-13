@@ -468,6 +468,7 @@ namespace AionCL
             // revocation visible to the player instead of failing silently at
             // the Aion login screen.
             var existingLauncherToken = launcherAuth.Token;
+            string gameTicket = null;
             if (!String.IsNullOrEmpty(existingLauncherToken))
             {
                 bool sessionActive;
@@ -488,6 +489,23 @@ namespace AionCL
                 {
                     launcherAuth.Clear();
                     authStatus.Text = TranslateMessage("Session launcher expirée ou révoquée. Reconnecte-toi via le navigateur.");
+                    return;
+                }
+
+                try
+                {
+                    gameTicket = await launcherAuth.IssueGameTicket(
+                        config.portalUrl.TrimEnd('/') + "/api/launcher/game-ticket",
+                        CancellationToken.None
+                    );
+                }
+                catch (Exception ex)
+                {
+                    Log("Obtention du ticket ingame impossible : " + ex.Message);
+                }
+                if (String.IsNullOrEmpty(gameTicket))
+                {
+                    authStatus.Text = TranslateMessage("Ticket ingame indisponible. Réessaie la connexion via le navigateur.");
                     return;
                 }
             }
@@ -553,9 +571,8 @@ namespace AionCL
                     // The browser flow issues a dedicated, revocable launcher token.
                     // Aion's -loginex client reads it from SessKey and sends it in
                     // CM_NP_LOGIN; never put the web password in game arguments.
-                    var launcherToken = launcherAuth.Token;
-                    if (!String.IsNullOrEmpty(launcherToken))
-                        command.Arguments += " -st /SessKey:\"" + launcherToken + "\"";
+                    if (!String.IsNullOrEmpty(gameTicket))
+                        command.Arguments += " -st /SessKey:\"" + gameTicket + "\"";
 
                     Log(
                         "Lancement : " +
