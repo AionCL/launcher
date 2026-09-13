@@ -162,7 +162,7 @@ namespace AionCL
         private async Task AuthenticateAsync() {
             if(config==null || String.IsNullOrWhiteSpace(authUser.Text) || String.IsNullOrWhiteSpace(authPassword.Text)) { authStatus.Text=TranslateMessage("Identifiants requis."); return; }
             authButton.Enabled=false; authStatus.Text=TranslateMessage("Connexion sécurisée…");
-            try { bool ok=await launcherAuth.Login(config.portalUrl.TrimEnd('/')+"/api/launcher/login",authUser.Text,authPassword.Text,authOtp.Text,authRemember.Checked,CancellationToken.None); authPassword.Clear(); authOtp.Clear(); authStatus.Text=ok?TranslateMessage("Launcher authentifié."):TranslateMessage("Connexion refusée."); }
+            try { bool ok=await launcherAuth.Login(config.portalUrl.TrimEnd('/')+"/api/launcher/login",authUser.Text,authPassword.Text,authOtp.Text,authRemember.Checked,CancellationToken.None); if(ok){authPassword.Clear(); authOtp.Clear();} authStatus.Text=ok?TranslateMessage("Launcher authentifié."):TranslateMessage("Connexion refusée. Vérifie le mot de passe et le code OTP."); }
             catch(Exception ex){authPassword.Clear();authStatus.Text=TranslateMessage("Service indisponible.");Log(ex.Message);} finally {authButton.Enabled=true;}
         }
 
