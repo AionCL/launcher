@@ -172,27 +172,27 @@ namespace AionCL
             catch(Exception ex){authPassword.Clear();authStatus.Text=TranslateMessage("Service indisponible.");Log(ex.Message);} finally {authButton.Enabled=true;}
         }
         private async Task ManualAuthenticateAsync() {
-            using (var dialog = new Form { Text = TranslateMessage("Connexion Aion directe"), ClientSize = new Size(390, 250), StartPosition = FormStartPosition.CenterParent, MinimizeBox = false, MaximizeBox = false }) {
+            using (var dialog = new Form { Text = TranslateMessage("Connexion Aion directe"), ClientSize = new Size(390, 210), StartPosition = FormStartPosition.CenterParent, MinimizeBox = false, MaximizeBox = false }) {
                 var user = new TextBox { Left = 24, Top = 24, Width = 342 };
                 var password = new TextBox { Left = 24, Top = 64, Width = 342, UseSystemPasswordChar = true };
-                var otp = new TextBox { Left = 24, Top = 104, Width = 342 };
-                var remember = new CheckBox { Left = 24, Top = 144, Width = 342, Text = TranslateMessage("Mémoriser les identifiants dans Windows") };
-                var submit = new Button { Left = 24, Top = 184, Width = 342, Height = 36, Text = TranslateMessage("Se connecter et utiliser le client") };
+                var remember = new CheckBox { Left = 24, Top = 104, Width = 342, Text = TranslateMessage("Mémoriser les identifiants dans Windows") };
+                var submit = new Button { Left = 24, Top = 144, Width = 342, Height = 36, Text = TranslateMessage("Utiliser ces identifiants pour le client") };
                 dialog.Controls.AddRange(new Control[] {
                     new Label { Left = 24, Top = 7, Width = 342, Text = TranslateMessage("Identifiant") }, user,
                     new Label { Left = 24, Top = 47, Width = 342, Text = TranslateMessage("Mot de passe") }, password,
-                    new Label { Left = 24, Top = 87, Width = 342, Text = TranslateMessage("Code OTP (si activé)") }, otp,
                     remember, submit
                 });
                 submit.Click += async delegate {
                     submit.Enabled = false;
                     try {
                         if (String.IsNullOrWhiteSpace(user.Text) || String.IsNullOrWhiteSpace(password.Text)) throw new InvalidOperationException("Identifiant et mot de passe requis.");
-                        bool ok = await launcherAuth.Login(config.portalUrl.TrimEnd('/') + "/api/launcher/login", user.Text.Trim(), password.Text, otp.Text, remember.Checked, CancellationToken.None);
-                        if (!ok) throw new InvalidOperationException("Connexion refusée. Vérifie le mot de passe et le code OTP.");
+                        // Direct mode intentionally bypasses the web portal. The
+                        // native LoginServer validates the Aion password itself;
+                        // web OTP and web password policy are unrelated here.
+                        launcherAuth.SaveCredentials(user.Text.Trim(), password.Text, remember.Checked);
                         directAuthUser = user.Text.Trim();
                         directAuthPassword = password.Text;
-                        authStatus.Text = TranslateMessage("Identifiants directs prêts pour ce lancement.");
+                        authStatus.Text = TranslateMessage("Identifiants directs prêts pour le client.");
                         dialog.DialogResult = DialogResult.OK;
                     } catch (Exception ex) { MessageBox.Show(dialog, TranslateMessage(ex.Message), "AionCL", MessageBoxButtons.OK, MessageBoxIcon.Warning); } finally { submit.Enabled = true; }
                 };
