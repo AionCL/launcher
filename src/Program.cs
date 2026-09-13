@@ -522,11 +522,18 @@ namespace AionCL
                         throw new InvalidOperationException(L("Les fichiers de cette langue sont absents. Vérifiez / réparez le client.", "Files for this language are missing. Verify / repair the game.", "Die Sprachdateien fehlen. Bitte das Spiel prüfen / reparieren."));
                     command.Arguments = GameLanguage.Apply(command.Arguments, selectedLanguage);
 
+                    // The browser flow issues a dedicated, revocable launcher token.
+                    // Aion's -loginex client reads it from SessKey and sends it in
+                    // CM_NP_LOGIN; never put the web password in game arguments.
+                    var launcherToken = launcherAuth.Token;
+                    if (!String.IsNullOrEmpty(launcherToken))
+                        command.Arguments += " -st /SessKey:\"" + launcherToken + "\"";
+
                     Log(
                         "Lancement : " +
                         command.FileName +
                         " " +
-                        command.Arguments
+                        RedactSessionKey(command.Arguments)
                     );
 
                     VoiceMode.Apply(pathBox.Text, selectedLanguage, false);
@@ -548,6 +555,16 @@ namespace AionCL
             {
                 SetBusy(false);
             }
+        }
+
+        private static string RedactSessionKey(string arguments) {
+            if (String.IsNullOrEmpty(arguments)) return arguments;
+            const string marker = "/SessKey:\"";
+            var start = arguments.IndexOf(marker, StringComparison.OrdinalIgnoreCase);
+            if (start < 0) return arguments;
+            var valueStart = start + marker.Length;
+            var end = arguments.IndexOf('"', valueStart);
+            return end < 0 ? arguments.Substring(0, valueStart) + "[redacted]" : arguments.Substring(0, valueStart) + "[redacted]" + arguments.Substring(end);
         }
 
         private bool EnsurePath()
