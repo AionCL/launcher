@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics;
 using System.Drawing;
 using System.IO;
 using System.Windows.Forms;
@@ -10,7 +11,8 @@ public sealed partial class MainForm {
     Panel footer, installPanel, storyPanel;
     PictureBox artwork;
     Label storyTitle, storyBody, pathLabel, languageLabel, clientTitle, heading, edition;
-    Button homeButton, helpButton, journalButton;
+    Label authSectionLabel, authUserLabel, authPasswordLabel;
+    Button homeButton, helpButton, journalButton, discordButton, youtubeButton;
     ComboBox languageBox;
     Button koreanVoices;
     readonly KoreanPack koreanPack = KoreanPack.Load();
@@ -31,6 +33,7 @@ public sealed partial class MainForm {
         using (var stream = typeof(MainForm).Assembly.GetManifestResourceStream("AionCL.classic-wings.jpg")) {
             if (stream != null) using (var source = Image.FromStream(stream)) portal = new Bitmap(source);
         }
+        BackgroundImage = portal; BackgroundImageLayout = ImageLayout.Stretch;
         var brand = LabelAt(this,"AIONCL",28,20,185,48,28,ForeColor); brand.Font = new Font("Georgia",28);
         edition = LabelAt(this,"CLASSIC  /  2.4",226,37,140,22,9,muted);
         homeButton = ButtonAt(this,"",370,26,120,42,false); homeButton.Click += delegate { storyPage="home"; ApplyLanguage(); };
@@ -41,7 +44,7 @@ public sealed partial class MainForm {
         heading = LabelAt(storyPanel,"AION CLASSIC",0,0,550,22,9,accent);
         storyTitle = LabelAt(storyPanel,"",0,29,580,36,20,ForeColor);
         storyBody = LabelAt(storyPanel,"",0,78,590,126,10,muted);
-        installPanel = new SurfacePanel { BackColor = Color.FromArgb(20,27,37) }; Controls.Add(installPanel);
+        installPanel = new SurfacePanel { BackColor = Color.FromArgb(20,27,37), AutoScroll = true }; Controls.Add(installPanel);
         clientTitle = LabelAt(installPanel,"",24,24,280,32,17,ForeColor);
         versionLabel.SetBounds(24,66,282,25); versionLabel.ForeColor=muted; installPanel.Controls.Add(versionLabel);
         pathLabel = LabelAt(installPanel,"",24,104,280,25,9,muted);
@@ -66,10 +69,18 @@ public sealed partial class MainForm {
         };
         StyleButton(installButton,"",installPanel,24,319,282,32,false); installButton.Enabled=false; installButton.Click += async delegate { await InstallAsync(); };
         StyleButton(verifyButton,"",installPanel,24,360,282,30,false); verifyButton.Enabled=false; verifyButton.Click += async delegate { await VerifyAsync(); };
-        StyleButton(authManualButton,"Connexion directe",installPanel,24,420,282,36,true); authManualButton.Click += async delegate { await ManualAuthenticateAsync(); };
-        StyleButton(authBrowserButton,"Connexion via navigateur",installPanel,24,464,282,36,false); authBrowserButton.Click += async delegate { await BrowserAuthenticateAsync(); };
-        StyleButton(authRevokeButton,"Révoquer la session",installPanel,24,508,282,30,false); authRevokeButton.Click += async delegate { await RevokeLauncherAsync(); };
-        authStatus.SetBounds(24,548,282,56); authStatus.ForeColor=muted; installPanel.Controls.Add(authStatus);
+        authSectionLabel=LabelAt(installPanel,"Connexion au jeu",24,420,282,22,9,accent);
+        authUserLabel=LabelAt(installPanel,"Identifiant",24,449,124,20,9,muted);
+        authUser.SetBounds(24,468,282,30); authUser.BackColor=BackColor; authUser.ForeColor=ForeColor; authUser.BorderStyle=BorderStyle.FixedSingle; installPanel.Controls.Add(authUser);
+        authPasswordLabel=LabelAt(installPanel,"Mot de passe",24,504,124,20,9,muted);
+        authPassword.SetBounds(24,523,282,30); authPassword.UseSystemPasswordChar=true; authPassword.BackColor=BackColor; authPassword.ForeColor=ForeColor; authPassword.BorderStyle=BorderStyle.FixedSingle; installPanel.Controls.Add(authPassword);
+        authRemember.SetBounds(24,558,282,24); authRemember.Text="Mémoriser dans Windows"; authRemember.ForeColor=muted; authRemember.BackColor=Color.Transparent; installPanel.Controls.Add(authRemember);
+        StyleButton(authManualButton,"Utiliser ces identifiants",installPanel,24,588,282,36,true); authManualButton.Click += async delegate { await ManualAuthenticateAsync(); };
+        StyleButton(authBrowserButton,"Connexion via navigateur",installPanel,24,632,282,36,false); authBrowserButton.Click += async delegate { await BrowserAuthenticateAsync(); };
+        StyleButton(authRevokeButton,"Révoquer la session",installPanel,24,676,282,30,false); authRevokeButton.Click += async delegate { await RevokeLauncherAsync(); };
+        authStatus.SetBounds(24,712,282,56); authStatus.ForeColor=muted; installPanel.Controls.Add(authStatus);
+        discordButton=ButtonAt(this,"Discord",370,26,100,40,false); discordButton.Click += delegate { OpenCommunity(config==null?null:config.discordUrl); };
+        youtubeButton=ButtonAt(this,"YouTube",478,26,100,40,false); youtubeButton.Click += delegate { OpenCommunity(config==null?null:config.youtubeUrl); };
         footer=new Panel { BackColor=Color.FromArgb(12,15,21) }; Controls.Add(footer);
         progressBar.SetBounds(28,23,650,5); footer.Controls.Add(progressBar);
         statusLabel.SetBounds(28,44,650,46); statusLabel.ForeColor=muted; footer.Controls.Add(statusLabel);
@@ -89,6 +100,7 @@ public sealed partial class MainForm {
         int w=ClientSize.Width,h=ClientSize.Height;
         homeButton.SetBounds(w-384,26,112,40); helpButton.SetBounds(w-260,26,104,40); journalButton.SetBounds(w-144,26,116,40);
         bool compact = w < 1080 || h < 700;
+        discordButton.Visible = !compact; youtubeButton.Visible = !compact;
         if (compact) {
             int compactMargin = 18;
             int contentW = Math.Max(760, w - compactMargin * 2);
@@ -99,7 +111,7 @@ public sealed partial class MainForm {
             artwork.Visible = true;
             storyPanel.Visible = false;
             int panelTop = artwork.Bottom + 14;
-            installPanel.SetBounds(compactMargin, panelTop, contentW, 620);
+            installPanel.SetBounds(compactMargin, panelTop, contentW, 790);
             int controlW = contentW - 48;
             clientTitle.SetBounds(24,20,controlW,34);
             versionLabel.SetBounds(24,60,controlW,28);
@@ -110,7 +122,7 @@ public sealed partial class MainForm {
             languageBox.SetBounds(24,206,controlW,32);
             koreanVoices.SetBounds(24,248,controlW,36); hitFontButton.SetBounds(24,290,controlW,36);
             installButton.SetBounds(24,334,controlW,36); verifyButton.SetBounds(24,378,controlW,36);
-            authManualButton.SetBounds(24,420,controlW,36); authBrowserButton.SetBounds(24,464,controlW,36); authRevokeButton.SetBounds(24,508,controlW,30); authStatus.SetBounds(24,548,controlW,56);
+            authSectionLabel.SetBounds(24,420,controlW,22); authUserLabel.SetBounds(24,449,controlW,20); authUser.SetBounds(24,468,controlW,30); authPasswordLabel.SetBounds(24,504,controlW,20); authPassword.SetBounds(24,523,controlW,30); authRemember.SetBounds(24,558,controlW,24); authManualButton.SetBounds(24,588,controlW,36); authBrowserButton.SetBounds(24,632,controlW,36); authRevokeButton.SetBounds(24,676,controlW,30); authStatus.SetBounds(24,712,controlW,56);
             footer.SetBounds(compactMargin, installPanel.Bottom + 14, contentW, 124);
             progressBar.SetBounds(18,24,contentW-36,6); statusLabel.SetBounds(18,46,contentW-206,66); cancelButton.SetBounds(contentW-186,48,168,44); playButton.SetBounds(contentW-348,24,330,76);
             AutoScrollMinSize = new Size(contentW + compactMargin * 2, footer.Bottom + compactMargin);
@@ -133,7 +145,7 @@ public sealed partial class MainForm {
         hitFontButton.SetBounds(24,290,side-48,36);
         installButton.SetBounds(24,334,side-48,36);
         verifyButton.SetBounds(24,378,side-48,36);
-        authManualButton.SetBounds(24,420,side-48,36); authBrowserButton.SetBounds(24,464,side-48,36); authRevokeButton.SetBounds(24,508,side-48,30); authStatus.SetBounds(24,548,side-48,56);
+        authSectionLabel.SetBounds(24,420,side-48,22); authUserLabel.SetBounds(24,449,side-48,20); authUser.SetBounds(24,468,side-48,30); authPasswordLabel.SetBounds(24,504,side-48,20); authPassword.SetBounds(24,523,side-48,30); authRemember.SetBounds(24,558,side-48,24); authManualButton.SetBounds(24,588,side-48,36); authBrowserButton.SetBounds(24,632,side-48,36); authRevokeButton.SetBounds(24,676,side-48,30); authStatus.SetBounds(24,712,side-48,56);
         int imageWidth = Math.Min(leftWidth, (h-440)*16/9);
         int imageHeight = portal == null ? imageWidth * 9 / 16 : imageWidth * portal.Height / portal.Width;
         artwork.SetBounds(margin+(leftWidth-imageWidth)/2,164,imageWidth,imageHeight);
@@ -158,6 +170,7 @@ public sealed partial class MainForm {
     private Label LabelAt(Control p,string t,int x,int y,int w,int h,float size,Color c) {
         var l=new Label { Text=t,Bounds=new Rectangle(x,y,w,h),ForeColor=c,BackColor=Color.Transparent,Font=new Font("Segoe UI",size) }; p.Controls.Add(l); return l;
     }
+    private void OpenCommunity(string url) { if(String.IsNullOrWhiteSpace(url)) return; try { Process.Start(new ProcessStartInfo { FileName=Safety.Https(url).AbsoluteUri, UseShellExecute=true }); } catch(Exception ex) { Log(ex.Message); } }
     private Button ButtonAt(Control p,string t,int x,int y,int w,int h,bool primary) { var b=new LauncherButton(); StyleButton(b,t,p,x,y,w,h,primary); return b; }
     private void StyleButton(Button b,string text,Control p,int x,int y,int w,int h,bool primary) {
         b.Font=new Font("Segoe UI",10F);b.Text=text;b.SetBounds(x,y,w,h);b.FlatStyle=FlatStyle.Flat;b.FlatAppearance.BorderColor=Color.FromArgb(62,76,93);b.FlatAppearance.MouseOverBackColor=Color.FromArgb(46,62,78);
@@ -167,7 +180,9 @@ public sealed partial class MainForm {
         changingLanguage=true;
         languageBox.SelectedIndex=selectedLanguage=="ENG"?1:selectedLanguage=="DEU"?2:0;
         homeButton.Text=L("Accueil","Home","Start"); helpButton.Text=L("Aide","Help","Hilfe"); journalButton.Text=L("Journal","Log","Protokoll");
-        authManualButton.Text=L("Connexion directe","Direct login","Direkte Anmeldung");
+        discordButton.Text="Discord"; youtubeButton.Text="YouTube";
+        authSectionLabel.Text=L("Connexion au jeu","Game login","Spielanmeldung"); authUserLabel.Text=L("Identifiant","Username","Benutzername"); authPasswordLabel.Text=L("Mot de passe","Password","Passwort"); authRemember.Text=L("Mémoriser dans Windows","Remember in Windows","In Windows speichern");
+        authManualButton.Text=L("Utiliser ces identifiants","Use these credentials","Diese Zugangsdaten verwenden");
         homeButton.BackColor=storyPage=="home"?Color.FromArgb(44,61,75):BackColor; helpButton.BackColor=storyPage=="help"?Color.FromArgb(44,61,75):BackColor;
         clientTitle.Text=L("Votre jeu","Your game","Dein Spiel");pathLabel.Text=L("DOSSIER DU CLIENT","GAME FOLDER","SPIELORDNER");languageLabel.Text=L("LANGUE DU JEU ET DU LAUNCHER","GAME & LAUNCHER LANGUAGE","SPIEL- UND LAUNCHERSPRACHE"); authButton.Text=L("Se connecter","Sign in","Anmelden"); authBrowserButton.Text=L("Connexion via navigateur","Sign in via browser","Über Browser anmelden"); authRevokeButton.Text=L("Révoquer la session","Revoke session","Sitzung widerrufen"); authOtpHint.Text=L("OTP (si activé)","OTP (if enabled)","OTP (falls aktiviert)");
         installButton.Text=L("Installer / reprendre","Install / resume","Installieren / fortsetzen");verifyButton.Text=L("Vérifier / réparer","Verify / repair","Prüfen / reparieren");cancelButton.Text=L("Interrompre","Interrupt","Unterbrechen"); playButton.Text=L("▶   JOUER","▶   PLAY","▶   SPIELEN");

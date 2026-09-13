@@ -25,6 +25,8 @@ public sealed class LauncherConfig {
     public string serverConfigUrl { get; set; }
     public string updateFeedUrl { get; set; }
     public string portalUrl { get; set; }
+    public string discordUrl { get; set; }
+    public string youtubeUrl { get; set; }
     public int maxParallelDownloads { get; set; }
     public int requestTimeoutSeconds { get; set; }
     public string gameExecutable { get; set; }
@@ -34,6 +36,8 @@ public sealed class LauncherConfig {
         if (!String.IsNullOrEmpty(updateFeedUrl)) Safety.Https(updateFeedUrl);
         if (String.IsNullOrEmpty(portalUrl)) portalUrl = "https://aioncl.com";
         Safety.Https(portalUrl);
+        if (!String.IsNullOrEmpty(discordUrl)) Safety.Https(discordUrl);
+        if (!String.IsNullOrEmpty(youtubeUrl)) Safety.Https(youtubeUrl);
         Safety.Https(manifestUrl); if (!String.IsNullOrEmpty(serverConfigUrl)) Safety.Https(serverConfigUrl);
         Safety.Relative(gameExecutable);
         if (String.IsNullOrEmpty(launchArguments) || !launchArguments.Contains("{ip}") || !launchArguments.Contains("{port}") || launchArguments.IndexOfAny(new[] {'\r','\n','\0'}) >= 0) throw new InvalidDataException("Profil de lancement invalide.");
