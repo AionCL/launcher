@@ -16,7 +16,7 @@ public sealed class LauncherAuth {
     public void ForgetCredentials(){try{if(File.Exists(credentials))File.Delete(credentials);}catch{}}
     public async Task<bool> BrowserLogin(string portal, CancellationToken token) {
         using(var client=new HttpClient()) {
-            client.Timeout=TimeSpan.FromSeconds(15);
+            client.Timeout=TimeSpan.FromSeconds(15); client.DefaultRequestHeaders.TryAddWithoutValidation("Origin","https://aioncl.com");
             var state=(Convert.ToBase64String(Guid.NewGuid().ToByteArray()).TrimEnd('=').Replace('+','-').Replace('/','_')+Convert.ToBase64String(Guid.NewGuid().ToByteArray()).TrimEnd('=').Replace('+','-').Replace('/','_')).Substring(0,43);
             var start=await client.PostAsync(portal.TrimEnd('/')+"/api/launcher/authorize/start",new StringContent(Json.Serialize(new {state=state}),Encoding.UTF8,"application/json"),token).ConfigureAwait(false);
             if(!start.IsSuccessStatusCode)return false;
@@ -25,7 +25,7 @@ public sealed class LauncherAuth {
             return false;
         }
     }
-    public async Task<bool> Login(string endpoint,string username,string password,string code,bool remember,CancellationToken token){using(var client=new HttpClient()){client.Timeout=TimeSpan.FromSeconds(15);var body=Json.Serialize(new {username=username,password=password,code=code??""});using(var content=new StringContent(body,Encoding.UTF8,"application/json")){var response=await client.PostAsync(endpoint,content,token).ConfigureAwait(false);if(!response.IsSuccessStatusCode)return false;var data=Json.Parse<LauncherAuthResponse>(await response.Content.ReadAsStringAsync().ConfigureAwait(false));if(String.IsNullOrEmpty(data.token))return false;Directory.CreateDirectory(Path.GetDirectoryName(path));File.WriteAllBytes(path,ProtectedData.Protect(Encoding.UTF8.GetBytes(data.token),null,DataProtectionScope.CurrentUser));if(remember)File.WriteAllBytes(credentials,ProtectedData.Protect(Encoding.UTF8.GetBytes(username+"\n"+password),null,DataProtectionScope.CurrentUser));else ForgetCredentials();return true;}}}
+    public async Task<bool> Login(string endpoint,string username,string password,string code,bool remember,CancellationToken token){using(var client=new HttpClient()){client.Timeout=TimeSpan.FromSeconds(15);client.DefaultRequestHeaders.TryAddWithoutValidation("Origin","https://aioncl.com");var body=Json.Serialize(new {username=username,password=password,code=code??""});using(var content=new StringContent(body,Encoding.UTF8,"application/json")){var response=await client.PostAsync(endpoint,content,token).ConfigureAwait(false);if(!response.IsSuccessStatusCode)return false;var data=Json.Parse<LauncherAuthResponse>(await response.Content.ReadAsStringAsync().ConfigureAwait(false));if(String.IsNullOrEmpty(data.token))return false;Directory.CreateDirectory(Path.GetDirectoryName(path));File.WriteAllBytes(path,ProtectedData.Protect(Encoding.UTF8.GetBytes(data.token),null,DataProtectionScope.CurrentUser));if(remember)File.WriteAllBytes(credentials,ProtectedData.Protect(Encoding.UTF8.GetBytes(username+"\n"+password),null,DataProtectionScope.CurrentUser));else ForgetCredentials();return true;}}}
 }
 public sealed class LauncherAuthResponse { public string token { get; set; } }
 }
