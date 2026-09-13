@@ -26,7 +26,7 @@ public sealed partial class MainForm {
 
     private void BuildUi() {
         DoubleBuffered = true; AutoScaleMode = AutoScaleMode.None;
-        ClientSize = new Size(1200, 760); MinimumSize = new Size(1136, 759);
+        ClientSize = new Size(1200, 760); MinimumSize = new Size(900, 600); AutoScroll = true;
         Font = new Font("Segoe UI", 10F); ForeColor = Color.FromArgb(231,235,241); BackColor = Color.FromArgb(12,16,23);
         using (var stream = typeof(MainForm).Assembly.GetManifestResourceStream("AionCL.classic-wings.jpg")) {
             if (stream != null) using (var source = Image.FromStream(stream)) portal = new Bitmap(source);
@@ -88,6 +88,36 @@ public sealed partial class MainForm {
         if(footer==null) return;
         int w=ClientSize.Width,h=ClientSize.Height;
         homeButton.SetBounds(w-384,26,112,40); helpButton.SetBounds(w-260,26,104,40); journalButton.SetBounds(w-144,26,116,40);
+        bool compact = w < 1080 || h < 700;
+        if (compact) {
+            int margin = 18;
+            int contentW = Math.Max(760, w - margin * 2);
+            int imageW = contentW;
+            int imageH = portal == null ? 220 : Math.Min(230, imageW * portal.Height / portal.Width);
+            updatePanel?.SetBounds(margin, 84, contentW, 54);
+            artwork.SetBounds(margin, 154, imageW, imageH);
+            artwork.Visible = true;
+            storyPanel.Visible = false;
+            int panelTop = artwork.Bottom + 14;
+            installPanel.SetBounds(margin, panelTop, contentW, 620);
+            int controlW = contentW - 48;
+            clientTitle.SetBounds(24,20,controlW,34);
+            versionLabel.SetBounds(24,60,controlW,28);
+            pathLabel.SetBounds(24,102,controlW,24);
+            pathBox.SetBounds(24,130,controlW-56,30);
+            browseButton.SetBounds(contentW-72,127,48,36);
+            languageLabel.SetBounds(24,178,controlW,24);
+            languageBox.SetBounds(24,206,controlW,32);
+            koreanVoices.SetBounds(24,248,controlW,36); hitFontButton.SetBounds(24,290,controlW,36);
+            installButton.SetBounds(24,334,controlW,36); verifyButton.SetBounds(24,378,controlW,36);
+            authManualButton.SetBounds(24,420,controlW,36); authBrowserButton.SetBounds(24,464,controlW,36); authRevokeButton.SetBounds(24,508,controlW,30); authStatus.SetBounds(24,548,controlW,56);
+            footer.SetBounds(margin, installPanel.Bottom + 14, contentW, 124);
+            progressBar.SetBounds(18,24,contentW-36,6); statusLabel.SetBounds(18,46,contentW-206,66); cancelButton.SetBounds(contentW-186,48,168,44); playButton.SetBounds(contentW-348,24,330,76);
+            AutoScrollMinSize = new Size(contentW + margin * 2, footer.Bottom + margin);
+            return;
+        }
+        storyPanel.Visible = true;
+        AutoScrollMinSize = Size.Empty;
         const int margin=28, gap=28, side=352;
         int leftWidth=w-margin*2-gap-side;
         footer.SetBounds(0,h-124,w,124);
