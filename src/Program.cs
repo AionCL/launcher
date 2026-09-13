@@ -464,6 +464,34 @@ namespace AionCL
             if (!EnsurePath())
                 return;
 
+            // Do not start the client with a stale browser session. This keeps
+            // revocation visible to the player instead of failing silently at
+            // the Aion login screen.
+            var existingLauncherToken = launcherAuth.Token;
+            if (!String.IsNullOrEmpty(existingLauncherToken))
+            {
+                bool sessionActive;
+                try
+                {
+                    sessionActive = await launcherAuth.Status(
+                        config.portalUrl.TrimEnd('/') + "/api/launcher/status",
+                        CancellationToken.None
+                    );
+                }
+                catch (Exception ex)
+                {
+                    Log("Contrôle de session launcher impossible : " + ex.Message);
+                    authStatus.Text = TranslateMessage("Session launcher indisponible. Reconnecte-toi via le navigateur.");
+                    return;
+                }
+                if (!sessionActive)
+                {
+                    launcherAuth.Clear();
+                    authStatus.Text = TranslateMessage("Session launcher expirée ou révoquée. Reconnecte-toi via le navigateur.");
+                    return;
+                }
+            }
+
             SetBusy(true);
 
             cts = new CancellationTokenSource();
