@@ -24,7 +24,7 @@ public sealed class LauncherConfig {
     public string manifestUrl { get; set; }
     public string serverConfigUrl { get; set; }
     public string updateFeedUrl { get; set; }
-    public string portalUrl { get; set; } = "https://aioncl.com";
+    public string portalUrl { get; set; }
     public int maxParallelDownloads { get; set; }
     public int requestTimeoutSeconds { get; set; }
     public string gameExecutable { get; set; }
@@ -32,7 +32,7 @@ public sealed class LauncherConfig {
     public void Validate() {
         if (product != "AionCL" || !Regex.IsMatch(clientBaseVersion ?? "", "^2\\.4\\.[0-9]+$") || maxParallelDownloads < 1 || maxParallelDownloads > 3 || requestTimeoutSeconds < 5 || requestTimeoutSeconds > 120) throw new InvalidDataException("Configuration launcher invalide.");
         if (!String.IsNullOrEmpty(updateFeedUrl)) Safety.Https(updateFeedUrl);
-        if (String.IsNullOrEmpty(portalUrl)) throw new InvalidDataException("URL du portail manquante.");
+        if (String.IsNullOrEmpty(portalUrl)) portalUrl = "https://aioncl.com";
         Safety.Https(portalUrl);
         Safety.Https(manifestUrl); if (!String.IsNullOrEmpty(serverConfigUrl)) Safety.Https(serverConfigUrl);
         Safety.Relative(gameExecutable);

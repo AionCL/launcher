@@ -60,7 +60,6 @@ Write-Host "Program : $programFile"
     (Join-Path $root 'src\KoreanPack.cs') `
     (Join-Path $root 'src\HitFont.cs') `
     (Join-Path $root 'src\LauncherAuth.cs') `
-    (Join-Path $root 'src\LauncherAuth.cs') `
     $programFile `
     (Join-Path $root 'src\LauncherUi.cs') `
     (Join-Path $root 'src\Localization.cs') `
