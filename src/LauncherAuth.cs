@@ -14,6 +14,8 @@ public sealed class LauncherAuth {
     public void Clear(){try{if(File.Exists(path))File.Delete(path);}catch{}}
     public Tuple<string,string> SavedCredentials { get { try { if(!File.Exists(credentials))return null; var value=Encoding.UTF8.GetString(ProtectedData.Unprotect(File.ReadAllBytes(credentials),null,DataProtectionScope.CurrentUser)).Split(new[]{'\n'},2); return value.Length==2?Tuple.Create(value[0],value[1]):null; } catch { return null; } } }
     public void ForgetCredentials(){try{if(File.Exists(credentials))File.Delete(credentials);}catch{}}
+    public async Task<bool> Status(string endpoint,CancellationToken token){var value=Token;if(String.IsNullOrEmpty(value))return false;using(var client=new HttpClient()){client.Timeout=TimeSpan.FromSeconds(10);client.DefaultRequestHeaders.TryAddWithoutValidation("Authorization","Bearer "+value);var response=await client.GetAsync(endpoint,token).ConfigureAwait(false);return response.IsSuccessStatusCode;}}
+    public async Task Revoke(string endpoint,CancellationToken token){var value=Token;if(String.IsNullOrEmpty(value))return;using(var client=new HttpClient()){client.Timeout=TimeSpan.FromSeconds(10);client.DefaultRequestHeaders.TryAddWithoutValidation("Authorization","Bearer "+value);await client.PostAsync(endpoint,new StringContent("{}",Encoding.UTF8,"application/json"),token).ConfigureAwait(false);}Clear();}
     public async Task<bool> BrowserLogin(string portal, CancellationToken token) {
         using(var client=new HttpClient()) {
             client.Timeout=TimeSpan.FromSeconds(15); client.DefaultRequestHeaders.TryAddWithoutValidation("Origin","https://aioncl.com");

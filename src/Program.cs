@@ -53,6 +53,7 @@ namespace AionCL
         private readonly Label authOtpHint = new Label();
         private readonly Button authButton = new LauncherButton();
         private readonly Button authBrowserButton = new LauncherButton();
+        private readonly Button authRevokeButton = new LauncherButton();
         private readonly Label authStatus = new Label();
         private readonly LauncherAuth launcherAuth = new LauncherAuth();
 
@@ -111,6 +112,7 @@ namespace AionCL
                 config.Validate();
                 var saved = launcherAuth.SavedCredentials;
                 if (saved != null) { authUser.Text = saved.Item1; authPassword.Text = saved.Item2; authRemember.Checked = true; }
+                try { authStatus.Text = await launcherAuth.Status(config.portalUrl.TrimEnd('/')+"/api/launcher/status", CancellationToken.None) ? "Session launcher active." : "Aucune session launcher."; } catch { authStatus.Text = "Statut indisponible."; }
                 await CheckUpdates(true);
 
                 Log("Chargement du manifest distant...");
@@ -171,6 +173,7 @@ namespace AionCL
             try { bool ok=await launcherAuth.BrowserLogin(config.portalUrl,CancellationToken.None); authStatus.Text=ok?TranslateMessage("Launcher authentifié."):TranslateMessage("Autorisation non terminée."); }
             catch(Exception ex){authStatus.Text=TranslateMessage("Service indisponible.");Log(ex.Message);} finally {authBrowserButton.Enabled=true;}
         }
+        private async Task RevokeLauncherAsync() { if(config==null)return; authRevokeButton.Enabled=false; try { await launcherAuth.Revoke(config.portalUrl.TrimEnd('/')+"/api/launcher/logout",CancellationToken.None); authStatus.Text=TranslateMessage("Session launcher révoquée."); } catch(Exception ex){Log(ex.Message);} finally{authRevokeButton.Enabled=true;} }
 
         private void Browse(object sender, EventArgs e)
         {
