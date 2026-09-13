@@ -66,14 +66,8 @@ public sealed partial class MainForm {
         };
         StyleButton(installButton,"",installPanel,24,319,282,32,false); installButton.Enabled=false; installButton.Click += async delegate { await InstallAsync(); };
         StyleButton(verifyButton,"",installPanel,24,360,282,30,false); verifyButton.Enabled=false; verifyButton.Click += async delegate { await VerifyAsync(); };
-        authUser.SetBounds(24,420,132,28); authUser.BackColor=BackColor; authUser.ForeColor=ForeColor; installPanel.Controls.Add(authUser);
-        authPassword.SetBounds(164,420,142,28); authPassword.BackColor=BackColor; authPassword.ForeColor=ForeColor; authPassword.UseSystemPasswordChar=true; installPanel.Controls.Add(authPassword);
-        authOtp.SetBounds(24,454,100,28); authOtp.BackColor=BackColor; authOtp.ForeColor=ForeColor; authOtp.MaxLength=20; installPanel.Controls.Add(authOtp);
-        authOtpHint.Text="OTP (si activé)"; authOtpHint.ForeColor=muted; authOtpHint.BackColor=installPanel.BackColor; authOtpHint.SetBounds(24,442,110,16); installPanel.Controls.Add(authOtpHint);
-        authRemember.Text="Mémoriser"; authRemember.ForeColor=muted; authRemember.BackColor=installPanel.BackColor; authRemember.SetBounds(132,454,100,28); installPanel.Controls.Add(authRemember);
-        StyleButton(authButton,"Se connecter",installPanel,24,488,282,32,false); authButton.Click += async delegate { await AuthenticateAsync(); };
-        StyleButton(authBrowserButton,"Connexion via navigateur",installPanel,24,524,282,32,false); authBrowserButton.Click += async delegate { await BrowserAuthenticateAsync(); };
-        authStatus.SetBounds(24,560,282,38); authStatus.ForeColor=muted; installPanel.Controls.Add(authStatus);
+        StyleButton(authBrowserButton,"Connexion via navigateur",installPanel,24,420,282,40,true); authBrowserButton.Click += async delegate { await BrowserAuthenticateAsync(); };
+        authStatus.SetBounds(24,468,282,56); authStatus.ForeColor=muted; installPanel.Controls.Add(authStatus);
         footer=new Panel { BackColor=Color.FromArgb(12,15,21) }; Controls.Add(footer);
         progressBar.SetBounds(28,23,650,5); footer.Controls.Add(progressBar);
         statusLabel.SetBounds(28,44,650,46); statusLabel.ForeColor=muted; footer.Controls.Add(statusLabel);
@@ -107,7 +101,7 @@ public sealed partial class MainForm {
         hitFontButton.SetBounds(24,290,side-48,36);
         installButton.SetBounds(24,334,side-48,36);
         verifyButton.SetBounds(24,378,side-48,36);
-        authUser.SetBounds(24,420,(side-58)/2,30); authPassword.SetBounds(34+(side-58)/2,420,(side-58)/2,30); authOtp.SetBounds(24,458,100,30); authRemember.SetBounds(132,458,100,30); authButton.SetBounds(24,494,side-48,36); authBrowserButton.SetBounds(24,536,side-48,36); authStatus.SetBounds(24,578,side-48,36);
+        authBrowserButton.SetBounds(24,420,side-48,40); authStatus.SetBounds(24,468,side-48,56);
         int imageWidth = Math.Min(leftWidth, (h-440)*16/9);
         int imageHeight = portal == null ? imageWidth * 9 / 16 : imageWidth * portal.Height / portal.Width;
         artwork.SetBounds(margin+(leftWidth-imageWidth)/2,164,imageWidth,imageHeight);
