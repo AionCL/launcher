@@ -17,7 +17,7 @@ public sealed class LauncherAuth {
     public async Task<bool> BrowserLogin(string portal, CancellationToken token) {
         using(var client=new HttpClient()) {
             client.Timeout=TimeSpan.FromSeconds(15);
-            var state=Convert.ToBase64String(Guid.NewGuid().ToByteArray()).TrimEnd('=').Replace('+','-').Replace('/','_')+Convert.ToBase64String(Guid.NewGuid().ToByteArray()).TrimEnd('=').Replace('+','-').Replace('/','_');
+            var state=(Convert.ToBase64String(Guid.NewGuid().ToByteArray()).TrimEnd('=').Replace('+','-').Replace('/','_')+Convert.ToBase64String(Guid.NewGuid().ToByteArray()).TrimEnd('=').Replace('+','-').Replace('/','_')).Substring(0,43);
             var start=await client.PostAsync(portal.TrimEnd('/')+"/api/launcher/authorize/start",new StringContent(Json.Serialize(new {state=state}),Encoding.UTF8,"application/json"),token).ConfigureAwait(false);
             if(!start.IsSuccessStatusCode)return false;
             Process.Start(new ProcessStartInfo { FileName=portal.TrimEnd('/')+"/account.html?launcher_state="+Uri.EscapeDataString(state),UseShellExecute=true });
