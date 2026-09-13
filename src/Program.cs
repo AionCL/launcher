@@ -52,6 +52,7 @@ namespace AionCL
         private readonly CheckBox authRemember = new CheckBox();
         private readonly Label authOtpHint = new Label();
         private readonly Button authButton = new LauncherButton();
+        private readonly Button authBrowserButton = new LauncherButton();
         private readonly Label authStatus = new Label();
         private readonly LauncherAuth launcherAuth = new LauncherAuth();
 
@@ -164,6 +165,11 @@ namespace AionCL
             authButton.Enabled=false; authStatus.Text=TranslateMessage("Connexion sécurisée…");
             try { bool ok=await launcherAuth.Login(config.portalUrl.TrimEnd('/')+"/api/launcher/login",authUser.Text,authPassword.Text,authOtp.Text,authRemember.Checked,CancellationToken.None); if(ok){authPassword.Clear(); authOtp.Clear();} authStatus.Text=ok?TranslateMessage("Launcher authentifié."):TranslateMessage("Connexion refusée. Vérifie le mot de passe et le code OTP."); }
             catch(Exception ex){authPassword.Clear();authStatus.Text=TranslateMessage("Service indisponible.");Log(ex.Message);} finally {authButton.Enabled=true;}
+        }
+        private async Task BrowserAuthenticateAsync() {
+            if(config==null)return; authBrowserButton.Enabled=false; authStatus.Text=TranslateMessage("Ouverture du portail…");
+            try { bool ok=await launcherAuth.BrowserLogin(config.portalUrl,CancellationToken.None); authStatus.Text=ok?TranslateMessage("Launcher authentifié."):TranslateMessage("Autorisation non terminée."); }
+            catch(Exception ex){authStatus.Text=TranslateMessage("Service indisponible.");Log(ex.Message);} finally {authBrowserButton.Enabled=true;}
         }
 
         private void Browse(object sender, EventArgs e)
