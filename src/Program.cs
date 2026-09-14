@@ -3,6 +3,7 @@ using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -48,17 +49,10 @@ namespace AionCL
         private readonly Button cancelButton = new LauncherButton();
         private readonly TextBox authUser = new TextBox();
         private readonly TextBox authPassword = new TextBox();
-        private readonly TextBox authOtp = new TextBox();
         private readonly CheckBox authRemember = new CheckBox();
-        private readonly Label authOtpHint = new Label();
-        private readonly Button authButton = new LauncherButton();
         private readonly Button authManualButton = new LauncherButton();
-        private readonly Button authBrowserButton = new LauncherButton();
-        private readonly Button authRevokeButton = new LauncherButton();
         private readonly Label authStatus = new Label();
         private readonly LauncherAuth launcherAuth = new LauncherAuth();
-        private string directAuthUser;
-        private string directAuthPassword;
 
         private readonly Label statusLabel = new Label();
         private readonly Label versionLabel = new Label();
@@ -118,7 +112,7 @@ namespace AionCL
                 config.Validate();
                 var saved = launcherAuth.SavedCredentials;
                 if (saved != null) { authUser.Text = saved.Item1; authPassword.Text = saved.Item2; authRemember.Checked = true; }
-                try { authStatus.Text = await launcherAuth.Status(config.portalUrl.TrimEnd('/')+"/api/launcher/status", CancellationToken.None) ? "Session launcher active." : "Aucune session launcher."; } catch { authStatus.Text = "Statut indisponible."; }
+                authStatus.Text = saved == null ? "Saisis tes identifiants pour lancer le client." : "Identifiants mémorisés disponibles.";
                 await CheckUpdates(true);
 
                 Log("Chargement du manifest distant...");
@@ -168,29 +162,17 @@ namespace AionCL
             }
         }
 
-        private async Task AuthenticateAsync() {
-            if(config==null || String.IsNullOrWhiteSpace(authUser.Text) || String.IsNullOrWhiteSpace(authPassword.Text)) { authStatus.Text=TranslateMessage("Identifiants requis."); return; }
-            authButton.Enabled=false; authStatus.Text=TranslateMessage("Connexion sécurisée…");
-            try { bool ok=await launcherAuth.Login(config.portalUrl.TrimEnd('/')+"/api/launcher/login",authUser.Text,authPassword.Text,authOtp.Text,authRemember.Checked,CancellationToken.None); if(ok){authPassword.Clear(); authOtp.Clear();} authStatus.Text=ok?TranslateMessage("Launcher authentifié."):TranslateMessage("Connexion refusée. Vérifie le mot de passe et le code OTP."); }
-            catch(Exception ex){authPassword.Clear();authStatus.Text=TranslateMessage("Service indisponible.");Log(ex.Message);} finally {authButton.Enabled=true;}
-        }
         private async Task ManualAuthenticateAsync() {
             if (String.IsNullOrWhiteSpace(authUser.Text) || String.IsNullOrWhiteSpace(authPassword.Text)) {
                 authStatus.Text = TranslateMessage("Identifiant et mot de passe requis.");
                 return;
             }
+            var validation = ValidateNativeCredentials(authUser.Text.Trim(), authPassword.Text);
+            if (validation != null) { authStatus.Text = TranslateMessage(validation); return; }
             launcherAuth.SaveCredentials(authUser.Text.Trim(), authPassword.Text, authRemember.Checked);
-            directAuthUser = authUser.Text.Trim();
-            directAuthPassword = authPassword.Text;
-            authStatus.Text = TranslateMessage("Identifiants directs prêts pour le client.");
+            authStatus.Text = TranslateMessage(authRemember.Checked ? "Identifiants enregistrés pour le client." : "Identifiants prêts pour le client.");
             await Task.Yield();
         }
-        private async Task BrowserAuthenticateAsync() {
-            if(config==null)return; authBrowserButton.Enabled=false; authStatus.Text=TranslateMessage("Ouverture du portail…");
-            try { bool ok=await launcherAuth.BrowserLogin(config.portalUrl,CancellationToken.None); authStatus.Text=ok?TranslateMessage("Launcher authentifié."):TranslateMessage("Autorisation non terminée."); }
-            catch(Exception ex){authStatus.Text=TranslateMessage("Service indisponible.");Log(ex.Message);} finally {authBrowserButton.Enabled=true;}
-        }
-        private async Task RevokeLauncherAsync() { if(config==null)return; authRevokeButton.Enabled=false; try { await launcherAuth.Revoke(config.portalUrl.TrimEnd('/')+"/api/launcher/logout",CancellationToken.None); authStatus.Text=TranslateMessage("Session launcher révoquée."); } catch(Exception ex){Log(ex.Message);} finally{authRevokeButton.Enabled=true;} }
 
         private void Browse(object sender, EventArgs e)
         {
@@ -481,54 +463,16 @@ namespace AionCL
             if (!EnsurePath())
                 return;
 
-            // Do not start the client with a stale browser session. This keeps
-            // revocation visible to the player instead of failing silently at
-            // the Aion login screen.
-            var existingLauncherToken = launcherAuth.Token;
-            string gameTicket = null;
-            if (String.IsNullOrEmpty(directAuthUser) || String.IsNullOrEmpty(directAuthPassword))
-            {
-                if (!String.IsNullOrEmpty(existingLauncherToken))
-                {
-                bool sessionActive;
-                try
-                {
-                    sessionActive = await launcherAuth.Status(
-                        config.portalUrl.TrimEnd('/') + "/api/launcher/status",
-                        CancellationToken.None
-                    );
-                }
-                catch (Exception ex)
-                {
-                    Log("Contrôle de session launcher impossible : " + ex.Message);
-                    authStatus.Text = TranslateMessage("Session launcher indisponible. Reconnecte-toi via le navigateur.");
-                    return;
-                }
-                if (!sessionActive)
-                {
-                    launcherAuth.Clear();
-                    authStatus.Text = TranslateMessage("Session launcher expirée ou révoquée. Reconnecte-toi via le navigateur.");
-                    return;
-                }
-
-                try
-                {
-                    gameTicket = await launcherAuth.IssueGameTicket(
-                        config.portalUrl.TrimEnd('/') + "/api/launcher/game-ticket",
-                        CancellationToken.None
-                    );
-                }
-                catch (Exception ex)
-                {
-                    Log("Obtention du ticket ingame impossible : " + ex.Message);
-                }
-                if (String.IsNullOrEmpty(gameTicket))
-                {
-                    authStatus.Text = TranslateMessage("Ticket ingame indisponible. Réessaie la connexion via le navigateur.");
-                    return;
-                }
-                }
+            var directAuthUser = authUser.Text.Trim();
+            var directAuthPassword = authPassword.Text;
+            if (String.IsNullOrWhiteSpace(directAuthUser) || String.IsNullOrEmpty(directAuthPassword)) {
+                authStatus.Text = TranslateMessage("Identifiant et mot de passe requis avant JOUER.");
+                return;
             }
+            var credentialError = ValidateNativeCredentials(directAuthUser, directAuthPassword);
+            if (credentialError != null) { authStatus.Text = TranslateMessage(credentialError); return; }
+            launcherAuth.SaveCredentials(directAuthUser, directAuthPassword, authRemember.Checked);
+            authStatus.Text = TranslateMessage("Connexion directe en préparation…");
 
             SetBusy(true);
 
@@ -591,10 +535,7 @@ namespace AionCL
                     // Explicit direct mode follows the native Aion launcher contract.
                     // Credentials are held only in memory and are never persisted by
                     // this mode unless the user separately checks Windows storage.
-                    if (!String.IsNullOrEmpty(directAuthUser) && !String.IsNullOrEmpty(directAuthPassword)) {
-                        command.Arguments += " -account:" + QuoteArgument(directAuthUser) + " -password:" + QuoteArgument(directAuthPassword);
-                    } else if (!String.IsNullOrEmpty(gameTicket))
-                        command.Arguments += " -st /SessKey:\"" + gameTicket + "\"";
+                    command.Arguments += " -account:" + NativeArgument(directAuthUser) + " -password:" + NativeArgument(directAuthPassword);
 
                     Log(
                         "Lancement : " +
@@ -641,9 +582,22 @@ namespace AionCL
             return endPassword < 0 ? redacted.Substring(0, startPassword) + "[redacted]" : redacted.Substring(0, startPassword) + "[redacted]" + redacted.Substring(endPassword);
         }
 
-        private static string QuoteArgument(string value) {
+        private static string NativeArgument(string value) {
             if (String.IsNullOrEmpty(value)) return "\"\"";
+            // Aion's command-line parser reads the value after the colon
+            // literally. Avoid quotes for the normal ASCII credential case;
+            // quoted values are otherwise sent with the quote characters.
+            if (value.IndexOfAny(new[] { ' ', '\t', '\r', '\n', '\"' }) < 0) return value;
             return "\"" + value.Replace("\\", "\\\\").Replace("\"", "\\\"") + "\"";
+        }
+
+        private static string ValidateNativeCredentials(string username, string password) {
+            if (String.IsNullOrWhiteSpace(username)) return "Identifiant requis.";
+            if (username.IndexOfAny(new[] { ' ', '\t', '\r', '\n', '\"' }) >= 0) return "L'identifiant ne doit pas contenir d'espace ou de guillemet.";
+            if (password.IndexOfAny(new[] { '\r', '\n', '\"' }) >= 0) return "Le mot de passe contient un caractère non pris en charge par le client.";
+            if (password.Trim() != password) return "Le mot de passe ne doit pas commencer ou finir par un espace.";
+            if (Encoding.UTF8.GetByteCount(password) > 32) return "Le mot de passe du client Aion doit contenir au maximum 32 octets.";
+            return null;
         }
 
         private bool EnsurePath()
