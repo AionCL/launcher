@@ -22,3 +22,6 @@ La version `launcher-v1.9.2-ergonomic` conserve la fenêtre fixe 1100×640, mais
 ## Release v1.9.3 — fenêtre responsive
 
 La version `launcher-v1.9.3-responsive` adapte la fenêtre à la zone de travail Windows, autorise le redimensionnement et réduit automatiquement les champs d’authentification lorsque la largeur disponible est plus faible. La page reste sans défilement et le bandeau d’action reste séparé de l’authentification.
+
+Asset : `AionCL-Launcher-20260914-165837-378.zip`  
+SHA-256 : `412d0f9651d66897d0cafd10d924d204efa901083952bc462e0b2e7b2ded5e5`
