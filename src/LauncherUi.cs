@@ -28,7 +28,10 @@ public sealed partial class MainForm {
 
     private void BuildUi() {
         DoubleBuffered = true; AutoScaleMode = AutoScaleMode.None;
-        ClientSize = new Size(1100, 640); MinimumSize = new Size(1100, 640); MaximumSize = new Size(1100, 640); AutoScroll = false;
+        var workArea = Screen.PrimaryScreen.WorkingArea;
+        int initialWidth = Math.Min(1180, Math.Max(1000, workArea.Width - 40));
+        int initialHeight = Math.Min(760, Math.Max(620, workArea.Height - 40));
+        ClientSize = new Size(initialWidth, initialHeight); MinimumSize = new Size(1000, 620); MaximumSize = Size.Empty; AutoScroll = false;
         Font = new Font("Segoe UI", 10F); ForeColor = Color.FromArgb(231,235,241); BackColor = Color.FromArgb(12,16,23);
         using (var stream = typeof(MainForm).Assembly.GetManifestResourceStream("AionCL.classic-wings.jpg")) {
             if (stream != null) using (var source = Image.FromStream(stream)) portal = new Bitmap(source);
@@ -97,10 +100,9 @@ public sealed partial class MainForm {
         if(footer==null) return;
         int w=ClientSize.Width,h=ClientSize.Height;
         homeButton.SetBounds(w-384,26,112,40); helpButton.SetBounds(w-260,26,104,40); journalButton.SetBounds(w-144,26,116,40);
-        // The launcher uses one predictable 1100x640 page. Only a genuinely
-        // narrower window falls back to the stacked layout; a short desktop
-        // work area must not hide the login controls behind a scrollbar.
-        bool compact = w < 1080;
+        // Keep the primary layout on one page. Only a genuinely narrow window
+        // falls back to the stacked layout; controls must never be hidden by a scrollbar.
+        bool compact = w < 980;
         discordButton.Visible = !compact; youtubeButton.Visible = !compact;
         if (compact) {
             int compactMargin = 18;
@@ -176,7 +178,7 @@ public sealed partial class MainForm {
         hitFontButton.SetBounds(24,228,side-48,30);
         installButton.SetBounds(24,263,side-48,30);
         verifyButton.SetBounds(24,298,side-48,30);
-        authSectionLabel.SetBounds(28,8,170,18); authUserLabel.SetBounds(28,27,150,16); authPasswordLabel.SetBounds(210,27,150,16); authUser.SetBounds(28,43,170,30); authPassword.SetBounds(210,43,170,30); authRemember.SetBounds(390,46,150,24); authManualButton.SetBounds(548,41,170,34); authStatus.SetBounds(28,80,690,20);
+        LayoutAuthRow(w-margin-side-16, margin);
         int imageWidth = Math.Min(leftWidth, (h-440)*16/9);
         int imageHeight = portal == null ? imageWidth * 9 / 16 : imageWidth * portal.Height / portal.Width;
         artwork.SetBounds(margin+(leftWidth-imageWidth)/2,164,imageWidth,imageHeight);
@@ -199,9 +201,22 @@ public sealed partial class MainForm {
         }
     }
     private void LayoutFooter(int w, int h) {
-        authSectionLabel.SetBounds(28,8,170,18); authUserLabel.SetBounds(28,27,150,16); authPasswordLabel.SetBounds(210,27,150,16);
-        authUser.SetBounds(28,43,170,30); authPassword.SetBounds(210,43,170,30); authRemember.SetBounds(390,46,150,24); authManualButton.SetBounds(548,41,170,34); authStatus.SetBounds(28,80,690,20);
+        LayoutAuthRow(w-396, 28);
         playButton.SetBounds(w-380,22,330,78); cancelButton.SetBounds(w-380,108,330,30); progressBar.SetBounds(28,136,w-458,6); statusLabel.SetBounds(28,105,w-458,24);
+    }
+    private void LayoutAuthRow(int rightEdge, int left) {
+        int available = Math.Max(520, rightEdge-left);
+        int userWidth, rememberWidth, manualWidth;
+        if (available >= 710) { userWidth=170; rememberWidth=150; manualWidth=170; }
+        else if (available >= 640) { userWidth=150; rememberWidth=120; manualWidth=155; }
+        else { userWidth=130; rememberWidth=100; manualWidth=145; }
+        int gap=10, x=left;
+        authSectionLabel.SetBounds(left,8,180,18);
+        authUserLabel.SetBounds(x,27,userWidth,16); authUser.SetBounds(x,43,userWidth,30); x+=userWidth+gap;
+        authPasswordLabel.SetBounds(x,27,userWidth,16); authPassword.SetBounds(x,43,userWidth,30); x+=userWidth+gap;
+        authRemember.SetBounds(x,46,rememberWidth,24); x+=rememberWidth+gap;
+        authManualButton.SetBounds(x,41,manualWidth,34);
+        authStatus.SetBounds(left,80,Math.Max(300,available),20);
     }
     private Label LabelAt(Control p,string t,int x,int y,int w,int h,float size,Color c) {
         var l=new Label { Text=t,Bounds=new Rectangle(x,y,w,h),ForeColor=c,BackColor=Color.Transparent,Font=new Font("Segoe UI",size) }; p.Controls.Add(l); return l;

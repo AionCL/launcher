@@ -18,3 +18,7 @@ SHA-256 : `dfc461307fd30769b305794b27f47bb60d742fe0515ac71e9c30f4b81febf75f`
 ## Release v1.9.2 — barre d’authentification sans chevauchement
 
 La version `launcher-v1.9.2-ergonomic` conserve la fenêtre fixe 1100×640, mais réserve un bandeau inférieur à la connexion et aux états. Le bouton `Interrompre` reste masqué au repos et remplace temporairement `JOUER` uniquement pendant une opération. Les champs d’identifiants restent visibles sur Accueil et Paramètres sans défilement.
+
+## Release v1.9.3 — fenêtre responsive
+
+La version `launcher-v1.9.3-responsive` adapte la fenêtre à la zone de travail Windows, autorise le redimensionnement et réduit automatiquement les champs d’authentification lorsque la largeur disponible est plus faible. La page reste sans défilement et le bandeau d’action reste séparé de l’authentification.
