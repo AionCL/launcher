@@ -28,7 +28,7 @@ public sealed partial class MainForm {
 
     private void BuildUi() {
         DoubleBuffered = true; AutoScaleMode = AutoScaleMode.None;
-        ClientSize = new Size(1100, 640); MinimumSize = new Size(1100, 640); MaximumSize = new Size(1100, 640); AutoScroll = true;
+        ClientSize = new Size(1100, 640); MinimumSize = new Size(1100, 640); MaximumSize = new Size(1100, 640); AutoScroll = false;
         Font = new Font("Segoe UI", 10F); ForeColor = Color.FromArgb(231,235,241); BackColor = Color.FromArgb(12,16,23);
         using (var stream = typeof(MainForm).Assembly.GetManifestResourceStream("AionCL.classic-wings.jpg")) {
             if (stream != null) using (var source = Image.FromStream(stream)) portal = new Bitmap(source);
@@ -37,7 +37,7 @@ public sealed partial class MainForm {
         var brand = LabelAt(this,"AIONCL",28,20,185,48,28,ForeColor); brand.Font = new Font("Georgia",28);
         edition = LabelAt(this,"CLASSIC  /  2.4",226,37,140,22,9,muted);
         homeButton = ButtonAt(this,"",370,26,120,42,false); homeButton.Click += delegate { storyPage="home"; ApplyLanguage(); };
-        helpButton = ButtonAt(this,"",498,26,100,42,false); helpButton.Click += delegate { storyPage="help"; ApplyLanguage(); };
+        helpButton = ButtonAt(this,"",498,26,100,42,false); helpButton.Click += delegate { storyPage="settings"; ApplyLanguage(); };
         journalButton = ButtonAt(this,"",606,26,110,42,false); journalButton.Click += delegate { ShowJournal(); };
         artwork = new PictureBox { Image = portal, SizeMode = PictureBoxSizeMode.Zoom, BackColor = Color.FromArgb(10,12,17) }; Controls.Add(artwork);
         storyPanel = new Panel { BackColor = BackColor }; Controls.Add(storyPanel);
@@ -138,6 +138,29 @@ public sealed partial class MainForm {
         const int margin=28, gap=28, side=352;
         int leftWidth=w-margin*2-gap-side;
         footer.SetBounds(0,h-124,w,124);
+
+        if (storyPage == "settings") {
+            artwork.Visible = false;
+            storyPanel.Visible = false;
+            installPanel.SetBounds(margin,164,w-margin*2,footer.Top-180);
+            int controlW=w-margin*2-48;
+            clientTitle.SetBounds(24,18,controlW,30);
+            versionLabel.SetBounds(24,52,controlW,24);
+            pathLabel.SetBounds(24,82,controlW,20);
+            pathBox.SetBounds(24,105,controlW-56,28);
+            browseButton.SetBounds(controlW-48,103,48,32);
+            languageLabel.SetBounds(24,139,controlW,20);
+            languageBox.SetBounds(24,161,Math.Min(520,controlW),29);
+            koreanVoices.SetBounds(24,197,Math.Min(520,controlW),30);
+            hitFontButton.SetBounds(24,232,Math.Min(520,controlW),30);
+            installButton.SetBounds(24,267,Math.Min(520,controlW),30);
+            verifyButton.SetBounds(24,302,Math.Min(520,controlW),30);
+            LayoutFooter(w, h);
+            if(updatePanel!=null) updatePanel.SetBounds(margin,90,w-margin*2,54);
+            return;
+        }
+
+        artwork.Visible = true;
         installPanel.SetBounds(w-margin-side,150,side,footer.Top-150);
         clientTitle.SetBounds(24,14,side-48,30);
         versionLabel.SetBounds(24,48,side-48,24);
@@ -172,6 +195,11 @@ public sealed partial class MainForm {
             updateNotice.TextAlign=ContentAlignment.MiddleLeft;
         }
     }
+    private void LayoutFooter(int w, int h) {
+        authSectionLabel.SetBounds(28,3,130,18); authUserLabel.SetBounds(28,20,150,16); authPasswordLabel.SetBounds(206,20,150,16);
+        authUser.SetBounds(28,36,170,30); authPassword.SetBounds(206,36,170,30); authRemember.SetBounds(386,38,130,24); authManualButton.SetBounds(520,34,158,34); authStatus.SetBounds(28,70,650,24);
+        playButton.SetBounds(w-380,24,330,76); progressBar.SetBounds(28,98,w-458,5); statusLabel.SetBounds(28,104,w-486,18); cancelButton.SetBounds(w-570,85,178,28);
+    }
     private Label LabelAt(Control p,string t,int x,int y,int w,int h,float size,Color c) {
         var l=new Label { Text=t,Bounds=new Rectangle(x,y,w,h),ForeColor=c,BackColor=Color.Transparent,Font=new Font("Segoe UI",size) }; p.Controls.Add(l); return l;
     }
@@ -184,16 +212,16 @@ public sealed partial class MainForm {
     private void ApplyLanguage() {
         changingLanguage=true;
         languageBox.SelectedIndex=selectedLanguage=="ENG"?1:selectedLanguage=="DEU"?2:0;
-        homeButton.Text=L("Accueil","Home","Start"); helpButton.Text=L("Aide","Help","Hilfe"); journalButton.Text=L("Journal","Log","Protokoll");
+        homeButton.Text=L("Accueil","Home","Start"); helpButton.Text=L("Paramètres","Settings","Einstellungen"); journalButton.Text=L("Journal","Log","Protokoll");
         discordButton.Text="Discord"; youtubeButton.Text="YouTube";
         authSectionLabel.Text=L("Connexion au jeu","Game login","Spielanmeldung"); authUserLabel.Text=L("Identifiant","Username","Benutzername"); authPasswordLabel.Text=L("Mot de passe","Password","Passwort"); authRemember.Text=L("Mémoriser dans Windows","Remember in Windows","In Windows speichern");
         authManualButton.Text=L("Utiliser ces identifiants","Use these credentials","Diese Zugangsdaten verwenden");
-        homeButton.BackColor=storyPage=="home"?Color.FromArgb(44,61,75):BackColor; helpButton.BackColor=storyPage=="help"?Color.FromArgb(44,61,75):BackColor;
+        homeButton.BackColor=storyPage=="home"?Color.FromArgb(44,61,75):BackColor; helpButton.BackColor=storyPage=="settings"?Color.FromArgb(44,61,75):BackColor;
         clientTitle.Text=L("Votre jeu","Your game","Dein Spiel");pathLabel.Text=L("DOSSIER DU CLIENT","GAME FOLDER","SPIELORDNER");languageLabel.Text=L("LANGUE DU JEU ET DU LAUNCHER","GAME & LAUNCHER LANGUAGE","SPIEL- UND LAUNCHERSPRACHE");
         installButton.Text=L("Installer / reprendre","Install / resume","Installieren / fortsetzen");verifyButton.Text=L("Vérifier / réparer","Verify / repair","Prüfen / reparieren");cancelButton.Text=L("Interrompre","Interrupt","Unterbrechen"); playButton.Text=L("▶   JOUER","▶   PLAY","▶   SPIELEN");
         browseButton.AccessibleName=L("Choisir le dossier client","Choose game folder","Spielordner auswählen");
-        storyTitle.Text=storyPage=="home"?L("Votre aventure reprend ici.","Your adventure continues here.","Dein Abenteuer geht weiter."):L("Prêt à rejoindre Atréia ?","Ready to enter Atreia?","Bereit für Atreia?");
-        storyBody.Text=storyPage=="home"?L("Retrouvez Atréia dans Aion Classic 2.4.\nChoisissez votre langue, puis entrez en jeu.","Return to Atreia in Aion Classic 2.4.\nChoose your language, then enter the game.","Kehre in Aion Classic 2.4 nach Atreia zurück.\nWähle deine Sprache und starte das Spiel."):L("Choisissez un dossier, puis installez le client.\nDéjà installé ? Vérifiez ses fichiers et cliquez sur JOUER.\nUn téléchargement interrompu peut être repris.","Choose a folder, then install the game.\nAlready installed? Verify its files and click PLAY.\nInterrupted downloads can be resumed.","Wähle einen Ordner und installiere das Spiel.\nSchon installiert? Prüfe die Dateien und klicke auf SPIELEN.\nUnterbrochene Downloads lassen sich fortsetzen.");
+        storyTitle.Text=storyPage=="home"?L("Votre aventure reprend ici.","Your adventure continues here.","Dein Abenteuer geht weiter."):L("Paramètres du launcher","Launcher settings","Launcher-Einstellungen");
+        storyBody.Text=storyPage=="home"?L("Retrouvez Atréia dans Aion Classic 2.4.\nChoisissez votre langue, puis entrez en jeu.","Return to Atreia in Aion Classic 2.4.\nChoose your language, then enter the game.","Kehre in Aion Classic 2.4 nach Atreia zurück.\nWähle deine Sprache und starte das Spiel."):L("Dossier du client, langue et outils facultatifs.\nLes modifications sont appliquées avant le prochain lancement.","Game folder, language and optional tools.\nChanges are applied before the next launch.","Spielordner, Sprache und optionale Werkzeuge.\nÄnderungen werden vor dem nächsten Start angewendet.");
         UpdateVersionText(); changingLanguage=false;
         if(manifest!=null) RefreshClientState(); else statusLabel.Text=L("Connexion au service de mise à jour…","Connecting to update service…","Verbindung zum Update-Dienst…");
         RefreshKoreanButton();
