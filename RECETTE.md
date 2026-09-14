@@ -121,3 +121,20 @@ Tout fichier différent déjà présent à destination est préservé et bloque 
 Version locale à essayer : out\updates-preview\AionCL.Launcher.exe, launcher 1.1.0. Encadré de notification et recherche manuelle, automatique au démarrage puis toutes les cinq minutes hors opération. Guide de publication : UPDATES.md. Flux public config/updates.json encore à publier (404 constaté). Une erreur de recherche n’annonce pas un succès ; le manifest déjà chargé reste utilisable.
 
 Patch client détecté : bouton METTRE À JOUR LE JEU, contrôle des fichiers au clic puis téléchargement des seuls packages nécessaires. Nouveau launcher : bouton Télécharger le launcher vers la release ; extraction/remplacement manuels, pas d’auto-update binaire dans cette étape. Aucun patch réel publié ou téléchargé par l’agent. 12 groupes tests OK ; notification launcher simulée vérifiée hors réseau ; recette publique à réaliser après publication.
+
+## Launcher v1.9.1 — recette ergonomie sans défilement
+
+Release : https://github.com/AionCL/launcher/releases/tag/launcher-v1.9.1-tabs
+Asset : `AionCL-Launcher-20260914-060714-173.zip`
+SHA-256 : `dfc461307fd30769b305794b27f47bb60d742fe0515ac71e9c30f4b81febf75f`
+
+Fermer l’ancien launcher, extraire cette archive et ouvrir `AionCL.Launcher.exe` avec le même dossier client. La fenêtre doit rester fixe, sans barre de défilement. Vérifier :
+
+1. **Accueil** affiche le visuel, l’état de mise à jour et le bouton JOUER.
+2. **Paramètres** affiche le dossier client, la langue, les voix coréennes, le hit font, l’installation et la réparation.
+3. **Journal** s’ouvre dans une fenêtre séparée.
+4. La barre fixe inférieure conserve identifiant, mot de passe, mémorisation et état de connexion.
+5. Un changement d’onglet ne modifie pas le dossier, la langue ou les identifiants.
+6. Après saisie des identifiants, cliquer **Utiliser ces identifiants**, puis **JOUER** ; le parcours natif validé de v1.9.0 doit rester fonctionnel.
+
+Aucun téléchargement du client n’est nécessaire pour cette recette. Les anciens jetons navigateur ne sont plus lus par le launcher.
