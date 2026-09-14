@@ -12,9 +12,9 @@ Détection au démarrage, toutes les 5 minutes lorsque le launcher est inactif, 
 
 Le bouton du client devient METTRE À JOUR LE JEU. Lors du clic, le launcher vérifie les fichiers locaux et télécharge les packages contenant les différences. La vérification complète peut être longue ; aucun hash complet n’est fait pendant la simple recherche des mises à jour. L’installation neuve utilise toujours le manifest complet. Les fichiers absents du nouveau manifest ne sont pas supprimés automatiquement : pour un patch exigeant des suppressions, un format de migration reste à concevoir. Les mods coréen/hit font sont des ajouts distincts ; ne pas intégrer leurs chemins dans le manifest officiel sans prévoir leur migration.
 
-## Launcher : prochaine version 1.1.1
+## Launcher : version 1.9.2
 
-1. Modifier Updates.LauncherVersion dans src/Updates.cs et launcherVersion dans config/launcher.json (même version, format trois nombres).
+1. Modifier Updates.LauncherVersion dans src/Updates.cs et launcherVersion dans config/launcher.json (même version, format trois nombres). Pour cette livraison : 1.9.2.
 2. Compiler et tester, produire le ZIP avec package-launcher.ps1, valider le lancement. Le ZIP doit conserver EXE, EXE.config et launcher.json ensemble.
 3. Publier le ZIP dans une release launcher.
 4. Modifier launcher.version et launcher.downloadPage dans config/updates.json. downloadPage doit être l’URL HTTPS de la release contenant le ZIP. Publier le flux EN DERNIER.

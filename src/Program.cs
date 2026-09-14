@@ -638,6 +638,8 @@ namespace AionCL
                                      pathBox.Text
                                  );
             cancelButton.Enabled = busy;
+            cancelButton.Visible = busy;
+            playButton.Visible = !busy;
             if (!busy) RefreshClientState();
         }
 

@@ -14,3 +14,7 @@ La version `launcher-v1.9.1-tabs` est la version de recette actuelle. Elle désa
 
 Asset : `AionCL-Launcher-20260914-060714-173.zip`
 SHA-256 : `dfc461307fd30769b305794b27f47bb60d742fe0515ac71e9c30f4b81febf75f`
+
+## Release v1.9.2 — barre d’authentification sans chevauchement
+
+La version `launcher-v1.9.2-ergonomic` conserve la fenêtre fixe 1100×640, mais réserve un bandeau inférieur à la connexion et aux états. Le bouton `Interrompre` reste masqué au repos et remplace temporairement `JOUER` uniquement pendant une opération. Les champs d’identifiants restent visibles sur Accueil et Paramètres sans défilement.

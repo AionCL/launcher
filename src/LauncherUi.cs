@@ -82,7 +82,7 @@ public sealed partial class MainForm {
         authStatus.SetBounds(28,70,650,24); authStatus.ForeColor=muted; footer.Controls.Add(authStatus);
         progressBar.SetBounds(28,98,650,5); footer.Controls.Add(progressBar);
         statusLabel.SetBounds(28,104,430,18); statusLabel.ForeColor=muted; footer.Controls.Add(statusLabel);
-        StyleButton(cancelButton,"",footer,500,85,178,28,false); cancelButton.Enabled=false; cancelButton.Click += delegate { if(cts!=null) cts.Cancel(); };
+        StyleButton(cancelButton,"",footer,500,85,178,28,false); cancelButton.Enabled=false; cancelButton.Visible=false; cancelButton.Click += delegate { if(cts!=null) cts.Cancel(); };
         StyleButton(playButton,"",footer,720,24,330,76,true); playButton.Font=new Font("Segoe UI",20,FontStyle.Bold); playButton.Enabled=false; playButton.Click += async delegate { await PlayAsync(); };
         logBox.Multiline=true; logBox.ReadOnly=true; logBox.ScrollBars=ScrollBars.Vertical; logBox.BackColor=BackColor; logBox.ForeColor=ForeColor; logBox.BorderStyle=BorderStyle.None;
         try { if(File.Exists(preferences)) pathBox.Text=File.ReadAllText(preferences); } catch(IOException) {} catch(UnauthorizedAccessException) {}
@@ -128,8 +128,11 @@ public sealed partial class MainForm {
             languageBox.SetBounds(24,206,controlW,32);
             koreanVoices.SetBounds(24,248,controlW,36); hitFontButton.SetBounds(24,290,controlW,36);
             installButton.SetBounds(24,334,controlW,36); verifyButton.SetBounds(24,378,controlW,36);
-            footer.SetBounds(compactMargin, installPanel.Bottom + 14, contentW, 124);
-            progressBar.SetBounds(18,24,contentW-36,6); statusLabel.SetBounds(18,46,contentW-206,66); cancelButton.SetBounds(contentW-186,48,168,44); playButton.SetBounds(contentW-348,24,330,76);
+            footer.SetBounds(compactMargin, installPanel.Bottom + 14, contentW, 164);
+            authSectionLabel.SetBounds(18,8,160,18); authUserLabel.SetBounds(18,27,150,16); authPasswordLabel.SetBounds(196,27,150,16);
+            authUser.SetBounds(18,43,170,30); authPassword.SetBounds(196,43,170,30); authRemember.SetBounds(374,46,142,24); authManualButton.SetBounds(522,41,190,34);
+            authStatus.SetBounds(18,78,contentW-36,20); statusLabel.SetBounds(18,105,contentW-206,24); progressBar.SetBounds(18,137,contentW-36,6);
+            playButton.SetBounds(contentW-186,101,168,42); cancelButton.SetBounds(contentW-186,101,168,42);
             AutoScrollMinSize = new Size(contentW + compactMargin * 2, footer.Bottom + compactMargin);
             return;
         }
@@ -137,12 +140,12 @@ public sealed partial class MainForm {
         AutoScrollMinSize = Size.Empty;
         const int margin=28, gap=28, side=352;
         int leftWidth=w-margin*2-gap-side;
-        footer.SetBounds(0,h-124,w,124);
+        footer.SetBounds(0,h-154,w,154);
 
         if (storyPage == "settings") {
             artwork.Visible = false;
             storyPanel.Visible = false;
-            installPanel.SetBounds(margin,164,w-margin*2,footer.Top-180);
+            installPanel.SetBounds(margin,150,w-margin*2,footer.Top-150);
             int controlW=w-margin*2-48;
             clientTitle.SetBounds(24,18,controlW,30);
             versionLabel.SetBounds(24,52,controlW,24);
@@ -173,17 +176,17 @@ public sealed partial class MainForm {
         hitFontButton.SetBounds(24,228,side-48,30);
         installButton.SetBounds(24,263,side-48,30);
         verifyButton.SetBounds(24,298,side-48,30);
-        authSectionLabel.SetBounds(28,3,130,18); authUserLabel.SetBounds(28,20,150,16); authPasswordLabel.SetBounds(206,20,150,16); authUser.SetBounds(28,36,170,30); authPassword.SetBounds(206,36,170,30); authRemember.SetBounds(386,38,130,24); authManualButton.SetBounds(520,34,158,34); authStatus.SetBounds(28,70,650,24);
+        authSectionLabel.SetBounds(28,8,170,18); authUserLabel.SetBounds(28,27,150,16); authPasswordLabel.SetBounds(210,27,150,16); authUser.SetBounds(28,43,170,30); authPassword.SetBounds(210,43,170,30); authRemember.SetBounds(390,46,150,24); authManualButton.SetBounds(548,41,170,34); authStatus.SetBounds(28,80,690,20);
         int imageWidth = Math.Min(leftWidth, (h-440)*16/9);
         int imageHeight = portal == null ? imageWidth * 9 / 16 : imageWidth * portal.Height / portal.Width;
         artwork.SetBounds(margin+(leftWidth-imageWidth)/2,164,imageWidth,imageHeight);
         storyPanel.SetBounds(margin,artwork.Bottom+20,leftWidth,footer.Top-artwork.Bottom-24);
         storyTitle.SetBounds(0,26,leftWidth,40);
         storyBody.SetBounds(0,76,leftWidth,Math.Max(60,storyPanel.Height-76));
-        playButton.SetBounds(w-margin-side,24,side,76);
-        progressBar.SetBounds(margin,24,leftWidth,6);
-        cancelButton.SetBounds(margin+leftWidth-168,48,168,44);
-        statusLabel.SetBounds(margin,46,leftWidth-188,66);
+        playButton.SetBounds(w-margin-side,22,side,78);
+        cancelButton.SetBounds(w-margin-side,108,side,30);
+        statusLabel.SetBounds(margin,105,leftWidth-24,24);
+        progressBar.SetBounds(margin,136,leftWidth,6);
         if(updatePanel!=null) {
             updatePanel.SetBounds(margin,90,w-margin*2,54);
             int downloadWidth=Math.Max(220,TextRenderer.MeasureText(launcherUpdateButton.Text,launcherUpdateButton.Font).Width+32);
@@ -196,9 +199,9 @@ public sealed partial class MainForm {
         }
     }
     private void LayoutFooter(int w, int h) {
-        authSectionLabel.SetBounds(28,3,130,18); authUserLabel.SetBounds(28,20,150,16); authPasswordLabel.SetBounds(206,20,150,16);
-        authUser.SetBounds(28,36,170,30); authPassword.SetBounds(206,36,170,30); authRemember.SetBounds(386,38,130,24); authManualButton.SetBounds(520,34,158,34); authStatus.SetBounds(28,70,650,24);
-        playButton.SetBounds(w-380,24,330,76); progressBar.SetBounds(28,98,w-458,5); statusLabel.SetBounds(28,104,w-486,18); cancelButton.SetBounds(w-570,85,178,28);
+        authSectionLabel.SetBounds(28,8,170,18); authUserLabel.SetBounds(28,27,150,16); authPasswordLabel.SetBounds(210,27,150,16);
+        authUser.SetBounds(28,43,170,30); authPassword.SetBounds(210,43,170,30); authRemember.SetBounds(390,46,150,24); authManualButton.SetBounds(548,41,170,34); authStatus.SetBounds(28,80,690,20);
+        playButton.SetBounds(w-380,22,330,78); cancelButton.SetBounds(w-380,108,330,30); progressBar.SetBounds(28,136,w-458,6); statusLabel.SetBounds(28,105,w-458,24);
     }
     private Label LabelAt(Control p,string t,int x,int y,int w,int h,float size,Color c) {
         var l=new Label { Text=t,Bounds=new Rectangle(x,y,w,h),ForeColor=c,BackColor=Color.Transparent,Font=new Font("Segoe UI",size) }; p.Controls.Add(l); return l;
