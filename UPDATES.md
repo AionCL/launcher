@@ -1,7 +1,8 @@
 ﻿# Publier les mises à jour AionCL
 
-Le nouveau launcher consulte une adresse stable : https://raw.githubusercontent.com/AionCL/launcher/main/config/updates.json.
-Détection au démarrage, toutes les 5 minutes lorsque le launcher est inactif, et sur demande. Ce fichier est préparé localement mais son URL répondait 404 à l’inspection : le publier est nécessaire pour activer la découverte distante. Aucune publication faite par l’agent.
+Le nouveau launcher consulte une adresse stable : https://github.com/AionCL/launcher/raw/refs/heads/main/config/updates.json.
+Détection au démarrage, toutes les 5 minutes lorsque le launcher est inactif, et sur demande. Ce fichier est préparé localement mais son URL répondait 404 à l’inspection : le publier est nécessaire pour activer la découverte distante. Le flux public contient également une section `notice` optionnelle pour
+afficher une annonce fermable dans le launcher.
 
 ## Client : prochain patch 2.4.1
 
@@ -36,7 +37,7 @@ git --no-pager diff --cached --stat
 Ne pas publier uniquement ces quatre fichiers dans un dépôt dont les autres changements n’ont pas encore été commités. Inclure les modules/packs décrits dans RECETTE.md, et conserver src/Core.cs.bak, .local et out hors Git. Aucun push automatique. Après publication choisie :
 
 ```powershell
-Invoke-RestMethod 'https://raw.githubusercontent.com/AionCL/launcher/main/config/updates.json' -TimeoutSec 30
+Invoke-RestMethod 'https://github.com/AionCL/launcher/raw/refs/heads/main/config/updates.json' -TimeoutSec 30
 ```
 
 ## Recette

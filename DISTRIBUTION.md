@@ -63,3 +63,11 @@ La version `2.0.4` ajoute la carte d’annonce générique du lancement du serve
 Le flux `config/updates.json` accepte aussi une section `notice` optionnelle
 (`title`, `message`, `actionLabel`, `actionUrl`). Elle affiche une carte
 d’information fermable dans le launcher, sans modifier le client de jeu.
+
+## Release v2.0.5 — diffusion fiable du flux
+
+Le launcher consulte désormais le flux via l’URL GitHub `raw` afin d’éviter
+les anciennes réponses mises en cache par `raw.githubusercontent.com`. La
+carte d’annonce est donc visible dès que le flux publié est rafraîchi.
+
+Pre-release : https://github.com/AionCL/launcher/releases/tag/launcher-v2.0.5-feed
