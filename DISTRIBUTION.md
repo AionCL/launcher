@@ -34,3 +34,7 @@ et bandeau d’authentification permanent. La fenêtre reste sans défilement et
 sa taille minimale est calculée pour conserver tous les contrôles visibles.
 Le mode compact conserve les boutons communautaires, les champs d’identifiants
 et l’action JOUER ; aucun contrôle fonctionnel n’est masqué selon la largeur.
+
+Pre-release : https://github.com/AionCL/launcher/releases/tag/launcher-v2.0.0-redesign  
+Asset : `AionCL-Launcher-20260915-205622-099.zip`  
+SHA-256 : `2893850b081d87e3c8623af04356fe974d301b22d64f612ab67e064a9c04dd35`
