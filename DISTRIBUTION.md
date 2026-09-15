@@ -44,3 +44,9 @@ SHA-256 : `2893850b081d87e3c8623af04356fe974d301b22d64f612ab67e064a9c04dd35`
 Le journal est désormais intégré dans la fenêtre principale via l’onglet
 Journal. Il ne s’ouvre plus dans une fenêtre séparée et conserve la même barre
 d’authentification et le même bouton JOUER.
+
+## Release v2.0.2 — logos intégrés
+
+Ajout d’une marque AionCL dans la navigation et de pictogrammes vectoriels
+Discord/YouTube dans les boutons communautaires. Aucun asset externe ni appel
+réseau supplémentaire n’est nécessaire.

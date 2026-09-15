@@ -9,7 +9,7 @@ public sealed partial class MainForm {
     readonly Color accent = Color.FromArgb(124, 181, 205);
     readonly Color muted = Color.FromArgb(153, 164, 181);
     Panel footer, installPanel, storyPanel;
-    Panel shell, navigation, workspace, contentArea, journalPanel;
+    Panel shell, navigation, workspace, contentArea, journalPanel, logoMark;
     PictureBox artwork;
     Label storyTitle, storyBody, pathLabel, languageLabel, clientTitle, heading, edition, brand;
     Label authSectionLabel, authUserLabel, authPasswordLabel;
@@ -73,8 +73,8 @@ public sealed partial class MainForm {
         };
         StyleButton(installButton,"",installPanel,24,319,282,32,false); installButton.Enabled=false; installButton.Click += async delegate { await InstallAsync(); };
         StyleButton(verifyButton,"",installPanel,24,360,282,30,false); verifyButton.Enabled=false; verifyButton.Click += async delegate { await VerifyAsync(); };
-        discordButton=ButtonAt(this,"Discord",370,26,100,40,false); discordButton.Click += delegate { OpenCommunity(config==null?null:config.discordUrl); };
-        youtubeButton=ButtonAt(this,"YouTube",478,26,100,40,false); youtubeButton.Click += delegate { OpenCommunity(config==null?null:config.youtubeUrl); };
+        discordButton=ButtonAt(this,"Discord",370,26,100,40,false); discordButton.Tag="discord"; discordButton.Click += delegate { OpenCommunity(config==null?null:config.discordUrl); };
+        youtubeButton=ButtonAt(this,"YouTube",478,26,100,40,false); youtubeButton.Tag="youtube"; youtubeButton.Click += delegate { OpenCommunity(config==null?null:config.youtubeUrl); };
         footer=new Panel { BackColor=Color.FromArgb(12,15,21) }; Controls.Add(footer);
         authSectionLabel=LabelAt(footer,"Connexion au jeu",28,3,130,18,9,accent);
         authUserLabel=LabelAt(footer,"Identifiant",28,20,150,16,8,muted);
@@ -106,8 +106,9 @@ public sealed partial class MainForm {
         navigation = new Panel { BackColor=Color.FromArgb(13,20,30) };
         workspace = new Panel { BackColor=Color.FromArgb(10,15,23) };
         contentArea = new Panel { BackColor=Color.Transparent };
+        logoMark = new LauncherLogo { BackColor=Color.Transparent };
         shell.Controls.Add(workspace); shell.Controls.Add(navigation);
-        navigation.Controls.Add(brand); navigation.Controls.Add(edition);
+        navigation.Controls.Add(logoMark); navigation.Controls.Add(brand); navigation.Controls.Add(edition);
         navigation.Controls.Add(homeButton); navigation.Controls.Add(helpButton); navigation.Controls.Add(journalButton);
         navigation.Controls.Add(discordButton); navigation.Controls.Add(youtubeButton);
         workspace.Controls.Add(contentArea);
@@ -124,7 +125,7 @@ public sealed partial class MainForm {
         shell.SetBounds(0,0,ClientSize.Width,ClientSize.Height);
         navigation.SetBounds(0,0,navWidth,ClientSize.Height);
         workspace.SetBounds(navWidth,0,Math.Max(1,ClientSize.Width-navWidth),ClientSize.Height);
-        brand.SetBounds(20,22,navWidth-40,42); edition.SetBounds(22,68,navWidth-44,20);
+        logoMark.SetBounds(20,18,42,42); brand.SetBounds(68,18,navWidth-78,42); edition.SetBounds(22,68,navWidth-44,20);
         homeButton.SetBounds(16,120,navWidth-32,42); helpButton.SetBounds(16,170,navWidth-32,42); journalButton.SetBounds(16,220,navWidth-32,42);
         discordButton.SetBounds(16,ClientSize.Height-104,(navWidth-42)/2,34); youtubeButton.SetBounds(22+(navWidth-42)/2,ClientSize.Height-104,(navWidth-42)/2,34);
         bool compact=ClientSize.Width<1080;
@@ -320,8 +321,34 @@ public sealed class LauncherButton:Button {
             using(var b=new SolidBrush(Enabled?(hovered?FlatAppearance.MouseOverBackColor:BackColor):Color.FromArgb(25,30,39)))e.Graphics.FillPath(b,shape);
             using(var p=new Pen(Enabled?FlatAppearance.BorderColor:Color.FromArgb(44,51,64)))e.Graphics.DrawPath(p,shape);
         }
-        TextRenderer.DrawText(e.Graphics,Text,Font,new Rectangle(5,0,Width-10,Height),Enabled?ForeColor:Color.FromArgb(124,137,155),TextFormatFlags.VerticalCenter|TextFormatFlags.HorizontalCenter|TextFormatFlags.SingleLine);
+        string icon=Tag as string;
+        Rectangle textBounds=new Rectangle(5,0,Width-10,Height);
+        if(icon=="discord"||icon=="youtube") { DrawSocialIcon(e.Graphics,icon,new Rectangle(8,(Height-18)/2,22,18)); textBounds=new Rectangle(34,0,Width-39,Height); }
+        TextRenderer.DrawText(e.Graphics,Text,Font,textBounds,Enabled?ForeColor:Color.FromArgb(124,137,155),TextFormatFlags.VerticalCenter|TextFormatFlags.HorizontalCenter|TextFormatFlags.SingleLine);
         if(Focused&&ShowFocusCues)ControlPaint.DrawFocusRectangle(e.Graphics,Rectangle.Inflate(ClientRectangle,-4,-4));
+    }
+    private void DrawSocialIcon(Graphics g,string icon,Rectangle r) {
+        if(icon=="youtube") {
+            using(var b=new SolidBrush(Color.FromArgb(232,62,72))) using(var shape=SurfacePanel.Outline(r,4)) g.FillPath(b,shape);
+            Point[] triangle={new Point(r.Left+8,r.Top+4),new Point(r.Left+8,r.Bottom-4),new Point(r.Right-5,r.Top+r.Height/2)};
+            using(var b=new SolidBrush(Color.White)) g.FillPolygon(b,triangle);
+        } else {
+            using(var b=new SolidBrush(Color.FromArgb(111,132,221))) g.FillEllipse(b,r);
+            using(var p=new Pen(Color.White,1.5f)) { g.DrawArc(p,r.Left+4,r.Top+3,r.Width-8,r.Height-7,200,140); g.DrawLine(p,r.Left+6,r.Top+5,r.Left+4,r.Top+1); g.DrawLine(p,r.Right-6,r.Top+5,r.Right-4,r.Top+1); }
+            using(var b=new SolidBrush(Color.White)) { g.FillEllipse(b,r.Left+7,r.Top+7,3,3); g.FillEllipse(b,r.Right-10,r.Top+7,3,3); }
+        }
+    }
+}
+public sealed class LauncherLogo:Panel {
+    public LauncherLogo(){DoubleBuffered=true;}
+    protected override void OnPaint(PaintEventArgs e) {
+        e.Graphics.SmoothingMode=System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
+        using(var b=new SolidBrush(Color.FromArgb(33,89,111))) e.Graphics.FillEllipse(b,2,2,Width-4,Height-4);
+        using(var p=new Pen(Color.FromArgb(151,224,239),2.2f)) {
+            Point[] left={new Point(Width/2,Height/2),new Point(Width/2-5,8),new Point(7,14),new Point(Width/2-2,Height/2)};
+            Point[] right={new Point(Width/2,Height/2),new Point(Width/2+5,8),new Point(Width-7,14),new Point(Width/2+2,Height/2)};
+            e.Graphics.DrawLines(p,left); e.Graphics.DrawLines(p,right); e.Graphics.DrawLine(p,Width/2,Height/2,Width/2,Height-8);
+        }
     }
 }
 }
