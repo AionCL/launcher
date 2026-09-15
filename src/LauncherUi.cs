@@ -9,7 +9,7 @@ public sealed partial class MainForm {
     readonly Color accent = Color.FromArgb(124, 181, 205);
     readonly Color muted = Color.FromArgb(153, 164, 181);
     Panel footer, installPanel, storyPanel;
-    Panel shell, navigation, workspace, contentArea;
+    Panel shell, navigation, workspace, contentArea, journalPanel;
     PictureBox artwork;
     Label storyTitle, storyBody, pathLabel, languageLabel, clientTitle, heading, edition, brand;
     Label authSectionLabel, authUserLabel, authPasswordLabel;
@@ -42,7 +42,7 @@ public sealed partial class MainForm {
         edition = LabelAt(this,"CLASSIC  /  2.4",226,37,140,22,9,muted);
         homeButton = ButtonAt(this,"",370,26,120,42,false); homeButton.Click += delegate { storyPage="home"; ApplyLanguage(); };
         helpButton = ButtonAt(this,"",498,26,100,42,false); helpButton.Click += delegate { storyPage="settings"; ApplyLanguage(); };
-        journalButton = ButtonAt(this,"",606,26,110,42,false); journalButton.Click += delegate { ShowJournal(); };
+        journalButton = ButtonAt(this,"",606,26,110,42,false); journalButton.Click += delegate { storyPage="journal"; ApplyLanguage(); };
         artwork = new PictureBox { Image = portal, SizeMode = PictureBoxSizeMode.Zoom, BackColor = Color.FromArgb(10,12,17) }; Controls.Add(artwork);
         storyPanel = new Panel { BackColor = BackColor }; Controls.Add(storyPanel);
         heading = LabelAt(storyPanel,"AION CLASSIC",0,0,550,22,9,accent);
@@ -89,6 +89,8 @@ public sealed partial class MainForm {
         StyleButton(cancelButton,"",footer,500,85,178,28,false); cancelButton.Enabled=false; cancelButton.Visible=false; cancelButton.Click += delegate { if(cts!=null) cts.Cancel(); };
         StyleButton(playButton,"",footer,720,24,330,76,true); playButton.Font=new Font("Segoe UI",20,FontStyle.Bold); playButton.Enabled=false; playButton.Click += async delegate { await PlayAsync(); };
         logBox.Multiline=true; logBox.ReadOnly=true; logBox.ScrollBars=ScrollBars.Vertical; logBox.BackColor=BackColor; logBox.ForeColor=ForeColor; logBox.BorderStyle=BorderStyle.None;
+        journalPanel = new SurfacePanel { BackColor=Color.FromArgb(14,21,30), Visible=false, Padding=new Padding(18) };
+        journalPanel.Controls.Add(logBox); logBox.Dock=DockStyle.Fill;
         try { if(File.Exists(preferences)) pathBox.Text=File.ReadAllText(preferences); } catch(IOException) {} catch(UnauthorizedAccessException) {}
         pathBox.Leave += delegate { SaveClientPath(); RefreshClientState(); };
         statusLabel.TextChanged += delegate { LocalizeStatus(); };
@@ -109,7 +111,7 @@ public sealed partial class MainForm {
         navigation.Controls.Add(homeButton); navigation.Controls.Add(helpButton); navigation.Controls.Add(journalButton);
         navigation.Controls.Add(discordButton); navigation.Controls.Add(youtubeButton);
         workspace.Controls.Add(contentArea);
-        contentArea.Controls.Add(artwork); contentArea.Controls.Add(storyPanel); contentArea.Controls.Add(installPanel);
+        contentArea.Controls.Add(artwork); contentArea.Controls.Add(storyPanel); contentArea.Controls.Add(installPanel); contentArea.Controls.Add(journalPanel);
         workspace.Controls.Add(footer);
         brand.Font=new Font("Georgia",25,FontStyle.Bold); brand.ForeColor=Color.White;
         edition.ForeColor=accent;
@@ -130,17 +132,19 @@ public sealed partial class MainForm {
         footer.SetBounds(0,ClientSize.Height-footerHeight,workW,footerHeight);
         contentArea.SetBounds(outer,contentTop,Math.Max(1,workW-outer*2),Math.Max(1,footer.Top-contentTop-14));
         int contentW=contentArea.Width, contentH=contentArea.Height;
-        if(storyPage=="settings") {
+        if(storyPage=="journal") {
+            artwork.Visible=false; storyPanel.Visible=false; installPanel.Visible=false; journalPanel.Visible=true;
+            journalPanel.SetBounds(0,0,contentW,contentH); logBox.Dock=DockStyle.Fill;
+        } else if(storyPage=="settings") {
             artwork.Visible=false; storyPanel.Visible=false; installPanel.Visible=true; installPanel.SetBounds(0,0,contentW,contentH);
+            journalPanel.Visible=false;
             LayoutSettingsPanel(contentW,contentH);
         } else {
-            artwork.Visible=true; storyPanel.Visible=true; installPanel.Visible=true;
-            int side=compact?320:350, left=Math.Max(420,contentW-side-gap);
-            installPanel.SetBounds(left+gap,0,side,contentH);
+            artwork.Visible=true; storyPanel.Visible=true; installPanel.Visible=false; journalPanel.Visible=false;
+            int left=contentW;
             artwork.SetBounds(0,0,left,Math.Min(contentH,Math.Max(220,left*9/16)));
             storyPanel.SetBounds(20,Math.Min(contentH-120,artwork.Bottom+12),left-40,Math.Max(100,contentH-artwork.Bottom-24));
             storyTitle.SetBounds(0,12,storyPanel.Width,38); storyBody.SetBounds(0,55,storyPanel.Width,Math.Max(50,storyPanel.Height-55));
-            LayoutInstallPanel(side,contentH);
         }
         LayoutFooter(workW,ClientSize.Height);
         AutoScrollMinSize=Size.Empty;
@@ -165,6 +169,18 @@ public sealed partial class MainForm {
     }
     private void LayoutSettingsPanel(int width,int height) { LayoutInstallPanel(width,height); }
     private void LayoutFooter(int w, int h) {
+        if(w<930) {
+            int playX=Math.Max(430,w-300), playW=Math.Max(250,w-playX-28);
+            authSectionLabel.SetBounds(28,8,190,18);
+            authUserLabel.SetBounds(28,27,135,16); authUser.SetBounds(28,43,135,28);
+            authPasswordLabel.SetBounds(173,27,135,16); authPassword.SetBounds(173,43,135,28);
+            authRemember.SetBounds(318,46,112,24);
+            authManualButton.SetBounds(28,78,190,32);
+            authStatus.SetBounds(228,80,Math.Max(180,playX-246),20);
+            statusLabel.SetBounds(28,111,playX-46,18); progressBar.SetBounds(28,132,Math.Max(180,playX-46),5);
+            playButton.SetBounds(playX,24,playW,68); cancelButton.SetBounds(playX,99,playW,30);
+            return;
+        }
         LayoutAuthRow(w-396, 28);
         playButton.SetBounds(w-380,22,330,78); cancelButton.SetBounds(w-380,108,330,30); progressBar.SetBounds(28,136,w-458,6); statusLabel.SetBounds(28,105,w-458,24);
     }
@@ -198,12 +214,12 @@ public sealed partial class MainForm {
         discordButton.Text="Discord"; youtubeButton.Text="YouTube";
         authSectionLabel.Text=L("Connexion au jeu","Game login","Spielanmeldung"); authUserLabel.Text=L("Identifiant","Username","Benutzername"); authPasswordLabel.Text=L("Mot de passe","Password","Passwort"); authRemember.Text=L("Mémoriser dans Windows","Remember in Windows","In Windows speichern");
         authManualButton.Text=L("Utiliser ces identifiants","Use these credentials","Diese Zugangsdaten verwenden");
-        homeButton.BackColor=storyPage=="home"?Color.FromArgb(44,61,75):BackColor; helpButton.BackColor=storyPage=="settings"?Color.FromArgb(44,61,75):BackColor;
+        homeButton.BackColor=storyPage=="home"?Color.FromArgb(44,61,75):BackColor; helpButton.BackColor=storyPage=="settings"?Color.FromArgb(44,61,75):BackColor; journalButton.BackColor=storyPage=="journal"?Color.FromArgb(44,61,75):BackColor;
         clientTitle.Text=L("Votre jeu","Your game","Dein Spiel");pathLabel.Text=L("DOSSIER DU CLIENT","GAME FOLDER","SPIELORDNER");languageLabel.Text=L("LANGUE DU JEU ET DU LAUNCHER","GAME & LAUNCHER LANGUAGE","SPIEL- UND LAUNCHERSPRACHE");
         installButton.Text=L("Installer / reprendre","Install / resume","Installieren / fortsetzen");verifyButton.Text=L("Vérifier / réparer","Verify / repair","Prüfen / reparieren");cancelButton.Text=L("Interrompre","Interrupt","Unterbrechen"); playButton.Text=L("▶   JOUER","▶   PLAY","▶   SPIELEN");
         browseButton.AccessibleName=L("Choisir le dossier client","Choose game folder","Spielordner auswählen");
-        storyTitle.Text=storyPage=="home"?L("Votre aventure reprend ici.","Your adventure continues here.","Dein Abenteuer geht weiter."):L("Paramètres du launcher","Launcher settings","Launcher-Einstellungen");
-        storyBody.Text=storyPage=="home"?L("Retrouvez Atréia dans Aion Classic 2.4.\nChoisissez votre langue, puis entrez en jeu.","Return to Atreia in Aion Classic 2.4.\nChoose your language, then enter the game.","Kehre in Aion Classic 2.4 nach Atreia zurück.\nWähle deine Sprache und starte das Spiel."):L("Dossier du client, langue et outils facultatifs.\nLes modifications sont appliquées avant le prochain lancement.","Game folder, language and optional tools.\nChanges are applied before the next launch.","Spielordner, Sprache und optionale Werkzeuge.\nÄnderungen werden vor dem nächsten Start angewendet.");
+        storyTitle.Text=storyPage=="home"?L("Votre aventure reprend ici.","Your adventure continues here.","Dein Abenteuer geht weiter."):storyPage=="journal"?L("Journal du launcher","Launcher log","Launcher-Protokoll"):L("Paramètres du launcher","Launcher settings","Launcher-Einstellungen");
+        storyBody.Text=storyPage=="home"?L("Retrouvez Atréia dans Aion Classic 2.4.\nChoisissez votre langue, puis entrez en jeu.","Return to Atreia in Aion Classic 2.4.\nChoose your language, then enter the game.","Kehre in Aion Classic 2.4 nach Atreia zurück.\nWähle deine Sprache und starte das Spiel."):storyPage=="journal"?L("Les opérations et diagnostics apparaissent ici.","Operations and diagnostics appear here.","Vorgänge und Diagnosen erscheinen hier."):L("Dossier du client, langue et outils facultatifs.\nLes modifications sont appliquées avant le prochain lancement.","Game folder, language and optional tools.\nChanges are applied before the next launch.","Spielordner, Sprache et optionale Werkzeuge.\nÄnderungen werden vor dem nächsten Start angewendet.");
         UpdateVersionText(); changingLanguage=false;
         if(manifest!=null) RefreshClientState(); else statusLabel.Text=L("Connexion au service de mise à jour…","Connecting to update service…","Verbindung zum Update-Dienst…");
         RefreshKoreanButton();
@@ -261,8 +277,8 @@ public sealed partial class MainForm {
     }
     private void LocalizeStatus() { if(changingLanguage)return; changingLanguage=true; statusLabel.Text=TranslateMessage(statusLabel.Text);changingLanguage=false; }
     private void ShowJournal() {
-        if(journal==null||journal.IsDisposed) { journal=new Form { Text="AionCL · "+journalButton.Text,Size=new Size(850,450),StartPosition=FormStartPosition.CenterParent,BackColor=BackColor };logBox.Dock=DockStyle.Fill;journal.Controls.Add(logBox);journal.FormClosing += delegate(object sender,FormClosingEventArgs e) { if(e.CloseReason==CloseReason.UserClosing){e.Cancel=true;journal.Hide();} }; }
-        journal.Show(this);journal.BringToFront();
+        storyPage="journal";
+        ApplyLanguage();
     }
     private void SaveClientPath() { if(!String.IsNullOrWhiteSpace(pathBox.Text)) SavePreference(preferences,pathBox.Text); }
     private void SavePreference(string path,string value) {
