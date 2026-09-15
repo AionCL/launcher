@@ -8,6 +8,9 @@ using System.Windows.Forms;
 namespace AionCL {
 public sealed partial class MainForm {
     Panel updatePanel;
+    Panel noticeCard;
+    Label noticeTitle, noticeMessage;
+    Button noticeClose, noticeAction;
     Label updateNotice;
     Button checkUpdatesButton,launcherUpdateButton;
     readonly System.Windows.Forms.Timer updateTimer=new System.Windows.Forms.Timer { Interval=300000 };
@@ -20,6 +23,12 @@ public sealed partial class MainForm {
         checkUpdatesButton=ButtonAt(updatePanel,"",650,12,165,34,false);checkUpdatesButton.Click += async delegate { await CheckUpdates(false); };
         launcherUpdateButton=ButtonAt(updatePanel,"",825,12,200,34,true);launcherUpdateButton.Visible=false;
         launcherUpdateButton.Click += delegate { if(releases!=null)Process.Start(new ProcessStartInfo { FileName=Safety.Https(releases.launcher.downloadPage).AbsoluteUri,UseShellExecute=true }); };
+        noticeCard=new SurfacePanel { BackColor=Color.FromArgb(20,40,63), Visible=false, Padding=new Padding(18) };
+        noticeTitle=new Label { ForeColor=Color.White, Font=new Font("Segoe UI",12,FontStyle.Bold), AutoEllipsis=true };
+        noticeMessage=new Label { ForeColor=Color.FromArgb(207,226,239), Font=new Font("Segoe UI",9), AutoEllipsis=true };
+        noticeClose=ButtonAt(noticeCard,"×",0,0,30,28,false); noticeClose.Click += delegate { noticeCard.Visible=false; };
+        noticeAction=ButtonAt(noticeCard,"",0,0,150,32,true); noticeAction.Visible=false; noticeAction.Click += delegate { if(releases!=null&&releases.notice!=null&&!String.IsNullOrWhiteSpace(releases.notice.actionUrl)) Process.Start(new ProcessStartInfo { FileName=Safety.Https(releases.notice.actionUrl).AbsoluteUri,UseShellExecute=true }); };
+        noticeCard.Controls.Add(noticeTitle); noticeCard.Controls.Add(noticeMessage); (workspace ?? (Control)this).Controls.Add(noticeCard); noticeCard.BringToFront();
         updateTimer.Tick += async delegate { if(!busy&&!checkingUpdates)await CheckUpdates(false); };
         FormClosed += delegate {updateTimer.Stop();updateTimer.Dispose();};
     }
@@ -39,7 +48,14 @@ public sealed partial class MainForm {
         if(ClientUpdateAvailable()){available+=L("Mise à jour du jeu : ","Game update: ","Spielupdate: ")+manifest.Manifest.clientVersion;installButton.Text=L("METTRE À JOUR LE JEU","UPDATE GAME","SPIEL AKTUALISIEREN");}
         else if(!busy)installButton.Text=L("Installer / reprendre","Install / resume","Installieren / fortsetzen");
         updateNotice.Text=checkingUpdates?L("Recherche des mises à jour…","Checking for updates…","Suche nach Updates…"):available.Length>0?available:updateError!=null?L("Recherche indisponible. Réessayez avec le bouton.","Update check unavailable. Retry with the button.","Updatesuche nicht verfügbar. Erneut versuchen."):releases==null?L("Mises à jour du jeu et du launcher","Game and launcher updates","Spiel- und Launcherupdates"):L("Vous êtes à jour","You are up to date","Du bist auf dem neuesten Stand")+" · Launcher "+Updates.LauncherVersion;
+        RefreshNoticeUi();
         LayoutLauncher();
+    }
+    private void RefreshNoticeUi() {
+        if(noticeCard==null) return;
+        var n=releases==null?null:releases.notice;
+        if(n==null||String.IsNullOrWhiteSpace(n.title)||String.IsNullOrWhiteSpace(n.message)) { noticeCard.Visible=false; return; }
+        noticeTitle.Text=n.title; noticeMessage.Text=n.message; noticeAction.Text=n.actionLabel??""; noticeAction.Visible=!String.IsNullOrWhiteSpace(n.actionUrl)&&!String.IsNullOrWhiteSpace(n.actionLabel); noticeCard.Visible=true; noticeCard.BringToFront();
     }
     private async Task CheckUpdates(bool startup) {
         if(config==null||checkingUpdates||(!startup&&busy))return;

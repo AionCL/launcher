@@ -8,17 +8,20 @@ using System.Threading.Tasks;
 namespace AionCL {
 public sealed class ClientRelease { public string version {get;set;} public string manifestUrl {get;set;} }
 public sealed class LauncherRelease { public string version {get;set;} public string downloadPage {get;set;} }
+public sealed class LauncherNotice { public string title {get;set;} public string message {get;set;} public string actionLabel {get;set;} public string actionUrl {get;set;} }
 public sealed class UpdateFeed {
     public int schemaVersion {get;set;} public string product {get;set;}
     public ClientRelease client {get;set;} public LauncherRelease launcher {get;set;}
+    public LauncherNotice notice {get;set;}
     public void Validate() {
         if(schemaVersion!=1||product!="AionCL"||client==null||launcher==null)throw new InvalidDataException("Invalid update feed.");
         if(!Regex.IsMatch(client.version??"",@"^2\.4\.[0-9]+$"))throw new InvalidDataException("Unsupported client release.");
         Updates.Version(client.version);Updates.Version(launcher.version);Safety.Https(client.manifestUrl);Safety.Https(launcher.downloadPage);
+        if(notice!=null) { if(String.IsNullOrWhiteSpace(notice.title)||String.IsNullOrWhiteSpace(notice.message)||notice.title.Length>120||notice.message.Length>600) throw new InvalidDataException("Invalid launcher notice."); if(!String.IsNullOrWhiteSpace(notice.actionUrl)) Safety.Https(notice.actionUrl); }
     }
 }
 public static class Updates {
-    public const string LauncherVersion = "2.0.3";
+    public const string LauncherVersion = "2.0.4";
     public static Version Version(string value) {
         Version parsed;
         if(!Regex.IsMatch(value??"",@"^[0-9]+\.[0-9]+\.[0-9]+$")||!System.Version.TryParse(value,out parsed))throw new InvalidDataException("Invalid release version.");return parsed;

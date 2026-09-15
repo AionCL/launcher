@@ -6,7 +6,13 @@
     "manifestUrl": "https://github.com/AionCL/client-2.4/releases/download/v2.4.1-shop-beta.1/install-manifest.json"
   },
   "launcher": {
-    "version": "2.0.3",
-    "downloadPage": "https://github.com/AionCL/launcher/releases/tag/launcher-v2.0.3-branding"
+    "version": "2.0.4",
+    "downloadPage": "https://github.com/AionCL/launcher/releases/tag/launcher-v2.0.4-news"
+  },
+  "notice": {
+    "title": "AionCL ouvre ses portes",
+    "message": "Le serveur est lancé. Rejoignez la communauté, partagez vos retours et aidons-nous à faire évoluer Atréia. Des fonctionnalités propulsées par IA arriveront progressivement en jeu.",
+    "actionLabel": "Découvrir AionCL",
+    "actionUrl": "https://aioncl.com"
   }
 }

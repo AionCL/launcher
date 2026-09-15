@@ -73,8 +73,8 @@ public sealed partial class MainForm {
         };
         StyleButton(installButton,"",installPanel,24,319,282,32,false); installButton.Enabled=false; installButton.Click += async delegate { await InstallAsync(); };
         StyleButton(verifyButton,"",installPanel,24,360,282,30,false); verifyButton.Enabled=false; verifyButton.Click += async delegate { await VerifyAsync(); };
-        discordButton=ButtonAt(this,"",370,26,100,40,false); discordButton.Tag="discord"; discordButton.AccessibleName="Discord"; discordButton.Click += delegate { OpenCommunity(config==null?null:config.discordUrl); };
-        youtubeButton=ButtonAt(this,"",478,26,100,40,false); youtubeButton.Tag="youtube"; youtubeButton.AccessibleName="YouTube"; youtubeButton.Click += delegate { OpenCommunity(config==null?null:config.youtubeUrl); };
+        discordButton=ButtonAt(this,"",370,26,36,36,false); discordButton.Tag="discord"; discordButton.AccessibleName="Discord"; discordButton.FlatAppearance.BorderSize=0; discordButton.Click += delegate { OpenCommunity(config==null?null:config.discordUrl); };
+        youtubeButton=ButtonAt(this,"",478,26,36,36,false); youtubeButton.Tag="youtube"; youtubeButton.AccessibleName="YouTube"; youtubeButton.FlatAppearance.BorderSize=0; youtubeButton.Click += delegate { OpenCommunity(config==null?null:config.youtubeUrl); };
         footer=new Panel { BackColor=Color.FromArgb(12,15,21) }; Controls.Add(footer);
         authSectionLabel=LabelAt(footer,"Connexion au jeu",28,3,130,18,9,accent);
         authUserLabel=LabelAt(footer,"Identifiant",28,20,150,16,8,muted);
@@ -127,7 +127,7 @@ public sealed partial class MainForm {
         workspace.SetBounds(navWidth,0,Math.Max(1,ClientSize.Width-navWidth),ClientSize.Height);
         logoMark.SetBounds(20,18,42,42); brand.SetBounds(68,18,navWidth-78,42); edition.SetBounds(22,68,navWidth-44,20);
         homeButton.SetBounds(16,120,navWidth-32,42); helpButton.SetBounds(16,170,navWidth-32,42); journalButton.SetBounds(16,220,navWidth-32,42);
-        discordButton.SetBounds(16,ClientSize.Height-104,(navWidth-42)/2,34); youtubeButton.SetBounds(22+(navWidth-42)/2,ClientSize.Height-104,(navWidth-42)/2,34);
+        discordButton.SetBounds(18,ClientSize.Height-106,34,34); youtubeButton.SetBounds(60,ClientSize.Height-106,34,34);
         bool compact=ClientSize.Width<1080;
         int workW=workspace.Width, contentTop=updatePanel==null?18:94;
         footer.SetBounds(0,ClientSize.Height-footerHeight,workW,footerHeight);
@@ -158,6 +158,12 @@ public sealed partial class MainForm {
             launcherUpdateButton.Visible=showDownload;
             checkUpdatesButton.SetBounds(updatePanel.Width-checkWidth-(showDownload?downloadWidth+20:10),12,checkWidth,40);
             updateNotice.SetBounds(16,10,Math.Max(180,checkUpdatesButton.Left-24),42); updateNotice.TextAlign=ContentAlignment.MiddleLeft;
+        }
+        if(noticeCard!=null&&noticeCard.Visible) {
+            int cardW=Math.Min(430,Math.Max(330,workspace.Width-44));
+            noticeCard.SetBounds(Math.Max(outer,workspace.Width-cardW-outer),contentTop+12,cardW,156);
+            noticeTitle.SetBounds(18,16,cardW-58,28); noticeClose.SetBounds(cardW-42,12,28,28);
+            noticeMessage.SetBounds(18,50,cardW-36,58); noticeAction.SetBounds(18,112,170,32);
         }
     }
     private void LayoutInstallPanel(int width,int height) {
@@ -317,7 +323,10 @@ public sealed class LauncherButton:Button {
     protected override void OnPaint(PaintEventArgs e){
         e.Graphics.Clear(Parent==null?BackColor:Parent.BackColor);
         e.Graphics.SmoothingMode=System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
-        using(var shape=SurfacePanel.Outline(new Rectangle(1,1,Width-3,Height-3),7)) {
+        string social=Tag as string;
+        if(social=="discord"||social=="youtube") {
+            if(hovered) using(var b=new SolidBrush(Color.FromArgb(35,55,73))) e.Graphics.FillEllipse(b,1,1,Width-2,Height-2);
+        } else using(var shape=SurfacePanel.Outline(new Rectangle(1,1,Width-3,Height-3),7)) {
             using(var b=new SolidBrush(Enabled?(hovered?FlatAppearance.MouseOverBackColor:BackColor):Color.FromArgb(25,30,39)))e.Graphics.FillPath(b,shape);
             using(var p=new Pen(Enabled?FlatAppearance.BorderColor:Color.FromArgb(44,51,64)))e.Graphics.DrawPath(p,shape);
         }

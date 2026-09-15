@@ -57,3 +57,9 @@ Les boutons Discord et YouTube affichent uniquement leurs pictogrammes, avec
 un nom accessible pour les lecteurs d’écran. L’exécutable utilise désormais
 `assets/aioncl-icon.ico` comme icône Windows au lieu de l’icône générique du
 compilateur.
+
+La version `2.0.4` ajoute la carte d’annonce générique du lancement du serveur.
+
+Le flux `config/updates.json` accepte aussi une section `notice` optionnelle
+(`title`, `message`, `actionLabel`, `actionUrl`). Elle affiche une carte
+d’information fermable dans le launcher, sans modifier le client de jeu.
