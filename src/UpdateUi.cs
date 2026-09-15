@@ -55,7 +55,7 @@ public sealed partial class MainForm {
         if(noticeCard==null) return;
         var n=releases==null?null:releases.notice;
         if(n==null||String.IsNullOrWhiteSpace(n.title)||String.IsNullOrWhiteSpace(n.message)) { noticeCard.Visible=false; return; }
-        noticeTitle.Text=n.title; noticeMessage.Text=n.message; noticeAction.Text=n.actionLabel??""; noticeAction.Visible=!String.IsNullOrWhiteSpace(n.actionUrl)&&!String.IsNullOrWhiteSpace(n.actionLabel); noticeCard.Visible=true; noticeCard.BringToFront();
+        noticeTitle.Text=n.title; noticeMessage.Text=n.message; noticeAction.Text=n.actionLabel??""; noticeAction.Visible=!String.IsNullOrWhiteSpace(n.actionUrl)&&!String.IsNullOrWhiteSpace(n.actionLabel); noticeCard.Visible=storyPage=="home"; if(noticeCard.Visible)noticeCard.BringToFront();
     }
     private async Task CheckUpdates(bool startup) {
         if(config==null||checkingUpdates||(!startup&&busy))return;

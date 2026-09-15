@@ -76,3 +76,8 @@ Pre-release : https://github.com/AionCL/launcher/releases/tag/launcher-v2.0.5-fe
 ## Release v2.1.0 — diagnostic intégré
 
 Ajoute un test de connexion depuis Paramètres pour vérifier le flux de mises à jour, le manifest et la configuration serveur. La page permet aussi d’effacer les identifiants mémorisés dans Windows.
+
+
+## Release v2.1.1 — annonce limitée à l’accueil
+
+La carte d’annonce est visible uniquement dans l’onglet Accueil. Elle est masquée dans Paramètres et Journal.
