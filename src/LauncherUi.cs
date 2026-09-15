@@ -9,8 +9,9 @@ public sealed partial class MainForm {
     readonly Color accent = Color.FromArgb(124, 181, 205);
     readonly Color muted = Color.FromArgb(153, 164, 181);
     Panel footer, installPanel, storyPanel;
+    Panel shell, navigation, workspace, contentArea;
     PictureBox artwork;
-    Label storyTitle, storyBody, pathLabel, languageLabel, clientTitle, heading, edition;
+    Label storyTitle, storyBody, pathLabel, languageLabel, clientTitle, heading, edition, brand;
     Label authSectionLabel, authUserLabel, authPasswordLabel;
     Button homeButton, helpButton, journalButton, discordButton, youtubeButton;
     ComboBox languageBox;
@@ -30,14 +31,14 @@ public sealed partial class MainForm {
         DoubleBuffered = true; AutoScaleMode = AutoScaleMode.None;
         var workArea = Screen.PrimaryScreen.WorkingArea;
         int initialWidth = Math.Min(1180, Math.Max(1000, workArea.Width - 40));
-        int initialHeight = Math.Min(760, Math.Max(620, workArea.Height - 40));
-        ClientSize = new Size(initialWidth, initialHeight); MinimumSize = new Size(1000, 620); MaximumSize = Size.Empty; AutoScroll = false;
+        int initialHeight = Math.Min(780, Math.Max(700, workArea.Height - 40));
+        ClientSize = new Size(initialWidth, initialHeight); MinimumSize = new Size(1000, 700); MaximumSize = Size.Empty; AutoScroll = false;
         Font = new Font("Segoe UI", 10F); ForeColor = Color.FromArgb(231,235,241); BackColor = Color.FromArgb(12,16,23);
         using (var stream = typeof(MainForm).Assembly.GetManifestResourceStream("AionCL.classic-wings.jpg")) {
             if (stream != null) using (var source = Image.FromStream(stream)) portal = new Bitmap(source);
         }
         BackgroundImage = portal; BackgroundImageLayout = ImageLayout.Stretch;
-        var brand = LabelAt(this,"AIONCL",28,20,185,48,28,ForeColor); brand.Font = new Font("Georgia",28);
+        brand = LabelAt(this,"AIONCL",28,20,185,48,28,ForeColor); brand.Font = new Font("Georgia",28);
         edition = LabelAt(this,"CLASSIC  /  2.4",226,37,140,22,9,muted);
         homeButton = ButtonAt(this,"",370,26,120,42,false); homeButton.Click += delegate { storyPage="home"; ApplyLanguage(); };
         helpButton = ButtonAt(this,"",498,26,100,42,false); helpButton.Click += delegate { storyPage="settings"; ApplyLanguage(); };
@@ -94,112 +95,75 @@ public sealed partial class MainForm {
         versionLabel.TextChanged += delegate { if(!changingLanguage) UpdateVersionText(); };
         Resize += delegate { LayoutLauncher(); };
         FormClosed += delegate { if(journal!=null) journal.Dispose(); if(portal!=null) portal.Dispose(); };
+        BuildShell();
         BuildUpdateUi(); LayoutLauncher(); ApplyLanguage();
     }
+    private void BuildShell() {
+        shell = new Panel { BackColor=Color.FromArgb(11,16,24), BackgroundImage=portal, BackgroundImageLayout=ImageLayout.Stretch, Dock=DockStyle.Fill };
+        Controls.Add(shell);
+        navigation = new Panel { BackColor=Color.FromArgb(13,20,30) };
+        workspace = new Panel { BackColor=Color.FromArgb(10,15,23) };
+        contentArea = new Panel { BackColor=Color.Transparent };
+        shell.Controls.Add(workspace); shell.Controls.Add(navigation);
+        navigation.Controls.Add(brand); navigation.Controls.Add(edition);
+        navigation.Controls.Add(homeButton); navigation.Controls.Add(helpButton); navigation.Controls.Add(journalButton);
+        navigation.Controls.Add(discordButton); navigation.Controls.Add(youtubeButton);
+        workspace.Controls.Add(contentArea);
+        contentArea.Controls.Add(artwork); contentArea.Controls.Add(storyPanel); contentArea.Controls.Add(installPanel);
+        workspace.Controls.Add(footer);
+        brand.Font=new Font("Georgia",25,FontStyle.Bold); brand.ForeColor=Color.White;
+        edition.ForeColor=accent;
+        navigation.BringToFront(); workspace.BringToFront(); navigation.BringToFront();
+    }
     private void LayoutLauncher() {
-        if(footer==null) return;
-        int w=ClientSize.Width,h=ClientSize.Height;
-        homeButton.SetBounds(w-384,26,112,40); helpButton.SetBounds(w-260,26,104,40); journalButton.SetBounds(w-144,26,116,40);
-        // Keep the primary layout on one page. Only a genuinely narrow window
-        // falls back to the stacked layout; controls must never be hidden by a scrollbar.
-        bool compact = w < 980;
-        discordButton.Visible = !compact; youtubeButton.Visible = !compact;
-        if (compact) {
-            int compactMargin = 18;
-            int contentW = Math.Max(760, w - compactMargin * 2);
-            int imageW = contentW;
-            int imageH = portal == null ? 220 : Math.Min(230, imageW * portal.Height / portal.Width);
-            if (updatePanel != null) {
-                updatePanel.SetBounds(compactMargin, 84, contentW, 104);
-                updateNotice.SetBounds(16,6,contentW-32,38);
-                checkUpdatesButton.SetBounds(16,54,Math.Min(220,contentW/2-24),40);
-                launcherUpdateButton.SetBounds(Math.Min(244,contentW/2+4),54,Math.Min(220,contentW/2-24),40);
-            }
-            artwork.SetBounds(compactMargin, updatePanel == null ? 154 : updatePanel.Bottom + 14, imageW, imageH);
-            artwork.Visible = true;
-            storyPanel.Visible = false;
-            int panelTop = artwork.Bottom + 14;
-            installPanel.SetBounds(compactMargin, panelTop, contentW, 430);
-            int controlW = contentW - 48;
-            clientTitle.SetBounds(24,20,controlW,34);
-            versionLabel.SetBounds(24,60,controlW,28);
-            pathLabel.SetBounds(24,102,controlW,24);
-            pathBox.SetBounds(24,130,controlW-56,30);
-            browseButton.SetBounds(contentW-72,127,48,36);
-            languageLabel.SetBounds(24,178,controlW,24);
-            languageBox.SetBounds(24,206,controlW,32);
-            koreanVoices.SetBounds(24,248,controlW,36); hitFontButton.SetBounds(24,290,controlW,36);
-            installButton.SetBounds(24,334,controlW,36); verifyButton.SetBounds(24,378,controlW,36);
-            footer.SetBounds(compactMargin, installPanel.Bottom + 14, contentW, 164);
-            authSectionLabel.SetBounds(18,8,160,18); authUserLabel.SetBounds(18,27,150,16); authPasswordLabel.SetBounds(196,27,150,16);
-            authUser.SetBounds(18,43,170,30); authPassword.SetBounds(196,43,170,30); authRemember.SetBounds(374,46,142,24); authManualButton.SetBounds(522,41,190,34);
-            authStatus.SetBounds(18,78,contentW-36,20); statusLabel.SetBounds(18,105,contentW-206,24); progressBar.SetBounds(18,137,contentW-36,6);
-            playButton.SetBounds(contentW-186,101,168,42); cancelButton.SetBounds(contentW-186,101,168,42);
-            AutoScrollMinSize = new Size(contentW + compactMargin * 2, footer.Bottom + compactMargin);
-            return;
+        if(shell==null||footer==null) return;
+        int w=Math.Max(980,ClientSize.Width), h=Math.Max(640,ClientSize.Height);
+        const int navWidth=190, outer=22, gap=18, footerHeight=142;
+        shell.SetBounds(0,0,ClientSize.Width,ClientSize.Height);
+        navigation.SetBounds(0,0,navWidth,ClientSize.Height);
+        workspace.SetBounds(navWidth,0,Math.Max(1,ClientSize.Width-navWidth),ClientSize.Height);
+        brand.SetBounds(20,22,navWidth-40,42); edition.SetBounds(22,68,navWidth-44,20);
+        homeButton.SetBounds(16,120,navWidth-32,42); helpButton.SetBounds(16,170,navWidth-32,42); journalButton.SetBounds(16,220,navWidth-32,42);
+        discordButton.SetBounds(16,ClientSize.Height-104,(navWidth-42)/2,34); youtubeButton.SetBounds(22+(navWidth-42)/2,ClientSize.Height-104,(navWidth-42)/2,34);
+        bool compact=ClientSize.Width<1080;
+        int workW=workspace.Width, contentTop=updatePanel==null?18:94;
+        footer.SetBounds(0,ClientSize.Height-footerHeight,workW,footerHeight);
+        contentArea.SetBounds(outer,contentTop,Math.Max(1,workW-outer*2),Math.Max(1,footer.Top-contentTop-14));
+        int contentW=contentArea.Width, contentH=contentArea.Height;
+        if(storyPage=="settings") {
+            artwork.Visible=false; storyPanel.Visible=false; installPanel.Visible=true; installPanel.SetBounds(0,0,contentW,contentH);
+            LayoutSettingsPanel(contentW,contentH);
+        } else {
+            artwork.Visible=true; storyPanel.Visible=true; installPanel.Visible=true;
+            int side=compact?320:350, left=Math.Max(420,contentW-side-gap);
+            installPanel.SetBounds(left+gap,0,side,contentH);
+            artwork.SetBounds(0,0,left,Math.Min(contentH,Math.Max(220,left*9/16)));
+            storyPanel.SetBounds(20,Math.Min(contentH-120,artwork.Bottom+12),left-40,Math.Max(100,contentH-artwork.Bottom-24));
+            storyTitle.SetBounds(0,12,storyPanel.Width,38); storyBody.SetBounds(0,55,storyPanel.Width,Math.Max(50,storyPanel.Height-55));
+            LayoutInstallPanel(side,contentH);
         }
-        storyPanel.Visible = true;
-        AutoScrollMinSize = Size.Empty;
-        const int margin=28, gap=28, side=352;
-        int leftWidth=w-margin*2-gap-side;
-        footer.SetBounds(0,h-154,w,154);
-
-        if (storyPage == "settings") {
-            artwork.Visible = false;
-            storyPanel.Visible = false;
-            installPanel.SetBounds(margin,150,w-margin*2,footer.Top-150);
-            int controlW=w-margin*2-48;
-            clientTitle.SetBounds(24,18,controlW,30);
-            versionLabel.SetBounds(24,52,controlW,24);
-            pathLabel.SetBounds(24,82,controlW,20);
-            pathBox.SetBounds(24,105,controlW-56,28);
-            browseButton.SetBounds(controlW-48,103,48,32);
-            languageLabel.SetBounds(24,139,controlW,20);
-            languageBox.SetBounds(24,161,Math.Min(520,controlW),29);
-            koreanVoices.SetBounds(24,197,Math.Min(520,controlW),30);
-            hitFontButton.SetBounds(24,232,Math.Min(520,controlW),30);
-            installButton.SetBounds(24,267,Math.Min(520,controlW),30);
-            verifyButton.SetBounds(24,302,Math.Min(520,controlW),30);
-            LayoutFooter(w, h);
-            if(updatePanel!=null) updatePanel.SetBounds(margin,90,w-margin*2,54);
-            return;
-        }
-
-        artwork.Visible = true;
-        installPanel.SetBounds(w-margin-side,150,side,footer.Top-150);
-        clientTitle.SetBounds(24,14,side-48,30);
-        versionLabel.SetBounds(24,48,side-48,24);
-        pathLabel.SetBounds(24,78,side-48,20);
-        pathBox.SetBounds(24,101,side-104,28);
-        browseButton.SetBounds(side-72,99,48,32);
-        languageLabel.SetBounds(24,135,side-48,20);
-        languageBox.SetBounds(24,157,side-48,29);
-        koreanVoices.SetBounds(24,193,side-48,30);
-        hitFontButton.SetBounds(24,228,side-48,30);
-        installButton.SetBounds(24,263,side-48,30);
-        verifyButton.SetBounds(24,298,side-48,30);
-        LayoutAuthRow(w-margin-side-16, margin);
-        int imageWidth = Math.Min(leftWidth, (h-440)*16/9);
-        int imageHeight = portal == null ? imageWidth * 9 / 16 : imageWidth * portal.Height / portal.Width;
-        artwork.SetBounds(margin+(leftWidth-imageWidth)/2,164,imageWidth,imageHeight);
-        storyPanel.SetBounds(margin,artwork.Bottom+20,leftWidth,footer.Top-artwork.Bottom-24);
-        storyTitle.SetBounds(0,26,leftWidth,40);
-        storyBody.SetBounds(0,76,leftWidth,Math.Max(60,storyPanel.Height-76));
-        playButton.SetBounds(w-margin-side,22,side,78);
-        cancelButton.SetBounds(w-margin-side,108,side,30);
-        statusLabel.SetBounds(margin,105,leftWidth-24,24);
-        progressBar.SetBounds(margin,136,leftWidth,6);
+        LayoutFooter(workW,ClientSize.Height);
+        AutoScrollMinSize=Size.Empty;
         if(updatePanel!=null) {
-            updatePanel.SetBounds(margin,90,w-margin*2,54);
-            int downloadWidth=Math.Max(220,TextRenderer.MeasureText(launcherUpdateButton.Text,launcherUpdateButton.Font).Width+32);
-            int checkWidth=Math.Max(242,TextRenderer.MeasureText(checkUpdatesButton.Text,checkUpdatesButton.Font).Width+32);
+            updatePanel.SetBounds(outer,18,Math.Max(1,workW-outer*2),64);
+            int downloadWidth=Math.Max(190,TextRenderer.MeasureText(launcherUpdateButton.Text,launcherUpdateButton.Font).Width+30);
+            int checkWidth=Math.Max(210,TextRenderer.MeasureText(checkUpdatesButton.Text,checkUpdatesButton.Font).Width+30);
             bool showDownload=releases!=null&&Updates.Newer(releases.launcher.version,Updates.LauncherVersion);
-            launcherUpdateButton.SetBounds(updatePanel.Width-downloadWidth-8,7,downloadWidth,40);
-            checkUpdatesButton.SetBounds(updatePanel.Width-8-checkWidth-(showDownload?downloadWidth+10:0),7,checkWidth,40);
-            updateNotice.SetBounds(16,6,checkUpdatesButton.Left-30,42);
-            updateNotice.TextAlign=ContentAlignment.MiddleLeft;
+            launcherUpdateButton.SetBounds(updatePanel.Width-downloadWidth-10,12,downloadWidth,40);
+            launcherUpdateButton.Visible=showDownload;
+            checkUpdatesButton.SetBounds(updatePanel.Width-checkWidth-(showDownload?downloadWidth+20:10),12,checkWidth,40);
+            updateNotice.SetBounds(16,10,Math.Max(180,checkUpdatesButton.Left-24),42); updateNotice.TextAlign=ContentAlignment.MiddleLeft;
         }
     }
+    private void LayoutInstallPanel(int width,int height) {
+        int inner=Math.Max(220,width-44), y=18;
+        clientTitle.SetBounds(22,y,inner,32); y+=40; versionLabel.SetBounds(22,y,inner,24); y+=34;
+        pathLabel.SetBounds(22,y,inner,20); y+=24; pathBox.SetBounds(22,y,inner-52,30); browseButton.SetBounds(width-66,y-3,42,36); y+=48;
+        languageLabel.SetBounds(22,y,inner,20); y+=24; languageBox.SetBounds(22,y,inner,32); y+=44;
+        koreanVoices.SetBounds(22,y,inner,34); y+=42; hitFontButton.SetBounds(22,y,inner,34); y+=42;
+        installButton.SetBounds(22,y,inner,38); y+=46; verifyButton.SetBounds(22,y,inner,38);
+    }
+    private void LayoutSettingsPanel(int width,int height) { LayoutInstallPanel(width,height); }
     private void LayoutFooter(int w, int h) {
         LayoutAuthRow(w-396, 28);
         playButton.SetBounds(w-380,22,330,78); cancelButton.SetBounds(w-380,108,330,30); progressBar.SetBounds(28,136,w-458,6); statusLabel.SetBounds(28,105,w-458,24);

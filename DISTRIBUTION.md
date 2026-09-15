@@ -25,3 +25,12 @@ La version `launcher-v1.9.3-responsive` adapte la fenêtre à la zone de travail
 
 Asset : `AionCL-Launcher-20260914-165837-378.zip`  
 SHA-256 : `412d0f9651d66897d0cafd10d924d204efa901083952bc462e0b2e7b2ded5e5`
+
+## Release v2.0.0 — rework visuel complet
+
+Cette version remplace la composition à positions fixes par un shell structuré
+avec navigation latérale, zone d’actualités, panneau de configuration du jeu
+et bandeau d’authentification permanent. La fenêtre reste sans défilement et
+sa taille minimale est calculée pour conserver tous les contrôles visibles.
+Le mode compact conserve les boutons communautaires, les champs d’identifiants
+et l’action JOUER ; aucun contrôle fonctionnel n’est masqué selon la largeur.

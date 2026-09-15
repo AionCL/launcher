@@ -15,7 +15,7 @@ public sealed partial class MainForm {
     UpdateFeed releases;
     string updateError;
     private void BuildUpdateUi() {
-        updatePanel=new Panel { BackColor=Color.FromArgb(23,39,51) };Controls.Add(updatePanel);
+        updatePanel=new Panel { BackColor=Color.FromArgb(23,39,51) };(workspace ?? (Control)this).Controls.Add(updatePanel);
         updateNotice=new Label { Bounds=new Rectangle(16,12,610,42),ForeColor=Color.FromArgb(176,218,233),Text="AionCL · Updates",Font=new Font("Segoe UI",9) };updatePanel.Controls.Add(updateNotice);
         checkUpdatesButton=ButtonAt(updatePanel,"",650,12,165,34,false);checkUpdatesButton.Click += async delegate { await CheckUpdates(false); };
         launcherUpdateButton=ButtonAt(updatePanel,"",825,12,200,34,true);launcherUpdateButton.Visible=false;
