@@ -45,6 +45,8 @@ namespace AionCL
         private readonly Button browseButton = new LauncherButton();
         private readonly Button installButton = new LauncherButton();
         private readonly Button verifyButton = new LauncherButton();
+        private readonly Button diagnosticsButton = new LauncherButton();
+        private readonly Button forgetCredentialsButton = new LauncherButton();
         private readonly Button playButton = new LauncherButton();
         private readonly Button cancelButton = new LauncherButton();
         private readonly TextBox authUser = new TextBox();
@@ -55,6 +57,7 @@ namespace AionCL
         private readonly LauncherAuth launcherAuth = new LauncherAuth();
 
         private readonly Label statusLabel = new Label();
+        private readonly Label diagnosticsStatus = new Label();
         private readonly Label versionLabel = new Label();
         private readonly ProgressBar progressBar = new ProgressBar();
         private readonly TextBox logBox = new TextBox();

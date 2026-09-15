@@ -2,6 +2,9 @@ using System;
 using System.Diagnostics;
 using System.Drawing;
 using System.IO;
+using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace AionCL {
@@ -90,7 +93,10 @@ public sealed partial class MainForm {
         StyleButton(playButton,"",footer,720,24,330,76,true); playButton.Font=new Font("Segoe UI",20,FontStyle.Bold); playButton.Enabled=false; playButton.Click += async delegate { await PlayAsync(); };
         logBox.Multiline=true; logBox.ReadOnly=true; logBox.ScrollBars=ScrollBars.Vertical; logBox.BackColor=BackColor; logBox.ForeColor=ForeColor; logBox.BorderStyle=BorderStyle.None;
         journalPanel = new SurfacePanel { BackColor=Color.FromArgb(14,21,30), Visible=false, Padding=new Padding(18) };
-        journalPanel.Controls.Add(logBox); logBox.Dock=DockStyle.Fill;
+        StyleButton(diagnosticsButton,"",journalPanel,18,10,200,32,false); diagnosticsButton.Click += async delegate { await RunDiagnosticsAsync(); };
+        StyleButton(forgetCredentialsButton,"",journalPanel,228,10,250,32,false); forgetCredentialsButton.Click += delegate { launcherAuth.ForgetCredentials(); authUser.Clear(); authPassword.Clear(); authRemember.Checked=false; authStatus.Text=L("Identifiants mémorisés effacés.","Saved credentials removed.","Gespeicherte Zugangsdaten gelöscht."); };
+        diagnosticsStatus.SetBounds(494,10,Math.Max(160,contentArea==null?280:contentArea.Width-520),34); diagnosticsStatus.ForeColor=muted; diagnosticsStatus.Font=new Font("Segoe UI",8); journalPanel.Controls.Add(diagnosticsStatus);
+        journalPanel.Controls.Add(logBox);
         try { if(File.Exists(preferences)) pathBox.Text=File.ReadAllText(preferences); } catch(IOException) {} catch(UnauthorizedAccessException) {}
         pathBox.Leave += delegate { SaveClientPath(); RefreshClientState(); };
         statusLabel.TextChanged += delegate { LocalizeStatus(); };
@@ -135,7 +141,7 @@ public sealed partial class MainForm {
         int contentW=contentArea.Width, contentH=contentArea.Height;
         if(storyPage=="journal") {
             artwork.Visible=false; storyPanel.Visible=false; installPanel.Visible=false; journalPanel.Visible=true;
-            journalPanel.SetBounds(0,0,contentW,contentH); logBox.Dock=DockStyle.Fill;
+            journalPanel.SetBounds(0,0,contentW,contentH); diagnosticsStatus.SetBounds(494,10,Math.Max(160,contentW-520),34); logBox.SetBounds(18,54,Math.Max(1,contentW-36),Math.Max(1,contentH-72));
         } else if(storyPage=="settings") {
             artwork.Visible=false; storyPanel.Visible=false; installPanel.Visible=true; installPanel.SetBounds(0,0,contentW,contentH);
             journalPanel.Visible=false;
@@ -209,6 +215,24 @@ public sealed partial class MainForm {
         var l=new Label { Text=t,Bounds=new Rectangle(x,y,w,h),ForeColor=c,BackColor=Color.Transparent,Font=new Font("Segoe UI",size) }; p.Controls.Add(l); return l;
     }
     private void OpenCommunity(string url) { if(String.IsNullOrWhiteSpace(url)) return; try { Process.Start(new ProcessStartInfo { FileName=Safety.Https(url).AbsoluteUri, UseShellExecute=true }); } catch(Exception ex) { Log(ex.Message); } }
+    private async Task RunDiagnosticsAsync() {
+        if(config==null) { diagnosticsStatus.Text=L("Launcher non initialisé.","Launcher is not initialized.","Launcher ist nicht initialisiert."); return; }
+        diagnosticsButton.Enabled=false; diagnosticsStatus.Text=L("Test en cours…","Testing…","Test läuft…");
+        try {
+            using(var network=new Network(config.requestTimeoutSeconds)) {
+                await network.Small(config.updateFeedUrl, CancellationToken.None);
+                await network.Small(config.manifestUrl, CancellationToken.None);
+                if(!String.IsNullOrWhiteSpace(config.serverConfigUrl)) {
+                    var server=ServerConfig.Parse(Encoding.UTF8.GetString(await network.Small(config.serverConfigUrl, CancellationToken.None)));
+                    diagnosticsStatus.Text=L("OK · flux, manifest et serveur accessibles.\n"+server.serverName,"OK · feed, manifest and server are reachable.\n"+server.serverName,"OK · Feed, Manifest und Server erreichbar.\n"+server.serverName);
+                } else diagnosticsStatus.Text=L("OK · flux et manifest accessibles.","OK · feed and manifest are reachable.","OK · Feed und Manifest erreichbar.");
+            }
+            Log(L("Diagnostic réseau terminé avec succès.","Network diagnostic completed successfully.","Netzwerkdiagnose erfolgreich abgeschlossen."));
+        } catch(Exception ex) {
+            diagnosticsStatus.Text=L("Échec · "+ex.Message,"Failed · "+ex.Message,"Fehler · "+ex.Message);
+            Log(L("Diagnostic réseau : ","Network diagnostic: ","Netzwerkdiagnose: ")+ex.Message);
+        } finally { diagnosticsButton.Enabled=true; }
+    }
     private Button ButtonAt(Control p,string t,int x,int y,int w,int h,bool primary) { var b=new LauncherButton(); StyleButton(b,t,p,x,y,w,h,primary); return b; }
     private void StyleButton(Button b,string text,Control p,int x,int y,int w,int h,bool primary) {
         b.Font=new Font("Segoe UI",10F);b.Text=text;b.SetBounds(x,y,w,h);b.FlatStyle=FlatStyle.Flat;b.FlatAppearance.BorderColor=Color.FromArgb(62,76,93);b.FlatAppearance.MouseOverBackColor=Color.FromArgb(46,62,78);
@@ -223,7 +247,7 @@ public sealed partial class MainForm {
         authManualButton.Text=L("Utiliser ces identifiants","Use these credentials","Diese Zugangsdaten verwenden");
         homeButton.BackColor=storyPage=="home"?Color.FromArgb(44,61,75):BackColor; helpButton.BackColor=storyPage=="settings"?Color.FromArgb(44,61,75):BackColor; journalButton.BackColor=storyPage=="journal"?Color.FromArgb(44,61,75):BackColor;
         clientTitle.Text=L("Votre jeu","Your game","Dein Spiel");pathLabel.Text=L("DOSSIER DU CLIENT","GAME FOLDER","SPIELORDNER");languageLabel.Text=L("LANGUE DU JEU ET DU LAUNCHER","GAME & LAUNCHER LANGUAGE","SPIEL- UND LAUNCHERSPRACHE");
-        installButton.Text=L("Installer / reprendre","Install / resume","Installieren / fortsetzen");verifyButton.Text=L("Vérifier / réparer","Verify / repair","Prüfen / reparieren");cancelButton.Text=L("Interrompre","Interrupt","Unterbrechen"); playButton.Text=L("▶   JOUER","▶   PLAY","▶   SPIELEN");
+        installButton.Text=L("Installer / reprendre","Install / resume","Installieren / fortsetzen");verifyButton.Text=L("Vérifier / réparer","Verify / repair","Prüfen / reparieren"); diagnosticsButton.Text=L("Tester la connexion","Run connection test","Verbindung testen"); forgetCredentialsButton.Text=L("Effacer les identifiants mémorisés","Clear saved credentials","Gespeicherte Zugangsdaten löschen"); cancelButton.Text=L("Interrompre","Interrupt","Unterbrechen"); playButton.Text=L("▶   JOUER","▶   PLAY","▶   SPIELEN");
         browseButton.AccessibleName=L("Choisir le dossier client","Choose game folder","Spielordner auswählen");
         storyTitle.Text=storyPage=="home"?L("Votre aventure reprend ici.","Your adventure continues here.","Dein Abenteuer geht weiter."):storyPage=="journal"?L("Journal du launcher","Launcher log","Launcher-Protokoll"):L("Paramètres du launcher","Launcher settings","Launcher-Einstellungen");
         storyBody.Text=storyPage=="home"?L("Retrouvez Atréia dans Aion Classic 2.4.\nChoisissez votre langue, puis entrez en jeu.","Return to Atreia in Aion Classic 2.4.\nChoose your language, then enter the game.","Kehre in Aion Classic 2.4 nach Atreia zurück.\nWähle deine Sprache und starte das Spiel."):storyPage=="journal"?L("Les opérations et diagnostics apparaissent ici.","Operations and diagnostics appear here.","Vorgänge und Diagnosen erscheinen hier."):L("Dossier du client, langue et outils facultatifs.\nLes modifications sont appliquées avant le prochain lancement.","Game folder, language and optional tools.\nChanges are applied before the next launch.","Spielordner, Sprache et optionale Werkzeuge.\nÄnderungen werden vor dem nächsten Start angewendet.");

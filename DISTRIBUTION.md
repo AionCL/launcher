@@ -71,3 +71,8 @@ les anciennes réponses mises en cache par `raw.githubusercontent.com`. La
 carte d’annonce est donc visible dès que le flux publié est rafraîchi.
 
 Pre-release : https://github.com/AionCL/launcher/releases/tag/launcher-v2.0.5-feed
+
+
+## Release v2.1.0 — diagnostic intégré
+
+Ajoute un test de connexion depuis Paramètres pour vérifier le flux de mises à jour, le manifest et la configuration serveur. La page permet aussi d’effacer les identifiants mémorisés dans Windows.
