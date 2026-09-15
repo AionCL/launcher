@@ -50,3 +50,10 @@ d’authentification et le même bouton JOUER.
 Ajout d’une marque AionCL dans la navigation et de pictogrammes vectoriels
 Discord/YouTube dans les boutons communautaires. Aucun asset externe ni appel
 réseau supplémentaire n’est nécessaire.
+
+## Release v2.0.3 — icône Windows et boutons sociaux
+
+Les boutons Discord et YouTube affichent uniquement leurs pictogrammes, avec
+un nom accessible pour les lecteurs d’écran. L’exécutable utilise désormais
+`assets/aioncl-icon.ico` comme icône Windows au lieu de l’icône générique du
+compilateur.

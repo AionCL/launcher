@@ -73,8 +73,8 @@ public sealed partial class MainForm {
         };
         StyleButton(installButton,"",installPanel,24,319,282,32,false); installButton.Enabled=false; installButton.Click += async delegate { await InstallAsync(); };
         StyleButton(verifyButton,"",installPanel,24,360,282,30,false); verifyButton.Enabled=false; verifyButton.Click += async delegate { await VerifyAsync(); };
-        discordButton=ButtonAt(this,"Discord",370,26,100,40,false); discordButton.Tag="discord"; discordButton.Click += delegate { OpenCommunity(config==null?null:config.discordUrl); };
-        youtubeButton=ButtonAt(this,"YouTube",478,26,100,40,false); youtubeButton.Tag="youtube"; youtubeButton.Click += delegate { OpenCommunity(config==null?null:config.youtubeUrl); };
+        discordButton=ButtonAt(this,"",370,26,100,40,false); discordButton.Tag="discord"; discordButton.AccessibleName="Discord"; discordButton.Click += delegate { OpenCommunity(config==null?null:config.discordUrl); };
+        youtubeButton=ButtonAt(this,"",478,26,100,40,false); youtubeButton.Tag="youtube"; youtubeButton.AccessibleName="YouTube"; youtubeButton.Click += delegate { OpenCommunity(config==null?null:config.youtubeUrl); };
         footer=new Panel { BackColor=Color.FromArgb(12,15,21) }; Controls.Add(footer);
         authSectionLabel=LabelAt(footer,"Connexion au jeu",28,3,130,18,9,accent);
         authUserLabel=LabelAt(footer,"Identifiant",28,20,150,16,8,muted);
@@ -212,7 +212,7 @@ public sealed partial class MainForm {
         changingLanguage=true;
         languageBox.SelectedIndex=selectedLanguage=="ENG"?1:selectedLanguage=="DEU"?2:0;
         homeButton.Text=L("Accueil","Home","Start"); helpButton.Text=L("Paramètres","Settings","Einstellungen"); journalButton.Text=L("Journal","Log","Protokoll");
-        discordButton.Text="Discord"; youtubeButton.Text="YouTube";
+        discordButton.Text=""; youtubeButton.Text="";
         authSectionLabel.Text=L("Connexion au jeu","Game login","Spielanmeldung"); authUserLabel.Text=L("Identifiant","Username","Benutzername"); authPasswordLabel.Text=L("Mot de passe","Password","Passwort"); authRemember.Text=L("Mémoriser dans Windows","Remember in Windows","In Windows speichern");
         authManualButton.Text=L("Utiliser ces identifiants","Use these credentials","Diese Zugangsdaten verwenden");
         homeButton.BackColor=storyPage=="home"?Color.FromArgb(44,61,75):BackColor; helpButton.BackColor=storyPage=="settings"?Color.FromArgb(44,61,75):BackColor; journalButton.BackColor=storyPage=="journal"?Color.FromArgb(44,61,75):BackColor;

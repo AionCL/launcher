@@ -63,6 +63,7 @@ Write-Host "Program : $programFile"
     $programFile `
     (Join-Path $root 'src\LauncherUi.cs') `
     (Join-Path $root 'src\Localization.cs') `
+    "/win32icon:$(Join-Path $root 'assets\aioncl-icon.ico')" `
     "/resource:$(Join-Path $root 'assets\classic-wings.jpg'),AionCL.classic-wings.jpg" `
     "/resource:$(Join-Path $root 'config\korean-pack.json'),AionCL.korean-pack.json" `
     "/resource:$(Join-Path $root 'assets\japanese-hit-font.pak'),AionCL.hit-font.pak"
