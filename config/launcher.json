@@ -1,6 +1,6 @@
 {
   "product": "AionCL",
-  "launcherVersion": "2.1.1",
+  "launcherVersion": "2.2.0",
   "updateFeedUrl": "https://github.com/AionCL/launcher/raw/refs/heads/main/config/updates.json",
   "portalUrl": "https://aioncl.com",
   "discordUrl": "https://discord.com/app",

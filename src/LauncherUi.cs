@@ -47,11 +47,11 @@ public sealed partial class MainForm {
         helpButton = ButtonAt(this,"",498,26,100,42,false); helpButton.Click += delegate { storyPage="settings"; ApplyLanguage(); };
         journalButton = ButtonAt(this,"",606,26,110,42,false); journalButton.Click += delegate { storyPage="journal"; ApplyLanguage(); };
         artwork = new PictureBox { Image = portal, SizeMode = PictureBoxSizeMode.Zoom, BackColor = Color.FromArgb(10,12,17) }; Controls.Add(artwork);
-        storyPanel = new Panel { BackColor = BackColor }; Controls.Add(storyPanel);
+        storyPanel = new SurfacePanel { BackColor = Color.FromArgb(178,10,15,23) }; Controls.Add(storyPanel);
         heading = LabelAt(storyPanel,"AION CLASSIC",0,0,550,22,9,accent);
         storyTitle = LabelAt(storyPanel,"",0,29,580,36,20,ForeColor);
         storyBody = LabelAt(storyPanel,"",0,78,590,126,10,muted);
-        installPanel = new SurfacePanel { BackColor = Color.FromArgb(20,27,37), AutoScroll = false }; Controls.Add(installPanel);
+        installPanel = new SurfacePanel { BackColor = Color.FromArgb(205,20,27,37), AutoScroll = false }; Controls.Add(installPanel);
         clientTitle = LabelAt(installPanel,"",24,24,280,32,17,ForeColor);
         versionLabel.SetBounds(24,66,282,25); versionLabel.ForeColor=muted; installPanel.Controls.Add(versionLabel);
         pathLabel = LabelAt(installPanel,"",24,104,280,25,9,muted);
@@ -78,7 +78,7 @@ public sealed partial class MainForm {
         StyleButton(verifyButton,"",installPanel,24,360,282,30,false); verifyButton.Enabled=false; verifyButton.Click += async delegate { await VerifyAsync(); };
         discordButton=ButtonAt(this,"",370,26,36,36,false); discordButton.Tag="discord"; discordButton.AccessibleName="Discord"; discordButton.FlatAppearance.BorderSize=0; discordButton.Click += delegate { OpenCommunity(config==null?null:config.discordUrl); };
         youtubeButton=ButtonAt(this,"",478,26,36,36,false); youtubeButton.Tag="youtube"; youtubeButton.AccessibleName="YouTube"; youtubeButton.FlatAppearance.BorderSize=0; youtubeButton.Click += delegate { OpenCommunity(config==null?null:config.youtubeUrl); };
-        footer=new Panel { BackColor=Color.FromArgb(12,15,21) }; Controls.Add(footer);
+        footer=new Panel { BackColor=Color.FromArgb(215,12,15,21) }; Controls.Add(footer);
         authSectionLabel=LabelAt(footer,"Connexion au jeu",28,3,130,18,9,accent);
         authUserLabel=LabelAt(footer,"Identifiant",28,20,150,16,8,muted);
         authPasswordLabel=LabelAt(footer,"Mot de passe",206,20,150,16,8,muted);
@@ -110,8 +110,8 @@ public sealed partial class MainForm {
         shell = new Panel { BackColor=Color.FromArgb(11,16,24), BackgroundImage=portal, BackgroundImageLayout=ImageLayout.Stretch, Dock=DockStyle.Fill };
         Controls.Add(shell);
         navigation = new Panel { BackColor=Color.FromArgb(13,20,30) };
-        workspace = new Panel { BackColor=Color.FromArgb(10,15,23) };
-        contentArea = new Panel { BackColor=Color.Transparent };
+        workspace = new Panel { BackColor=Color.FromArgb(45,10,15,23), BackgroundImage=portal, BackgroundImageLayout=ImageLayout.Stretch };
+        contentArea = new Panel { BackColor=Color.Transparent, BackgroundImage=portal, BackgroundImageLayout=ImageLayout.Stretch };
         logoMark = new LauncherLogo { BackColor=Color.Transparent };
         shell.Controls.Add(workspace); shell.Controls.Add(navigation);
         navigation.Controls.Add(logoMark); navigation.Controls.Add(brand); navigation.Controls.Add(edition);
@@ -149,8 +149,8 @@ public sealed partial class MainForm {
         } else {
             artwork.Visible=true; storyPanel.Visible=true; installPanel.Visible=false; journalPanel.Visible=false;
             int left=contentW;
-            artwork.SetBounds(0,0,left,Math.Min(contentH,Math.Max(220,left*9/16)));
-            storyPanel.SetBounds(20,Math.Min(contentH-120,artwork.Bottom+12),left-40,Math.Max(100,contentH-artwork.Bottom-24));
+            artwork.SetBounds(0,0,left,contentH);
+            storyPanel.SetBounds(20,Math.Max(18,contentH-150),left-40,Math.Min(132,Math.Max(100,contentH-36)));
             storyTitle.SetBounds(0,12,storyPanel.Width,38); storyBody.SetBounds(0,55,storyPanel.Width,Math.Max(50,storyPanel.Height-55));
         }
         LayoutFooter(workW,ClientSize.Height);
@@ -333,7 +333,7 @@ public sealed class SurfacePanel:Panel {
         path.AddArc(r.Right-d,r.Bottom-d,d,d,0,90);path.AddArc(r.Left,r.Bottom-d,d,d,90,90);path.CloseFigure();return path;
     }
     protected override void OnPaintBackground(PaintEventArgs e) {
-        e.Graphics.Clear(Parent==null?BackColor:Parent.BackColor);
+        base.OnPaintBackground(e);
         e.Graphics.SmoothingMode=System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
         using(var shape=Outline(new Rectangle(0,0,Width-1,Height-1),12))
         using(var fill=new SolidBrush(BackColor))

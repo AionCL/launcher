@@ -81,3 +81,8 @@ Ajoute un test de connexion depuis Paramètres pour vérifier le flux de mises �
 ## Release v2.1.1 — annonce limitée à l’accueil
 
 La carte d’annonce est visible uniquement dans l’onglet Accueil. Elle est masquée dans Paramètres et Journal.
+
+
+## Release v2.2.0 — fond étendu et transparence
+
+L’illustration s’étend sur toute la zone principale. Les panneaux, la barre de mise à jour et l’infobulle utilisent des niveaux de transparence pour conserver le visuel en arrière-plan tout en gardant un contraste lisible.

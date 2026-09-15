@@ -18,12 +18,12 @@ public sealed partial class MainForm {
     UpdateFeed releases;
     string updateError;
     private void BuildUpdateUi() {
-        updatePanel=new Panel { BackColor=Color.FromArgb(23,39,51) };(workspace ?? (Control)this).Controls.Add(updatePanel);
+        updatePanel=new Panel { BackColor=Color.FromArgb(178,23,39,51) };(workspace ?? (Control)this).Controls.Add(updatePanel);
         updateNotice=new Label { Bounds=new Rectangle(16,12,610,42),ForeColor=Color.FromArgb(176,218,233),Text="AionCL · Updates",Font=new Font("Segoe UI",9) };updatePanel.Controls.Add(updateNotice);
         checkUpdatesButton=ButtonAt(updatePanel,"",650,12,165,34,false);checkUpdatesButton.Click += async delegate { await CheckUpdates(false); };
         launcherUpdateButton=ButtonAt(updatePanel,"",825,12,200,34,true);launcherUpdateButton.Visible=false;
         launcherUpdateButton.Click += delegate { if(releases!=null)Process.Start(new ProcessStartInfo { FileName=Safety.Https(releases.launcher.downloadPage).AbsoluteUri,UseShellExecute=true }); };
-        noticeCard=new SurfacePanel { BackColor=Color.FromArgb(20,40,63), Visible=false, Padding=new Padding(18) };
+        noticeCard=new SurfacePanel { BackColor=Color.FromArgb(185,20,40,63), Visible=false, Padding=new Padding(18) };
         noticeTitle=new Label { ForeColor=Color.White, Font=new Font("Segoe UI",12,FontStyle.Bold), AutoEllipsis=true };
         noticeMessage=new Label { ForeColor=Color.FromArgb(207,226,239), Font=new Font("Segoe UI",9), AutoEllipsis=true };
         noticeClose=ButtonAt(noticeCard,"×",0,0,30,28,false); noticeClose.Click += delegate { noticeCard.Visible=false; };
