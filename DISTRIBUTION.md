@@ -114,3 +114,8 @@ La release candidate ayant été validée sous Windows, le launcher v2.4.0 est p
 
 Release : https://github.com/AionCL/launcher/releases/tag/launcher-v2.4.0
 SHA-256 : `32eff357989d74b760abd47cb8094885d346c6691197dd4da77a98a2e9409cfb`
+
+
+## Release v2.5.0 — comptes mémorisés
+
+La barre de connexion propose désormais la sélection de plusieurs comptes mémorisés. Chaque compte est stocké dans le coffre DPAPI Windows, peut être sélectionné rapidement et supprimé individuellement. Les anciens fichiers mono-compte sont migrés automatiquement.

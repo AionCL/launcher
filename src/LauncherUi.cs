@@ -81,6 +81,8 @@ public sealed partial class MainForm {
         youtubeButton=ButtonAt(this,"",478,26,36,36,false); youtubeButton.Tag="youtube"; youtubeButton.AccessibleName="YouTube"; youtubeButton.FlatAppearance.BorderSize=0; youtubeButton.Click += delegate { OpenCommunity(config==null?null:config.youtubeUrl); };
         footer=new Panel { BackColor=Color.FromArgb(215,12,15,21) }; Controls.Add(footer);
         authSectionLabel=LabelAt(footer,"Connexion au jeu",28,3,130,18,9,accent);
+        accountBox.DropDownStyle=ComboBoxStyle.DropDownList; accountBox.FlatStyle=FlatStyle.Flat; accountBox.BackColor=Color.FromArgb(35,43,56); accountBox.ForeColor=ForeColor; accountBox.AccessibleName="Compte enregistré"; footer.Controls.Add(accountBox);
+        accountBox.SelectedIndexChanged += delegate { if(loadingAccounts||accountBox.SelectedItem==null)return; var saved=launcherAuth.Find(accountBox.SelectedItem.ToString()); if(saved!=null){authUser.Text=saved.username;authPassword.Text=saved.password;authRemember.Checked=true;authStatus.Text=L("Compte enregistré sélectionné.","Saved account selected.","Gespeichertes Konto ausgewählt.");} };
         authUserLabel=LabelAt(footer,"Identifiant",28,20,150,16,8,muted);
         authPasswordLabel=LabelAt(footer,"Mot de passe",206,20,150,16,8,muted);
         authUser.SetBounds(28,36,170,30); authUser.BackColor=BackColor; authUser.ForeColor=ForeColor; authUser.BorderStyle=BorderStyle.FixedSingle; footer.Controls.Add(authUser);
@@ -95,7 +97,7 @@ public sealed partial class MainForm {
         logBox.Multiline=true; logBox.ReadOnly=true; logBox.ScrollBars=ScrollBars.Vertical; logBox.BackColor=BackColor; logBox.ForeColor=ForeColor; logBox.BorderStyle=BorderStyle.None;
         journalPanel = new SurfacePanel { BackColor=Color.FromArgb(14,21,30), Visible=false, Padding=new Padding(18) };
         StyleButton(diagnosticsButton,"",journalPanel,18,10,200,32,false); diagnosticsButton.Click += async delegate { await RunDiagnosticsAsync(); };
-        StyleButton(forgetCredentialsButton,"",journalPanel,228,10,250,32,false); forgetCredentialsButton.Click += delegate { launcherAuth.ForgetCredentials(); authUser.Clear(); authPassword.Clear(); authRemember.Checked=false; authStatus.Text=L("Identifiants mémorisés effacés.","Saved credentials removed.","Gespeicherte Zugangsdaten gelöscht."); };
+        StyleButton(forgetCredentialsButton,"",journalPanel,228,10,250,32,false); forgetCredentialsButton.Click += delegate { if(accountBox.SelectedItem!=null) launcherAuth.ForgetCredential(accountBox.SelectedItem.ToString()); else launcherAuth.ForgetCredentials(); RefreshAccountBox(null); authUser.Clear(); authPassword.Clear(); authRemember.Checked=false; authStatus.Text=L("Compte mémorisé effacé.","Saved account removed.","Gespeichertes Konto gelöscht."); };
         diagnosticsStatus.SetBounds(494,10,Math.Max(160,contentArea==null?280:contentArea.Width-520),34); diagnosticsStatus.ForeColor=muted; diagnosticsStatus.Font=new Font("Segoe UI",8); journalPanel.Controls.Add(diagnosticsStatus);
         journalPanel.Controls.Add(logBox);
         try { if(File.Exists(preferences)) pathBox.Text=File.ReadAllText(preferences); } catch(IOException) {} catch(UnauthorizedAccessException) {}
@@ -187,6 +189,7 @@ public sealed partial class MainForm {
         if(w<930) {
             int playX=Math.Max(430,w-300), playW=Math.Max(250,w-playX-28);
             authSectionLabel.SetBounds(28,8,190,18);
+            accountBox.SetBounds(210,5,190,26);
             authUserLabel.SetBounds(28,27,135,16); authUser.SetBounds(28,43,135,28);
             authPasswordLabel.SetBounds(173,27,135,16); authPassword.SetBounds(173,43,135,28);
             authRemember.SetBounds(318,46,112,24);
@@ -207,6 +210,7 @@ public sealed partial class MainForm {
         else { userWidth=130; rememberWidth=100; manualWidth=145; }
         int gap=10, x=left;
         authSectionLabel.SetBounds(left,8,180,18);
+        accountBox.SetBounds(left+190,5,170,26);
         authUserLabel.SetBounds(x,27,userWidth,16); authUser.SetBounds(x,43,userWidth,30); x+=userWidth+gap;
         authPasswordLabel.SetBounds(x,27,userWidth,16); authPassword.SetBounds(x,43,userWidth,30); x+=userWidth+gap;
         authRemember.SetBounds(x,46,rememberWidth,24); x+=rememberWidth+gap;
@@ -217,6 +221,13 @@ public sealed partial class MainForm {
         var l=new Label { Text=t,Bounds=new Rectangle(x,y,w,h),ForeColor=c,BackColor=Color.Transparent,Font=new Font("Segoe UI",size) }; p.Controls.Add(l); return l;
     }
     private void OpenCommunity(string url) { if(String.IsNullOrWhiteSpace(url)) return; try { Process.Start(new ProcessStartInfo { FileName=Safety.Https(url).AbsoluteUri, UseShellExecute=true }); } catch(Exception ex) { Log(ex.Message); } }
+    private void RefreshAccountBox(string selected) {
+        if(accountBox==null)return;
+        loadingAccounts=true; accountBox.Items.Clear(); int index=-1, i=0;
+        foreach(var account in launcherAuth.Accounts) { if(String.IsNullOrWhiteSpace(account.username))continue; accountBox.Items.Add(account.username); if(String.Equals(account.username,selected,StringComparison.OrdinalIgnoreCase))index=i; i++; }
+        if(index<0&&accountBox.Items.Count>0)index=0; if(index>=0)accountBox.SelectedIndex=index; loadingAccounts=false;
+        if(index>=0&&accountBox.SelectedItem!=null) { var saved=launcherAuth.Find(accountBox.SelectedItem.ToString()); if(saved!=null){authUser.Text=saved.username;authPassword.Text=saved.password;authRemember.Checked=true;} }
+    }
     private async Task RunDiagnosticsAsync() {
         if(config==null) { diagnosticsStatus.Text=L("Launcher non initialisé.","Launcher is not initialized.","Launcher ist nicht initialisiert."); return; }
         diagnosticsButton.Enabled=false; diagnosticsStatus.Text=L("Test en cours…","Testing…","Test läuft…");

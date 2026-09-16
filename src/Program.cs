@@ -51,10 +51,12 @@ namespace AionCL
         private readonly Button cancelButton = new LauncherButton();
         private readonly TextBox authUser = new TextBox();
         private readonly TextBox authPassword = new TextBox();
+        private readonly ComboBox accountBox = new ComboBox();
         private readonly CheckBox authRemember = new CheckBox();
         private readonly Button authManualButton = new LauncherButton();
         private readonly Label authStatus = new Label();
         private readonly LauncherAuth launcherAuth = new LauncherAuth();
+        private bool loadingAccounts;
 
         private readonly Label statusLabel = new Label();
         private readonly Label diagnosticsStatus = new Label();
@@ -113,9 +115,8 @@ namespace AionCL
                     );
 
                 config.Validate();
-                var saved = launcherAuth.SavedCredentials;
-                if (saved != null) { authUser.Text = saved.Item1; authPassword.Text = saved.Item2; authRemember.Checked = true; }
-                authStatus.Text = saved == null ? "Saisis tes identifiants pour lancer le client." : "Identifiants mémorisés disponibles.";
+                RefreshAccountBox(null);
+                authStatus.Text = launcherAuth.Accounts.Count == 0 ? "Saisis tes identifiants pour lancer le client." : "Identifiants mémorisés disponibles.";
                 await CheckUpdates(true);
 
                 Log("Chargement du manifest distant...");
@@ -173,6 +174,7 @@ namespace AionCL
             var validation = ValidateNativeCredentials(authUser.Text.Trim(), authPassword.Text);
             if (validation != null) { authStatus.Text = TranslateMessage(validation); return; }
             launcherAuth.SaveCredentials(authUser.Text.Trim(), authPassword.Text, authRemember.Checked);
+            RefreshAccountBox(authUser.Text.Trim());
             authStatus.Text = TranslateMessage(authRemember.Checked ? "Identifiants enregistrés pour le client." : "Identifiants prêts pour le client.");
             await Task.Yield();
         }
@@ -470,6 +472,7 @@ namespace AionCL
             var credentialError = ValidateNativeCredentials(directAuthUser, directAuthPassword);
             if (credentialError != null) { authStatus.Text = TranslateMessage(credentialError); return; }
             launcherAuth.SaveCredentials(directAuthUser, directAuthPassword, authRemember.Checked);
+            RefreshAccountBox(directAuthUser);
             authStatus.Text = TranslateMessage("Connexion directe en préparation…");
 
             SetBusy(true);
