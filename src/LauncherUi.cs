@@ -120,7 +120,8 @@ public sealed partial class MainForm {
         workspace.Controls.Add(contentArea);
         contentArea.Controls.Add(artwork); contentArea.Controls.Add(storyPanel); contentArea.Controls.Add(installPanel); contentArea.Controls.Add(journalPanel);
         workspace.Controls.Add(footer);
-        brand.Font=new Font("Georgia",25,FontStyle.Bold); brand.ForeColor=Color.White;
+        brand.Font=new Font("Georgia",22,FontStyle.Bold); brand.ForeColor=Color.White; brand.TextAlign=ContentAlignment.MiddleCenter;
+        edition.TextAlign=ContentAlignment.MiddleCenter;
         edition.ForeColor=accent;
         navigation.BringToFront(); workspace.BringToFront(); navigation.BringToFront();
     }
@@ -131,8 +132,8 @@ public sealed partial class MainForm {
         shell.SetBounds(0,0,ClientSize.Width,ClientSize.Height);
         navigation.SetBounds(0,0,navWidth,ClientSize.Height);
         workspace.SetBounds(navWidth,0,Math.Max(1,ClientSize.Width-navWidth),ClientSize.Height);
-        logoMark.SetBounds(20,18,42,42); brand.SetBounds(68,18,navWidth-78,42); edition.SetBounds(22,68,navWidth-44,20);
-        homeButton.SetBounds(16,120,navWidth-32,42); helpButton.SetBounds(16,170,navWidth-32,42); journalButton.SetBounds(16,220,navWidth-32,42);
+        logoMark.SetBounds(20,18,42,42); brand.SetBounds(10,68,navWidth-20,34); edition.SetBounds(22,104,navWidth-44,20);
+        homeButton.SetBounds(16,146,navWidth-32,42); helpButton.SetBounds(16,196,navWidth-32,42); journalButton.SetBounds(16,246,navWidth-32,42);
         discordButton.SetBounds(18,ClientSize.Height-106,34,34); youtubeButton.SetBounds(60,ClientSize.Height-106,34,34);
         bool compact=ClientSize.Width<1080;
         int workW=workspace.Width, contentTop=updatePanel==null?18:94;

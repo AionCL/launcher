@@ -86,3 +86,8 @@ La carte d’annonce est visible uniquement dans l’onglet Accueil. Elle est ma
 ## Release v2.2.0 — fond étendu et transparence
 
 L’illustration s’étend sur toute la zone principale. Les panneaux, la barre de mise à jour et l’infobulle utilisent des niveaux de transparence pour conserver le visuel en arrière-plan tout en gardant un contraste lisible.
+
+
+## Release v2.2.1 — logo de navigation
+
+Le nom AIONCL est centré sur une ligne dédiée sous l’icône afin de rester entièrement visible à toutes les tailles du launcher.
