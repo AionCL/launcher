@@ -37,7 +37,10 @@ public sealed partial class MainForm {
         int initialHeight = Math.Min(780, Math.Max(700, workArea.Height - 40));
         ClientSize = new Size(initialWidth, initialHeight); MinimumSize = new Size(1000, 700); MaximumSize = Size.Empty; AutoScroll = false;
         Font = new Font("Segoe UI", 10F); ForeColor = Color.FromArgb(231,235,241); BackColor = Color.FromArgb(12,16,23);
-        using (var stream = typeof(MainForm).Assembly.GetManifestResourceStream("AionCL.classic-wings.jpg")) {
+        using (var stream = typeof(MainForm).Assembly.GetManifestResourceStream("AionCL.portal.png")) {
+            if (stream != null) using (var source = Image.FromStream(stream)) portal = new Bitmap(source);
+        }
+        if (portal == null) using (var stream = typeof(MainForm).Assembly.GetManifestResourceStream("AionCL.classic-wings.jpg")) {
             if (stream != null) using (var source = Image.FromStream(stream)) portal = new Bitmap(source);
         }
         BackgroundImage = portal; BackgroundImageLayout = ImageLayout.Stretch;
@@ -46,7 +49,7 @@ public sealed partial class MainForm {
         homeButton = ButtonAt(this,"",370,26,120,42,false); homeButton.Click += delegate { storyPage="home"; ApplyLanguage(); };
         helpButton = ButtonAt(this,"",498,26,100,42,false); helpButton.Click += delegate { storyPage="settings"; ApplyLanguage(); };
         journalButton = ButtonAt(this,"",606,26,110,42,false); journalButton.Click += delegate { storyPage="journal"; ApplyLanguage(); };
-        artwork = new PictureBox { Image = portal, SizeMode = PictureBoxSizeMode.Zoom, BackColor = Color.FromArgb(10,12,17) }; Controls.Add(artwork);
+        artwork = new PictureBox { Image = portal, SizeMode = PictureBoxSizeMode.StretchImage, BackColor = Color.FromArgb(10,12,17) }; Controls.Add(artwork);
         storyPanel = new SurfacePanel { BackColor = Color.FromArgb(178,10,15,23) }; Controls.Add(storyPanel);
         heading = LabelAt(storyPanel,"AION CLASSIC",0,0,550,22,9,accent);
         storyTitle = LabelAt(storyPanel,"",0,29,580,36,20,ForeColor);

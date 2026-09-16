@@ -91,3 +91,8 @@ L’illustration s’étend sur toute la zone principale. Les panneaux, la barre
 ## Release v2.2.1 — logo de navigation
 
 Le nom AIONCL est centré sur une ligne dédiée sous l’icône afin de rester entièrement visible à toutes les tailles du launcher.
+
+
+## Release v2.3.0 — fond panoramique
+
+Le launcher utilise désormais l’illustration panoramique `portal.png`, conçue avec une zone sombre pour la navigation et une scène principale étendue. L’image est étirée sur toute la zone utile afin d’éviter les bandes et encadrés résiduels.
