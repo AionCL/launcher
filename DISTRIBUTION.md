@@ -106,3 +106,11 @@ Le launcher est maintenant fixe en 1100×700, sans redimensionnement ni maximisa
 ## Release v2.4.0-rc1 — diagnostic et progression
 
 Le diagnostic vérifie désormais le flux, le manifest, la résolution DNS, les ports login/jeu, la version locale et l’espace disque. Les téléchargements affichent leur pourcentage, leur vitesse et une estimation du temps restant pour le package actif.
+
+
+## Release stable v2.4.0
+
+La release candidate ayant été validée sous Windows, le launcher v2.4.0 est publié en stable. Le flux public pointe désormais vers cette release.
+
+Release : https://github.com/AionCL/launcher/releases/tag/launcher-v2.4.0
+SHA-256 : `32eff357989d74b760abd47cb8094885d346c6691197dd4da77a98a2e9409cfb`
