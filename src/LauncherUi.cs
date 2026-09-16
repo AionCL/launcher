@@ -2,6 +2,7 @@ using System;
 using System.Diagnostics;
 using System.Drawing;
 using System.IO;
+using System.Net;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -225,7 +226,17 @@ public sealed partial class MainForm {
                 await network.Small(config.manifestUrl, CancellationToken.None);
                 if(!String.IsNullOrWhiteSpace(config.serverConfigUrl)) {
                     var server=ServerConfig.Parse(Encoding.UTF8.GetString(await network.Small(config.serverConfigUrl, CancellationToken.None)));
-                    diagnosticsStatus.Text=L("OK · flux, manifest et serveur accessibles.\n"+server.serverName,"OK · feed, manifest and server are reachable.\n"+server.serverName,"OK · Feed, Manifest und Server erreichbar.\n"+server.serverName);
+                    var ip=await ServerService.Resolve(server.loginHost,CancellationToken.None);
+                    await ServerService.Tcp(ip,server.loginPort,CancellationToken.None);
+                    await ServerService.Tcp(ip,server.gamePort,CancellationToken.None);
+                    string disk="";
+                    if(!String.IsNullOrWhiteSpace(pathBox.Text)) {
+                        var root=Path.GetPathRoot(Path.GetFullPath(pathBox.Text));
+                        if(!String.IsNullOrWhiteSpace(root)) { var drive=new DriveInfo(root); disk=" · "+FormatBytes(drive.AvailableFreeSpace)+" libres"; }
+                    }
+                    string local="";
+                    if(!String.IsNullOrWhiteSpace(pathBox.Text)) { var marker=Safety.Under(pathBox.Text,".aioncl/version.json"); if(File.Exists(marker)) { var v=Json.Parse<LocalVersion>(File.ReadAllText(marker)); if(v!=null)local=" · client "+v.version; } }
+                    diagnosticsStatus.Text=L("OK · flux, manifest, DNS et ports accessibles.\n"+server.serverName+" · "+ip+disk+local,"OK · feed, manifest, DNS and ports reachable.\n"+server.serverName+" · "+ip+disk+local,"OK · Feed, Manifest, DNS und Ports erreichbar.\n"+server.serverName+" · "+ip+disk+local);
                 } else diagnosticsStatus.Text=L("OK · flux et manifest accessibles.","OK · feed and manifest are reachable.","OK · Feed und Manifest erreichbar.");
             }
             Log(L("Diagnostic réseau terminé avec succès.","Network diagnostic completed successfully.","Netzwerkdiagnose erfolgreich abgeschlossen."));

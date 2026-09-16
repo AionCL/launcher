@@ -262,8 +262,9 @@ namespace AionCL
                                     );
                             }
 
+                            string eta = p.BytesPerSecond > 0 && p.Total > p.Bytes ? " · reste " + FormatDuration((p.Total-p.Bytes) / p.BytesPerSecond) : "";
                             statusLabel.Text =
-                                p.Package +
+                                L("Téléchargement ","Downloading ","Download ") + percent + "% · " + p.Package +
                                 " - " +
                                 FormatBytes(p.Bytes) +
                                 " / " +
@@ -272,7 +273,7 @@ namespace AionCL
                                 FormatBytes(
                                     (long)p.BytesPerSecond
                                 ) +
-                                "/s";
+                                "/s" + eta;
                         });
                 var extractionProgress = new Progress<ExtractionProgress>(delegate(ExtractionProgress p) {
                     progressBar.Style = ProgressBarStyle.Continuous;
@@ -688,6 +689,13 @@ namespace AionCL
             return value.ToString("0.00") +
                    " " +
                    units[unit];
+        }
+
+        private static string FormatDuration(double seconds)
+        {
+            if (seconds < 60) return Math.Max(1, (int)Math.Ceiling(seconds)) + " s";
+            var span = TimeSpan.FromSeconds(seconds);
+            return span.TotalHours >= 1 ? ((int)span.TotalHours) + " h " + span.Minutes.ToString("00") + " min" : ((int)span.TotalMinutes) + " min " + span.Seconds.ToString("00") + " s";
         }
     }
 }

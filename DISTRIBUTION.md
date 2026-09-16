@@ -101,3 +101,8 @@ Le launcher utilise désormais l’illustration panoramique `portal.png`, conçu
 ## Release v2.3.1 — fenêtre fixe
 
 Le launcher est maintenant fixe en 1100×700, sans redimensionnement ni maximisation. Cette taille compacte conserve tous les contrôles visibles.
+
+
+## Release v2.4.0-rc1 — diagnostic et progression
+
+Le diagnostic vérifie désormais le flux, le manifest, la résolution DNS, les ports login/jeu, la version locale et l’espace disque. Les téléchargements affichent leur pourcentage, leur vitesse et une estimation du temps restant pour le package actif.
