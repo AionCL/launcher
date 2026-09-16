@@ -243,15 +243,9 @@ namespace AionCL
                     new Progress<TransferProgress>(
                         delegate(TransferProgress p)
                         {
+                            int percent = p.Total > 0 ? (int)Math.Min(100, p.Bytes * 100L / p.Total) : 0;
                             if (p.Total > 0)
                             {
-                                int percent =
-                                    (int)Math.Min(
-                                        100,
-                                        p.Bytes * 100L /
-                                        p.Total
-                                    );
-
                                 progressBar.Value =
                                     Math.Max(
                                         0,
