@@ -96,3 +96,8 @@ Le nom AIONCL est centré sur une ligne dédiée sous l’icône afin de rester 
 ## Release v2.3.0 — fond panoramique
 
 Le launcher utilise désormais l’illustration panoramique `portal.png`, conçue avec une zone sombre pour la navigation et une scène principale étendue. L’image est étirée sur toute la zone utile afin d’éviter les bandes et encadrés résiduels.
+
+
+## Release v2.3.1 — fenêtre fixe
+
+Le launcher est maintenant fixe en 1100×700, sans redimensionnement ni maximisation. Cette taille compacte conserve tous les contrôles visibles.

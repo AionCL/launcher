@@ -32,10 +32,7 @@ public sealed partial class MainForm {
 
     private void BuildUi() {
         DoubleBuffered = true; AutoScaleMode = AutoScaleMode.None;
-        var workArea = Screen.PrimaryScreen.WorkingArea;
-        int initialWidth = Math.Min(1180, Math.Max(1000, workArea.Width - 40));
-        int initialHeight = Math.Min(780, Math.Max(700, workArea.Height - 40));
-        ClientSize = new Size(initialWidth, initialHeight); MinimumSize = new Size(1000, 700); MaximumSize = Size.Empty; AutoScroll = false;
+        ClientSize = new Size(1100, 700); MinimumSize = ClientSize; MaximumSize = ClientSize; AutoScroll = false;
         Font = new Font("Segoe UI", 10F); ForeColor = Color.FromArgb(231,235,241); BackColor = Color.FromArgb(12,16,23);
         using (var stream = typeof(MainForm).Assembly.GetManifestResourceStream("AionCL.portal.png")) {
             if (stream != null) using (var source = Image.FromStream(stream)) portal = new Bitmap(source);

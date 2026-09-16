@@ -67,10 +67,11 @@ namespace AionCL
         public MainForm(bool preview)
         {
             Text = "AionCL - Classic 2.4";
-            ClientSize = new Size(1180, 720);
-            MinimumSize = new Size(1000, 620);
-            FormBorderStyle = FormBorderStyle.Sizable;
-            MaximizeBox = true;
+            ClientSize = new Size(1100, 700);
+            MinimumSize = ClientSize;
+            MaximumSize = ClientSize;
+            FormBorderStyle = FormBorderStyle.FixedSingle;
+            MaximizeBox = false;
             StartPosition = FormStartPosition.CenterScreen;
 
             BuildUi();
