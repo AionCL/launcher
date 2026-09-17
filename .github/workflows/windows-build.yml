@@ -22,7 +22,7 @@ jobs:
           dotnet tool install --global wix --version 4.0.5
           $stage = Get-ChildItem -Directory out\distribution-* | Sort-Object LastWriteTime -Descending | Select-Object -First 1
           if (-not $stage) { throw 'Distribution staging directory not found.' }
-          wix build installer\Product.wxs -d SourceDir="$($stage.FullName)" -o out\AionCL-Launcher-2.5.5.msi
+          wix build installer\Product.wxs -d SourceDir="$($stage.FullName)" -o out\AionCL-Launcher-2.5.6.msi
       - name: Upload launcher package
         uses: actions/upload-artifact@v4
         with:
