@@ -189,13 +189,13 @@ public sealed partial class MainForm {
         if(w<930) {
             int playX=Math.Max(430,w-300), playW=Math.Max(250,w-playX-28);
             authSectionLabel.SetBounds(28,8,190,18);
-            accountBox.SetBounds(210,5,190,26);
-            authUserLabel.SetBounds(28,27,135,16); authUser.SetBounds(28,43,135,28);
-            authPasswordLabel.SetBounds(173,27,135,16); authPassword.SetBounds(173,43,135,28);
-            authRemember.SetBounds(318,46,112,24);
-            authManualButton.SetBounds(28,78,190,32);
-            authStatus.SetBounds(228,80,Math.Max(180,playX-246),20);
-            statusLabel.SetBounds(28,111,playX-46,18); progressBar.SetBounds(28,132,Math.Max(180,playX-46),5);
+            accountBox.SetBounds(210,5,Math.Max(180,playX-220),26);
+            authUserLabel.SetBounds(28,34,135,16); authUser.SetBounds(28,50,135,28);
+            authPasswordLabel.SetBounds(173,34,135,16); authPassword.SetBounds(173,50,135,28);
+            authRemember.SetBounds(318,53,112,24);
+            authManualButton.SetBounds(28,88,190,32);
+            authStatus.SetBounds(228,90,Math.Max(180,playX-246),20);
+            statusLabel.SetBounds(28,113,playX-46,18); progressBar.SetBounds(28,132,Math.Max(180,playX-46),5);
             playButton.SetBounds(playX,24,playW,68); cancelButton.SetBounds(playX,99,playW,30);
             return;
         }
@@ -211,11 +211,11 @@ public sealed partial class MainForm {
         int gap=10, x=left;
         authSectionLabel.SetBounds(left,8,180,18);
         accountBox.SetBounds(left+190,5,170,26);
-        authUserLabel.SetBounds(x,27,userWidth,16); authUser.SetBounds(x,43,userWidth,30); x+=userWidth+gap;
-        authPasswordLabel.SetBounds(x,27,userWidth,16); authPassword.SetBounds(x,43,userWidth,30); x+=userWidth+gap;
-        authRemember.SetBounds(x,46,rememberWidth,24); x+=rememberWidth+gap;
-        authManualButton.SetBounds(x,41,manualWidth,34);
-        authStatus.SetBounds(left,80,Math.Max(300,available),20);
+        authUserLabel.SetBounds(x,36,userWidth,16); authUser.SetBounds(x,52,userWidth,30); x+=userWidth+gap;
+        authPasswordLabel.SetBounds(x,36,userWidth,16); authPassword.SetBounds(x,52,userWidth,30); x+=userWidth+gap;
+        authRemember.SetBounds(x,55,rememberWidth,24); x+=rememberWidth+gap;
+        authManualButton.SetBounds(x,50,manualWidth,34);
+        authStatus.SetBounds(left,90,Math.Max(300,available),20);
     }
     private Label LabelAt(Control p,string t,int x,int y,int w,int h,float size,Color c) {
         var l=new Label { Text=t,Bounds=new Rectangle(x,y,w,h),ForeColor=c,BackColor=Color.Transparent,Font=new Font("Segoe UI",size) }; p.Controls.Add(l); return l;
