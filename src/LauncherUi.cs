@@ -188,8 +188,8 @@ public sealed partial class MainForm {
     private void LayoutFooter(int w, int h) {
         if(w<930) {
             int playX=Math.Max(430,w-300), playW=Math.Max(250,w-playX-28);
-            authSectionLabel.SetBounds(28,8,190,18);
-            accountBox.SetBounds(210,5,Math.Max(180,playX-220),26);
+            authSectionLabel.SetBounds(288,8,Math.Max(120,playX-300),18);
+            accountBox.SetBounds(28,5,250,26);
             authUserLabel.SetBounds(28,34,135,16); authUser.SetBounds(28,50,135,28);
             authPasswordLabel.SetBounds(173,34,135,16); authPassword.SetBounds(173,50,135,28);
             authRemember.SetBounds(318,53,112,24);
