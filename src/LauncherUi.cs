@@ -81,7 +81,7 @@ public sealed partial class MainForm {
         youtubeButton=ButtonAt(this,"",478,26,36,36,false); youtubeButton.Tag="youtube"; youtubeButton.AccessibleName="YouTube"; youtubeButton.FlatAppearance.BorderSize=0; youtubeButton.Click += delegate { OpenCommunity(config==null?null:config.youtubeUrl); };
         footer=new Panel { BackColor=Color.FromArgb(215,12,15,21) }; Controls.Add(footer);
         authSectionLabel=LabelAt(footer,"Connexion au jeu",28,3,130,18,9,accent);
-        accountBox.DropDownStyle=ComboBoxStyle.DropDownList; accountBox.FlatStyle=FlatStyle.Flat; accountBox.BackColor=Color.FromArgb(35,43,56); accountBox.ForeColor=ForeColor; accountBox.AccessibleName="Compte enregistré"; footer.Controls.Add(accountBox);
+        accountBox.DropDownStyle=ComboBoxStyle.DropDownList; accountBox.FlatStyle=FlatStyle.Flat; accountBox.BackColor=Color.FromArgb(35,43,56); accountBox.ForeColor=ForeColor; accountBox.AccessibleName="Compte enregistré"; accountBox.IntegralHeight=false; accountBox.DropDownHeight=28; footer.Controls.Add(accountBox);
         accountBox.SelectedIndexChanged += delegate { if(loadingAccounts||accountBox.SelectedItem==null)return; var saved=launcherAuth.Find(accountBox.SelectedItem.ToString()); if(saved!=null){authUser.Text=saved.username;authPassword.Text=saved.password;authRemember.Checked=true;authStatus.Text=L("Compte enregistré sélectionné.","Saved account selected.","Gespeichertes Konto ausgewählt.");} };
         authUserLabel=LabelAt(footer,"Identifiant",28,20,150,16,8,muted);
         authPasswordLabel=LabelAt(footer,"Mot de passe",206,20,150,16,8,muted);
