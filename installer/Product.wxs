@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Wix xmlns="http://wixtoolset.org/schemas/v4/wxs">
+  <Package Name="AionCL Launcher" Manufacturer="AionCL" Version="2.5.2"
+           UpgradeCode="7E8E6F4D-6F1A-4D9A-9A6C-2A2B9D8D2C41"
+           Scope="perMachine">
+    <SummaryInformation Description="AionCL Classic 2.4 launcher" />
+    <MajorUpgrade DowngradeErrorMessage="Une version plus récente du launcher est déjà installée." />
+    <MediaTemplate EmbedCab="yes" />
+    <Feature Id="MainFeature" Title="AionCL Launcher" Level="1">
+      <ComponentGroupRef Id="MainComponents" />
+    </Feature>
+  </Package>
+
+  <Fragment>
+    <StandardDirectory Id="ProgramFiles6432Folder">
+      <Directory Id="INSTALLFOLDER" Name="AionCL Launcher" />
+    </StandardDirectory>
+    <StandardDirectory Id="ProgramMenuFolder">
+      <Directory Id="AIONCLMENU" Name="AionCL Launcher" />
+    </StandardDirectory>
+  </Fragment>
+
+  <Fragment>
+    <ComponentGroup Id="MainComponents" Directory="INSTALLFOLDER">
+      <Component Id="LauncherFiles" Guid="*">
+        <File Id="LauncherExe" Source="$(var.SourceDir)\AionCL.Launcher.exe" KeyPath="yes">
+          <Shortcut Id="StartMenuShortcut" Directory="AIONCLMENU" Name="AionCL Launcher"
+                    Description="Lancer AionCL Classic 2.4" WorkingDirectory="INSTALLFOLDER" />
+          <Shortcut Id="DesktopShortcut" Directory="DesktopFolder" Name="AionCL Launcher"
+                    Description="Lancer AionCL Classic 2.4" WorkingDirectory="INSTALLFOLDER" />
+        </File>
+        <File Id="LauncherConfig" Source="$(var.SourceDir)\AionCL.Launcher.exe.config" />
+        <File Id="LauncherJson" Source="$(var.SourceDir)\launcher.json" />
+      </Component>
+    </ComponentGroup>
+  </Fragment>
+</Wix>

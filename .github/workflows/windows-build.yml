@@ -16,8 +16,17 @@ jobs:
       - name: Build and test launcher
         shell: pwsh
         run: ./package-launcher.ps1
+      - name: Build MSI installer
+        shell: pwsh
+        run: |
+          dotnet tool install --global wix --version 4.0.5
+          $stage = Get-ChildItem -Directory out\distribution-* | Sort-Object LastWriteTime -Descending | Select-Object -First 1
+          if (-not $stage) { throw 'Distribution staging directory not found.' }
+          wix build installer\Product.wxs -d SourceDir=$stage.FullName -o out\AionCL-Launcher-2.5.2.msi
       - name: Upload launcher package
         uses: actions/upload-artifact@v4
         with:
           name: aioncl-launcher-${{ github.sha }}
-          path: out/AionCL-Launcher-*.zip
+          path: |
+            out/AionCL-Launcher-*.zip
+            out/AionCL-Launcher-*.msi
