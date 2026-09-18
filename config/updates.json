@@ -2,8 +2,8 @@
   "schemaVersion": 1,
   "product": "AionCL",
   "client": {
-    "version": "2.4.2",
-    "manifestUrl": "https://github.com/AionCL/client-2.4/releases/download/v2.4.2-mouse-fix.1/install-manifest.json"
+    "version": "2.4.3",
+    "manifestUrl": "https://github.com/AionCL/client-2.4/releases/download/v2.4.3/install-manifest.json"
   },
   "launcher": {
     "version": "2.5.14",
