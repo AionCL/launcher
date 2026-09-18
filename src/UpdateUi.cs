@@ -51,8 +51,9 @@ public sealed partial class MainForm {
         // are handled separately; do not display a second download button here.
         launcherUpdateButton.Visible=false;
         string available=launcherAvailable?L("Nouveau launcher disponible dans le journal. ","A new launcher is available in the log. ","Ein neuer Launcher ist im Journal verfügbar. "):"";
-        if(ClientUpdateAvailable()){available+=L("Mise à jour du jeu : ","Game update: ","Spielupdate: ")+manifest.Manifest.clientVersion;installButton.Text=L("METTRE À JOUR LE JEU","UPDATE GAME","SPIEL AKTUALISIEREN");}
-        else if(!busy)installButton.Text=L("Installer / reprendre","Install / resume","Installieren / fortsetzen");
+        if(ClientUpdateAvailable()){available+=L("Mise à jour du jeu : ","Game update: ","Spielupdate: ")+manifest.Manifest.clientVersion;installButton.Text=L("METTRE À JOUR LE JEU","UPDATE GAME","SPIEL AKTUALISIEREN");ApplyActionStyle(installButton,Color.FromArgb(205,125,32),Color.FromArgb(230,151,48),10F);}
+        else if(!busy){installButton.Text=L("Installer / reprendre","Install / resume","Installieren / fortsetzen");ApplyActionStyle(installButton,Color.FromArgb(31,145,123),Color.FromArgb(43,170,145),10F);}
+        ApplyActionStyle(verifyButton,Color.FromArgb(123,83,166),Color.FromArgb(148,106,193),10F);
         updateNotice.ForeColor=updateError!=null?Color.FromArgb(255,202,125):Color.FromArgb(176,218,233);
         updateNotice.Text=checkingUpdates?L("Recherche des mises à jour…","Checking for updates…","Suche nach Updates…"):available.Length>0?available:updateError!=null?updateError:releases==null?L("Mises à jour du jeu et du launcher","Game and launcher updates","Spiel- und Launcherupdates"):L("Vous êtes à jour","You are up to date","Du bist auf dem neuesten Stand")+" · Launcher "+Updates.LauncherVersion;
         RefreshNoticeUi();

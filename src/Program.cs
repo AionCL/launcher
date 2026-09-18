@@ -217,8 +217,7 @@ namespace AionCL
                 String.IsNullOrWhiteSpace(pathBox.Text))
             {
                 playButton.Enabled = manifest != null;
-                playButton.Text = L("⬇   TÉLÉCHARGER LE JEU", "⬇   DOWNLOAD GAME", "⬇   SPIEL HERUNTERLADEN");
-                playButton.Font = new Font("Segoe UI", 15F, FontStyle.Bold);
+                ApplyPlayActionStyle(manifest==null?ClientState.Absent:ClientState.Absent);
                 return;
             }
 
@@ -233,21 +232,28 @@ namespace AionCL
                 statusLabel.Text = ClientStateText(state);
 
                 playButton.Enabled = true;
-                playButton.Text = state == ClientState.Valid
-                    ? L("▶   JOUER", "▶   PLAY", "▶   SPIELEN")
-                    : state == ClientState.Absent
-                        ? L("⬇   TÉLÉCHARGER LE JEU", "⬇   DOWNLOAD GAME", "⬇   SPIEL HERUNTERLADEN")
-                        : L("⚙   INSTALLER / RÉPARER", "⚙   INSTALL / REPAIR", "⚙   INSTALLIEREN / REPARIEREN");
-                playButton.Font = new Font("Segoe UI", state == ClientState.Valid ? 20F : 15F, FontStyle.Bold);
+                ApplyPlayActionStyle(state);
             }
             catch (Exception ex)
             {
                 playButton.Enabled = manifest != null;
-                playButton.Text = L("⬇   TÉLÉCHARGER LE JEU", "⬇   DOWNLOAD GAME", "⬇   SPIEL HERUNTERLADEN");
-                playButton.Font = new Font("Segoe UI", 15F, FontStyle.Bold);
+                ApplyPlayActionStyle(ClientState.Incomplete);
                 statusLabel.Text =
                     "État du client : erreur";
                 Log(ex.Message);
+            }
+        }
+
+        private void ApplyPlayActionStyle(ClientState state) {
+            if (state == ClientState.Valid) {
+                playButton.Text=L("▶   JOUER","▶   PLAY","▶   SPIELEN");
+                ApplyActionStyle(playButton,Color.FromArgb(25,135,190),Color.FromArgb(41,163,215),20F);
+            } else if (state == ClientState.Absent) {
+                playButton.Text=L("⬇   TÉLÉCHARGER LE JEU","⬇   DOWNLOAD GAME","⬇   SPIEL HERUNTERLADEN");
+                ApplyActionStyle(playButton,Color.FromArgb(31,145,123),Color.FromArgb(43,170,145),15F);
+            } else {
+                playButton.Text=L("⚙   INSTALLER / RÉPARER","⚙   INSTALL / REPAIR","⚙   INSTALLIEREN / REPARIEREN");
+                ApplyActionStyle(playButton,Color.FromArgb(123,83,166),Color.FromArgb(148,106,193),15F);
             }
         }
 

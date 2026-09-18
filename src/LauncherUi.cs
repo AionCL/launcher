@@ -268,6 +268,12 @@ public sealed partial class MainForm {
         b.Font=new Font("Segoe UI",10F);b.Text=text;b.SetBounds(x,y,w,h);b.FlatStyle=FlatStyle.Flat;b.FlatAppearance.BorderColor=Color.FromArgb(62,76,93);b.FlatAppearance.MouseOverBackColor=Color.FromArgb(46,62,78);
         b.BackColor=primary?Color.FromArgb(37,125,147):Color.FromArgb(27,37,49);b.ForeColor=Color.White;b.Cursor=Cursors.Hand;b.UseVisualStyleBackColor=false;p.Controls.Add(b);
     }
+    private void ApplyActionStyle(Button button, Color color, Color hover, float fontSize) {
+        button.BackColor=color;
+        button.FlatAppearance.BorderColor=Color.FromArgb(Math.Min(255,color.R+25),Math.Min(255,color.G+25),Math.Min(255,color.B+25));
+        button.FlatAppearance.MouseOverBackColor=hover;
+        button.Font=new Font("Segoe UI",fontSize,FontStyle.Bold);
+    }
     private void ApplyLanguage() {
         changingLanguage=true;
         languageBox.SelectedIndex=selectedLanguage=="ENG"?1:selectedLanguage=="DEU"?2:0;
