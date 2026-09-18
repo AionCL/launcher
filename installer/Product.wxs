@@ -30,8 +30,10 @@
                     Description="Lancer AionCL Classic 2.4" WorkingDirectory="INSTALLFOLDER" />
         </File>
         <File Id="LauncherConfig" Source="$(var.SourceDir)\AionCL.Launcher.exe.config" />
-        <File Id="UpdaterExe" Source="$(var.SourceDir)\AionCL.Updater.exe" />
         <File Id="LauncherJson" Source="$(var.SourceDir)\launcher.json" />
+      </Component>
+      <Component Id="UpdaterComponent" Guid="D0E1E2F3-4A5B-46C7-8D9E-0F1A2B3C4D5E">
+        <File Id="UpdaterExe" Source="$(var.SourceDir)\AionCL.Updater.exe" KeyPath="yes" />
       </Component>
     </ComponentGroup>
   </Fragment>
