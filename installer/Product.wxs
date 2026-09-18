@@ -1,13 +1,22 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<Wix xmlns="http://wixtoolset.org/schemas/v4/wxs">
-  <Package Name="AionCL Launcher" Manufacturer="AionCL" Version="2.5.16"
+<Wix xmlns="http://wixtoolset.org/schemas/v4/wxs"
+     xmlns:ui="http://wixtoolset.org/schemas/v4/wxs/ui">
+  <Package Name="AionCL Launcher" Manufacturer="AionCL" Version="2.5.17"
            UpgradeCode="7E8E6F4D-6F1A-4D9A-9A6C-2A2B9D8D2C41"
            Scope="perMachine">
     <SummaryInformation Description="AionCL Classic 2.4 launcher" />
     <MajorUpgrade DowngradeErrorMessage="Une version plus récente du launcher est déjà installée." />
     <MediaTemplate EmbedCab="yes" />
-    <Feature Id="MainFeature" Title="AionCL Launcher" Level="1">
-      <ComponentGroupRef Id="MainComponents" />
+    <Property Id="WIXUI_INSTALLDIR" Value="INSTALLFOLDER" />
+    <ui:WixUI Id="WixUI_Mondo" InstallDirectory="INSTALLFOLDER" />
+    <Feature Id="MainFeature" Title="AionCL Launcher" Description="Fichiers nécessaires au fonctionnement du launcher." Level="1" Display="expand">
+      <ComponentGroupRef Id="LauncherComponents" />
+      <Feature Id="StartMenuFeature" Title="Raccourci Menu Démarrer" Description="Ajouter AionCL Launcher au Menu Démarrer." Level="1">
+        <ComponentGroupRef Id="StartMenuComponents" />
+      </Feature>
+      <Feature Id="DesktopFeature" Title="Raccourci Bureau" Description="Ajouter AionCL Launcher sur le Bureau." Level="1">
+        <ComponentGroupRef Id="DesktopComponents" />
+      </Feature>
     </Feature>
   </Package>
 
@@ -21,14 +30,9 @@
   </Fragment>
 
   <Fragment>
-    <ComponentGroup Id="MainComponents" Directory="INSTALLFOLDER">
+    <ComponentGroup Id="LauncherComponents" Directory="INSTALLFOLDER">
       <Component Id="LauncherFiles" Guid="*">
-        <File Id="LauncherExe" Source="$(var.SourceDir)\AionCL.Launcher.exe" KeyPath="yes">
-          <Shortcut Id="StartMenuShortcut" Directory="AIONCLMENU" Name="AionCL Launcher"
-                    Description="Lancer AionCL Classic 2.4" WorkingDirectory="INSTALLFOLDER" />
-          <Shortcut Id="DesktopShortcut" Directory="DesktopFolder" Name="AionCL Launcher"
-                    Description="Lancer AionCL Classic 2.4" WorkingDirectory="INSTALLFOLDER" />
-        </File>
+        <File Id="LauncherExe" Source="$(var.SourceDir)\AionCL.Launcher.exe" KeyPath="yes" />
         <File Id="LauncherConfig" Source="$(var.SourceDir)\AionCL.Launcher.exe.config" />
         <File Id="LauncherJson" Source="$(var.SourceDir)\launcher.json" />
       </Component>
@@ -36,5 +40,23 @@
         <File Id="UpdaterExe" Source="$(var.SourceDir)\AionCL.Updater.exe" KeyPath="yes" />
       </Component>
     </ComponentGroup>
+
+    <ComponentGroup Id="StartMenuComponents" Directory="AIONCLMENU">
+      <Component Id="StartMenuShortcutComponent" Guid="*">
+        <Shortcut Id="StartMenuShortcut" Target="[#LauncherExe]" Name="AionCL Launcher"
+                  Description="Lancer AionCL Classic 2.4" WorkingDirectory="INSTALLFOLDER" />
+        <RemoveFolder Id="RemoveStartMenuFolder" On="uninstall" />
+        <RegistryValue Root="HKCU" Key="Software\AionCL\Launcher" Name="StartMenuShortcut" Type="integer" Value="1" KeyPath="yes" />
+      </Component>
+    </ComponentGroup>
+
+    <ComponentGroup Id="DesktopComponents" Directory="DesktopFolder">
+      <Component Id="DesktopShortcutComponent" Guid="*">
+        <Shortcut Id="DesktopShortcut" Target="[#LauncherExe]" Name="AionCL Launcher"
+                  Description="Lancer AionCL Classic 2.4" WorkingDirectory="INSTALLFOLDER" />
+        <RegistryValue Root="HKCU" Key="Software\AionCL\Launcher" Name="DesktopShortcut" Type="integer" Value="1" KeyPath="yes" />
+      </Component>
+    </ComponentGroup>
   </Fragment>
+
 </Wix>

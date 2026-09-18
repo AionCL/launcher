@@ -22,7 +22,40 @@ jobs:
           dotnet tool install --global wix --version 4.0.5
           $stage = Get-ChildItem -Directory out\distribution-* | Sort-Object LastWriteTime -Descending | Select-Object -First 1
           if (-not $stage) { throw 'Distribution staging directory not found.' }
-          wix build installer\Product.wxs -d SourceDir="$($stage.FullName)" -o out\AionCL-Launcher-2.5.16.msi
+          wix build installer\Product.wxs -ext WixToolset.UI.wixext -d SourceDir="$($stage.FullName)" -o out\AionCL-Launcher-2.5.17.msi
+      - name: Detect Authenticode signing configuration
+        shell: pwsh
+        env:
+          SIGNING_CERT: ${{ secrets.AIONCL_SIGNING_CERT_BASE64 }}
+        run: |
+          if ([string]::IsNullOrWhiteSpace($env:SIGNING_CERT)) {
+            'AIONCL_SIGNING_CERT_CONFIGURED=false' >> $env:GITHUB_ENV
+          } else {
+            'AIONCL_SIGNING_CERT_CONFIGURED=true' >> $env:GITHUB_ENV
+          }
+      - name: Sign Windows binaries when certificate is configured
+        if: env.AIONCL_SIGNING_CERT_CONFIGURED == 'true'
+        shell: pwsh
+        env:
+          AIONCL_SIGNING_CERT_BASE64: ${{ secrets.AIONCL_SIGNING_CERT_BASE64 }}
+          AIONCL_SIGNING_CERT_PASSWORD: ${{ secrets.AIONCL_SIGNING_CERT_PASSWORD }}
+        run: |
+          $pfx = Join-Path $env:RUNNER_TEMP 'aioncl-signing.pfx'
+          [IO.File]::WriteAllBytes($pfx, [Convert]::FromBase64String($env:AIONCL_SIGNING_CERT_BASE64))
+          $signtool = Get-ChildItem "$env:ProgramFiles\Windows Kits\10\bin" -Filter signtool.exe -Recurse |
+            Where-Object { $_.FullName -match '\\x64\\signtool\.exe$' } |
+            Sort-Object FullName -Descending | Select-Object -First 1
+          if (-not $signtool) { throw 'signtool.exe not found.' }
+          $targets = @('out\AionCL.Launcher.exe', 'out\AionCL.Updater.exe', 'out\AionCL-Launcher-2.5.17.msi')
+          foreach ($target in $targets) {
+            & $signtool.FullName sign /fd SHA256 /td SHA256 /tr http://timestamp.digicert.com /f $pfx /p $env:AIONCL_SIGNING_CERT_PASSWORD $target
+            if ($LASTEXITCODE -ne 0) { throw "Signing failed: $target" }
+          }
+          Remove-Item -Force $pfx
+      - name: Report unsigned build when certificate is not configured
+        if: env.AIONCL_SIGNING_CERT_CONFIGURED != 'true'
+        shell: pwsh
+        run: Write-Warning 'AIONCL_SIGNING_CERT_BASE64 is not configured; this build remains unsigned.'
       - name: Upload launcher package
         uses: actions/upload-artifact@v4
         with:

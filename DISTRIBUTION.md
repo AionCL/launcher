@@ -2,7 +2,9 @@
 
 Windows avec .NET Framework 4.8. Extraire tout le ZIP dans un dossier accessible en écriture, puis ouvrir AionCL.Launcher.exe. Choisir un dossier client, INSTALLER, puis JOUER. VÉRIFIER / RÉPARER contrôle les fichiers et réinstalle les packages endommagés. ANNULER permet de reprendre avec INSTALLER ; conserver .aioncl/cache pour réutiliser les téléchargements.
 
-La première utilisation exige Internet et la publication de la configuration serveur. Ne pas distribuer tant que la recette décrite dans RECETTE.md n’est pas validée. Le launcher est portable et non signé ; la signature de distribution reste à organiser.
+La première utilisation exige Internet et la publication de la configuration serveur. Ne pas distribuer tant que la recette décrite dans RECETTE.md n’est pas validée. Le MSI propose le dossier d’installation et les composants optionnels « Raccourci Menu Démarrer » et « Raccourci Bureau ». Le chemin final est visible dans l’écran de confirmation de l’installeur. Les binaires ne sont reconnus comme signés par Windows que lorsque le workflow reçoit un certificat Authenticode de confiance.
+
+Pour activer la signature dans GitHub Actions, configurer les secrets `AIONCL_SIGNING_CERT_BASE64` (PFX encodé en Base64) et `AIONCL_SIGNING_CERT_PASSWORD`. Le certificat doit être émis par une autorité de confiance ; un certificat auto-signé ne supprimera pas l’alerte Windows.
 
 La configuration serveur provient de https://raw.githubusercontent.com/AionCL/launcher/main/config/server-config.json. Le cache .aioncl/server-config.json est créé automatiquement au premier clic JOUER réussi. En cas de panne distante, un cache valide est réutilisé avec un avertissement. Une maintenance déjà en cache reste bloquante ; une nouvelle maintenance distante ne peut pas être connue hors ligne. Le serveur de jeu reste responsable du contrôle d’accès. Sans cache et sans source accessible, réessayer après rétablissement de la connexion ; aucun fichier manuel n’est demandé.
 
