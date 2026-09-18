@@ -421,8 +421,14 @@ public static class Installation {
             int packageIndex = 0;
             foreach (var p in plan.Packages) { packageIndex++; log("Extraction : " + p.name); await Extract(Safety.Under(cache, p.name), p, stage, token, extractionProgress, packageIndex, plan.Packages.Length).ConfigureAwait(false); }
             // Commit is recoverable, not an atomic directory swap. No version marker until final verification.
+            // A later patch package may replace a file from the base package;
+            // only the effective (last) entry must be moved from staging.
+            var effectiveFiles = new Dictionary<string, ClientFile>(StringComparer.OrdinalIgnoreCase);
+            foreach (var package in plan.Target.Manifest.packages) foreach (var file in package.files) effectiveFiles[file.path] = file;
             foreach (var f in plan.Packages.SelectMany(p => p.files)) {
                 token.ThrowIfCancellationRequested(); string destination = VoiceMode.FilePath(root, f.path); string staged = Safety.Under(stage, f.path);
+                ClientFile effective;
+                if (!effectiveFiles.TryGetValue(f.path, out effective) || !Object.ReferenceEquals(effective, f)) continue;
                 // Preserve a verified shop variant when another file in its package is repaired.
                 if (ShopPatchIntegrity.Matches(destination, f)) continue;
                 Directory.CreateDirectory(Path.GetDirectoryName(destination));
