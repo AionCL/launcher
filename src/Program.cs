@@ -422,6 +422,12 @@ namespace AionCL
                     if (!await koreanPack.Valid(pathBox.Text, selectedLanguage, cts.Token))
                         throw new InvalidDataException(L("Le pack coréen est incomplet ou modifié. Consultez le journal avant de le réinstaller.", "The Korean pack is incomplete or modified. Check the log before reinstalling.", "Das koreanische Paket ist unvollständig oder verändert. Vor Neuinstallation das Protokoll prüfen."));
                 }
+                if (japanesePack.HasPack(pathBox.Text, selectedLanguage)) {
+                    statusLabel.Text = L("Vérification du pack japonais…", "Verifying Japanese voice pack…", "Japanisches Stimmenpaket wird geprüft…");
+                    progressBar.Style = ProgressBarStyle.Marquee;
+                    if (!await japanesePack.Valid(pathBox.Text, selectedLanguage, cts.Token))
+                        throw new InvalidDataException(L("Le pack japonais est incomplet ou modifié. Consultez le journal avant de le réinstaller.", "The Japanese pack is incomplete or modified. Check the log before reinstalling.", "Das japanische Paket ist unvollständig oder verändert. Vor Neuinstallation das Protokoll prüfen."));
+                }
                 progressBar.Style = ProgressBarStyle.Continuous;
                 progressBar.Value = 100;
                 outcome = L("Vérification terminée : tous les fichiers sont valides.", "Verification complete: all files are valid.", "Prüfung abgeschlossen: Alle Dateien sind gültig.");
@@ -582,7 +588,6 @@ namespace AionCL
                         RedactSessionKey(command.Arguments)
                     );
 
-                    VoiceMode.Apply(pathBox.Text, selectedLanguage, false);
                     game.StartGame(command);
                 }
             }
@@ -662,6 +667,7 @@ namespace AionCL
             this.busy = busy;
             languageBox.Enabled = !busy;
             koreanVoices.Enabled = !busy;
+            japaneseVoices.Enabled = !busy;
             hitFontButton.Enabled = !busy;
             RefreshUpdateUi();
             pathBox.Enabled = !busy;

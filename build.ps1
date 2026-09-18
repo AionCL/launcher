@@ -59,6 +59,7 @@ Write-Host "Program : $programFile"
     (Join-Path $root 'src\Updates.cs') `
     (Join-Path $root 'src\UpdateUi.cs') `
     (Join-Path $root 'src\KoreanPack.cs') `
+    (Join-Path $root 'src\JapanesePack.cs') `
     (Join-Path $root 'src\HitFont.cs') `
     (Join-Path $root 'src\LauncherAuth.cs') `
     $programFile `
@@ -68,6 +69,7 @@ Write-Host "Program : $programFile"
     "/resource:$(Join-Path $root 'assets\classic-wings.jpg'),AionCL.classic-wings.jpg" `
     "/resource:$(Join-Path $root 'assets\portal.png'),AionCL.portal.png" `
     "/resource:$(Join-Path $root 'config\korean-pack.json'),AionCL.korean-pack.json" `
+    "/resource:$(Join-Path $root 'config\japanese-pack.json'),AionCL.japanese-pack.json" `
     "/resource:$(Join-Path $root 'assets\japanese-hit-font.pak'),AionCL.hit-font.pak"
 
 if ($LASTEXITCODE -ne 0) {

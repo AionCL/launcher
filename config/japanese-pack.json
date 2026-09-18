@@ -1,0 +1,252 @@
+[
+    {
+        "path": "cutscene/ab1/voice/zvoice.pak",
+        "sha256": "A36F8C044F84AF590BAF818FBB7339C8F2CE0F09B8D1F667B550ED64DD0AE346",
+        "size": 11931274
+    },
+    {
+        "path": "cutscene/dc1/voice/zvoice.pak",
+        "sha256": "CEDF34B24D6735BF4C4EAF93D54B77A569ABCFA1EEB6ED6BE9F64DBFA2DC6963",
+        "size": 4739632
+    },
+    {
+        "path": "cutscene/df1/voice/zvoice.pak",
+        "sha256": "4958A5FD5B73A5EDACBA8B697717493636EF0A556294C63807A396BBBCF43594",
+        "size": 1795425
+    },
+    {
+        "path": "cutscene/df1a/voice/zvoice.pak",
+        "sha256": "182FECAA7D70FC290A2AB6C8F3F12B3C8B8C0CF5420BC6C7F0015C9B2F93699F",
+        "size": 1448411
+    },
+    {
+        "path": "cutscene/df2/voice/zvoice.pak",
+        "sha256": "6F5771A6CBC2296DC36F9FA31879395121B2D3BE4E7A2230BA2BAE9438D9EB82",
+        "size": 4592701
+    },
+    {
+        "path": "cutscene/df2/zdf2.pak",
+        "sha256": "2BCE590385410C64B9ADC23E35A3E1A84E5B2A6771F44CF38FF670021AA9003D",
+        "size": 178839
+    },
+    {
+        "path": "cutscene/df2a/voice/zvoice.pak",
+        "sha256": "F0A8E6E9362D59CA8F101DA2D91F60D8E9EFFD5C273446892A5B60091AA19ABD",
+        "size": 2615526
+    },
+    {
+        "path": "cutscene/df3/voice/zvoice.pak",
+        "sha256": "72998B85A9BB2450B600FFE55C34214E370278642DE179780E0C93484392974A",
+        "size": 7781868
+    },
+    {
+        "path": "cutscene/df3/zdf3.pak",
+        "sha256": "8B12DB2B3D1E954EE9DCBA7C81D07735F4C6D081341BF5962BC57C971ABFD2ED",
+        "size": 323938
+    },
+    {
+        "path": "cutscene/df4/voice/zvoice.pak",
+        "sha256": "F28A73FFD5089F3678D094F3F2B94000B8CBA86C46F000B39BD05119C9414774",
+        "size": 4640281
+    },
+    {
+        "path": "cutscene/df4/zdf4.pak",
+        "sha256": "3B5C4DA38B081B1828A513249629E08096C54EFC1798527D53E37BF051AA021A",
+        "size": 140999
+    },
+    {
+        "path": "cutscene/df5/voice/zvoice.pak",
+        "sha256": "C3F1817A6E85B7BCCF1FBFC6790C14100D8CF427C3BA505CEF21BBB163D85743",
+        "size": 2483936
+    },
+    {
+        "path": "cutscene/df6/voice/zvoice.pak",
+        "sha256": "8DA14134CE20FFCF01D63E4018767490EB6EF5FF73A62B7E17FA49DB295702D7",
+        "size": 3542800
+    },
+    {
+        "path": "cutscene/housing/voice/zvoice.pak",
+        "sha256": "24E1D3844D15692DACC509E6D9A827242C8FD304B47ACCDBC6CD2F339844B8F1",
+        "size": 2790019
+    },
+    {
+        "path": "cutscene/id/voice/zvoice.pak",
+        "sha256": "E122F6DD5E1A094C95037AF4E03ABA835AB535D5A4A085598C312FC7CDF2E3D8",
+        "size": 101621991
+    },
+    {
+        "path": "cutscene/lc1/voice/zvoice.pak",
+        "sha256": "63B14682C23A4EC7386BB62470B03CF77B1AC2A45A3E9134C99436FBC22CE2C2",
+        "size": 5384919
+    },
+    {
+        "path": "cutscene/ldf4a/voice/zvoice.pak",
+        "sha256": "0D32AD224E0CE56D5A94EDDFF98B0B4CF3C34A14275E4046EC79690D1CC433C3",
+        "size": 8705165
+    },
+    {
+        "path": "cutscene/ldf4b/voice/zvoice.pak",
+        "sha256": "923F363602B3877162AD101805318E69E5ECF117A4375E3225541ED75F13A371",
+        "size": 2297460
+    },
+    {
+        "path": "cutscene/ldf5a/voice/zvoice.pak",
+        "sha256": "100CDEF84D48BF8909A1D51B06FAB567D20873D0817F1EBB9CE368BF7CF36703",
+        "size": 2087281
+    },
+    {
+        "path": "cutscene/ldf5b/voice/zvoice.pak",
+        "sha256": "9E1DEFCFAB32A997FFF8E3C4DFDCD7B2D91FC11C8CABB72E3102031AEE5886FE",
+        "size": 3592851
+    },
+    {
+        "path": "cutscene/ldf7/voice/zvoice.pak",
+        "sha256": "2F7F71AE0ED29777E74C20B47873D9A6B2F09413BAC8FED1E4ED4902B69AEEDA",
+        "size": 1319790
+    },
+    {
+        "path": "cutscene/ldf8/voice/zvoice.pak",
+        "sha256": "3559C5589380E7F8393727C662D50D2A873192BD2218ACFC0F02133F65D53A45",
+        "size": 1768156
+    },
+    {
+        "path": "cutscene/lf1/voice/zvoice.pak",
+        "sha256": "EA49AA7EF7CBE63B43C9597CEC271FF0E92FAFE2905C466D7B2144E3601FAAEC",
+        "size": 361465
+    },
+    {
+        "path": "cutscene/lf1a/voice/zvoice.pak",
+        "sha256": "E8C240069A2F7F0E2DC1E40AA75E211FA6C8C69DCB7F02C4B9B44C14BB51269B",
+        "size": 2304231
+    },
+    {
+        "path": "cutscene/lf2/voice/zvoice.pak",
+        "sha256": "78A1FEB57F9CA6539029D6E5FFAA9F08A26D0334676F390C0755608D7876DA01",
+        "size": 5988448
+    },
+    {
+        "path": "cutscene/lf2a/voice/zvoice.pak",
+        "sha256": "E1628E893EE2A50C4647806DA208CC30FC7BD279BB38CA90BEA5D8A121EB9953",
+        "size": 1459189
+    },
+    {
+        "path": "cutscene/lf3/voice/zvoice.pak",
+        "sha256": "FA6E832CE0E0B3799F8F5F3A165E7EA8CE09D955FA5A6579E99266CA9B1DE853",
+        "size": 11412801
+    },
+    {
+        "path": "cutscene/lf3/zlf3.pak",
+        "sha256": "BBAD6823A2EDF6349120095D2F7334E2C82470BE34790F73ECE9B49A1C69D569",
+        "size": 625842
+    },
+    {
+        "path": "cutscene/lf4/voice/zvoice.pak",
+        "sha256": "57FB5FB444043271CA7FD2F42299424A21F2BC669F12F91EE0753249304DCFA6",
+        "size": 5748590
+    },
+    {
+        "path": "cutscene/lf4/zlf4.pak",
+        "sha256": "28A66B95D7AF7B6D7D2440037A4A7AB9A4E3BD38191CA4D667FB3E9E1AE6ADDC",
+        "size": 160267
+    },
+    {
+        "path": "cutscene/lf5/voice/zvoice.pak",
+        "sha256": "4F62CCB4E2FE06E8179EF654A65B37E2ACDEA2A6B25F904E0EBE50BE1EBD1078",
+        "size": 2678493
+    },
+    {
+        "path": "cutscene/lf6/voice/zvoice.pak",
+        "sha256": "F19B168CCA193DAA053A7272C599D6F7DA2805C6394BB06437A00597C9FD7123",
+        "size": 3238678
+    },
+    {
+        "path": "gossip/zgossip.pak",
+        "sha256": "DDF7BDC9D02BCC933A10995FB17C1EB877961805E14D1CB8097C06F35335A6C1",
+        "size": 70320647
+    },
+    {
+        "path": "motion/robot/zrobot.pak",
+        "sha256": "C6093FC0845D28437FA264756362FD6D742F77EEEE4C6145B4DC39FB77A16EDA",
+        "size": 1965200
+    },
+    {
+        "path": "motion/zmotion.pak",
+        "sha256": "7526D2788FFAB83900C1430BEA19D18AC4736372466C630F399E176AE606E27D",
+        "size": 23415370
+    },
+    {
+        "path": "music/zmusic.pak",
+        "sha256": "F685CC6FEC4D541632A20E0A1F1AA1E16AAE90AEB354844AFBB2F0E1203D6BAA",
+        "size": 4423775
+    },
+    {
+        "path": "npc/zsound_npc_1.pak",
+        "sha256": "AA71494C7A1F02924744B8A843F643378FF4F2436E52C5A7F7AFEA04236B6827",
+        "size": 103224403
+    },
+    {
+        "path": "npc/zsound_npc_2.pak",
+        "sha256": "70EB836B4D988BA4FAE48AE0443D8E3A49BAA0DC3D2C0312DCB617BEB308D1C5",
+        "size": 85241793
+    },
+    {
+        "path": "npc/zsound_npc_3.pak",
+        "sha256": "28A7215768FA1D8419742884BC872CB3E3A24A16A6A77764D811D2A87DCA5858",
+        "size": 100336929
+    },
+    {
+        "path": "npc/zsound_npc_4.pak",
+        "sha256": "2AD365D601B6D83E07F97AE7A52B08E041F323446098405ADC8D906B112A338A",
+        "size": 96802897
+    },
+    {
+        "path": "npc/zsound_npc_5.pak",
+        "sha256": "BEDB710DABBD34CFA8E0C536846232C7544A42B32A18947F637E3D48552F5683",
+        "size": 80230907
+    },
+    {
+        "path": "npc/zsound_npc_6.pak",
+        "sha256": "E01EDD0198BD868538E30D69E9EF80BCB5304E5A089F8F42EE649FB8538D0130",
+        "size": 18287770
+    },
+    {
+        "path": "system/zsystem.pak",
+        "sha256": "2D4CF69E85D3D2C4AF9F4459F37C9819403365BA9DA717C7CA164B7D7E7480C9",
+        "size": 9682849
+    },
+    {
+        "path": "voice/attack/zattack.pak",
+        "sha256": "1C732A88F10D0896581398376D7A1E681E190AE76C3AD092F1A1A76BEB45E221",
+        "size": 5667260
+    },
+    {
+        "path": "voice/cast/zcast.pak",
+        "sha256": "AF63BB040A357C7354D05654CF0D3778FB9758450E61AC97212D58DBD890DFFF",
+        "size": 13981989
+    },
+    {
+        "path": "voice/damage/zdamage.pak",
+        "sha256": "56CF72EDDEBD811708A2A1BDDB4004A056B389AEBFB9BBAA13D3ED9DE42FD55A",
+        "size": 5485121
+    },
+    {
+        "path": "voice/defence/zdefence.pak",
+        "sha256": "87624BFBF0549F4E8DE0B2C0C3AE923A1B99D1E1AF9622E540CA570C4A951FA3",
+        "size": 1193516
+    },
+    {
+        "path": "voice/login/zlogin.pak",
+        "sha256": "C7E9EA15CA983F2128EBFADD96C86639099DD4E0C4EDBE351AF229E40A70D45E",
+        "size": 7963892
+    },
+    {
+        "path": "voice/motion/zmotion.pak",
+        "sha256": "151DDD67E36708C260E5C34AE37A16DBAA2B1EAEB8F645595BBB3D60331F806C",
+        "size": 1007333
+    },
+    {
+        "path": "voice/social/zsocial.pak",
+        "sha256": "AF2231FE3D3EFC9C5F4CA9B68B328A62D7DA2AE45C0A78FC388397B5602456F1",
+        "size": 47104157
+    }
+]

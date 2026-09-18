@@ -19,8 +19,9 @@ public sealed partial class MainForm {
     Label authSectionLabel, authUserLabel, authPasswordLabel;
     Button homeButton, helpButton, journalButton, discordButton, youtubeButton;
     ComboBox languageBox;
-    Button koreanVoices, shortcutsButton;
+    Button koreanVoices, japaneseVoices, shortcutsButton;
     readonly KoreanPack koreanPack = KoreanPack.Load();
+    readonly JapanesePack japanesePack = JapanesePack.Load();
     readonly HitFont hitFont = HitFont.Load();
     Button hitFontButton;
     Form journal;
@@ -66,7 +67,9 @@ public sealed partial class MainForm {
         languageBox.SelectedIndexChanged += delegate { if (changingLanguage) return; selectedLanguage=new[] { "FRA","ENG","DEU" }[languageBox.SelectedIndex]; SavePreference(languagePreference,selectedLanguage); ApplyLanguage(); };
         koreanVoices = ButtonAt(installPanel,"",24,239,282,30,false);
         koreanVoices.Click += async delegate { await ToggleKoreanPack(); };
-        hitFontButton = ButtonAt(installPanel,"",24,274,282,30,false);
+        japaneseVoices = ButtonAt(installPanel,"",24,274,282,30,false);
+        japaneseVoices.Click += async delegate { await ToggleJapanesePack(); };
+        hitFontButton = ButtonAt(installPanel,"",24,309,282,30,false);
         hitFontButton.Click += delegate {
             if(!EnsurePath())return;
             try {
@@ -75,9 +78,9 @@ public sealed partial class MainForm {
                 statusLabel.Text=L("Style des dégâts mis à jour. Relancez le jeu pour le voir.","Damage style updated. Restart the game to see it.","Schadensanzeige geändert. Spiel neu starten.");
             }catch(Exception ex){MessageBox.Show(this,ex.Message,"AionCL",MessageBoxButtons.OK,MessageBoxIcon.Error);}
         };
-        StyleButton(installButton,"",installPanel,24,319,282,32,false); installButton.Enabled=false; installButton.Click += async delegate { await InstallAsync(); };
-        StyleButton(verifyButton,"",installPanel,24,360,282,30,false); verifyButton.Enabled=false; verifyButton.Click += async delegate { await VerifyAsync(); };
-        shortcutsButton=ButtonAt(installPanel,"",24,395,282,30,false); shortcutsButton.Click += delegate { CreateShortcuts(); };
+        StyleButton(installButton,"",installPanel,24,354,282,32,false); installButton.Enabled=false; installButton.Click += async delegate { await InstallAsync(); };
+        StyleButton(verifyButton,"",installPanel,24,395,282,30,false); verifyButton.Enabled=false; verifyButton.Click += async delegate { await VerifyAsync(); };
+        shortcutsButton=ButtonAt(installPanel,"",24,430,282,30,false); shortcutsButton.Click += delegate { CreateShortcuts(); };
         discordButton=ButtonAt(this,"",370,26,36,36,false); discordButton.Tag="discord"; discordButton.AccessibleName="Discord"; discordButton.FlatAppearance.BorderSize=0; discordButton.Click += delegate { OpenCommunity(config==null?null:config.discordUrl); };
         youtubeButton=ButtonAt(this,"",478,26,36,36,false); youtubeButton.Tag="youtube"; youtubeButton.AccessibleName="YouTube"; youtubeButton.FlatAppearance.BorderSize=0; youtubeButton.Click += delegate { OpenCommunity(config==null?null:config.youtubeUrl); };
         footer=new Panel { BackColor=Color.FromArgb(215,12,15,21) }; Controls.Add(footer);
@@ -210,7 +213,7 @@ public sealed partial class MainForm {
         clientTitle.SetBounds(22,y,inner,32); y+=40; versionLabel.SetBounds(22,y,inner,24); y+=34;
         pathLabel.SetBounds(22,y,inner,20); y+=24; pathBox.SetBounds(22,y,inner-52,30); browseButton.SetBounds(width-66,y-3,42,36); y+=48;
         languageLabel.SetBounds(22,y,inner,20); y+=24; languageBox.SetBounds(22,y,inner,32); y+=44;
-        koreanVoices.SetBounds(22,y,inner,34); y+=42; hitFontButton.SetBounds(22,y,inner,34); y+=42;
+        koreanVoices.SetBounds(22,y,inner,34); y+=42; japaneseVoices.SetBounds(22,y,inner,34); y+=42; hitFontButton.SetBounds(22,y,inner,34); y+=42;
         installButton.SetBounds(22,y,inner,38); y+=46; verifyButton.SetBounds(22,y,inner,38); y+=46; shortcutsButton.SetBounds(22,y,inner,34);
     }
     private void LayoutSettingsPanel(int width,int height) { LayoutInstallPanel(width,height); }
@@ -323,6 +326,11 @@ public sealed partial class MainForm {
         catch(IOException){koreanVoices.Enabled=false;return;} catch(ArgumentException){koreanVoices.Enabled=false;return;}
         koreanVoices.Text=present?L("Voix coréennes : retirer","Korean voices: remove","Koreanische Stimmen: entfernen"):L("Installer les voix coréennes","Install Korean voices","Koreanische Stimmen installieren");
         koreanVoices.Enabled=manifest!=null && !String.IsNullOrWhiteSpace(pathBox.Text);
+        bool japanesePresent=false;
+        try { if(!String.IsNullOrWhiteSpace(pathBox.Text))japanesePresent=japanesePack.HasPack(pathBox.Text,selectedLanguage); }
+        catch(IOException){japaneseVoices.Enabled=false;return;} catch(ArgumentException){japaneseVoices.Enabled=false;return;}
+        japaneseVoices.Text=japanesePresent?L("Voix japonaises : retirer","Japanese voices: remove","Japanische Stimmen: entfernen"):L("Installer les voix japonaises","Install Japanese voices","Japanische Stimmen installieren");
+        japaneseVoices.Enabled=manifest!=null && !String.IsNullOrWhiteSpace(pathBox.Text);
         if(hitFontButton!=null) {
             bool installed=!String.IsNullOrWhiteSpace(pathBox.Text)&&hitFont.Installed(pathBox.Text,selectedLanguage);
             hitFontButton.Text=installed?L("Japan hit font : retirer","Japan hit font: remove","Japan Hit Font: entfernen"):L("Installer Japan hit font","Install Japan hit font","Japan Hit Font installieren");
@@ -337,6 +345,7 @@ public sealed partial class MainForm {
         try {
             VoiceMode.RequireGameClosed();
             bool install=!koreanPack.HasPack(root,language);
+            if(install && japanesePack.HasPack(root,language)) throw new InvalidOperationException(L("Retirez d’abord le pack japonais avant d’activer les voix coréennes.","Remove the Japanese pack before enabling Korean voices.","Entfernen Sie zuerst das japanische Paket, bevor Sie koreanische Stimmen aktivieren."));
             string source=null;
             if(install && !koreanPack.HasCache(root)) {
                 source=koreanPack.PreviousSource(root,language);
@@ -358,6 +367,23 @@ public sealed partial class MainForm {
         } catch(OperationCanceledException) { outcome=L("Opération interrompue. Le bouton permet de retirer les fichiers ajoutés.","Operation interrupted. Use the button to remove added files.","Vorgang unterbrochen. Hinzugefügte Dateien über die Schaltfläche entfernen."); }
         catch(Exception ex) { outcome=TranslateMessage(ex.Message);MessageBox.Show(this,outcome,"AionCL",MessageBoxButtons.OK,MessageBoxIcon.Error); }
         finally { reporting=false;progressBar.Style=ProgressBarStyle.Continuous;SetBusy(false);if(outcome!=null){statusLabel.Text=outcome;Log(outcome);} }
+    }
+    private async System.Threading.Tasks.Task ToggleJapanesePack() {
+        if(!EnsurePath())return;
+        string root=pathBox.Text,language=selectedLanguage; bool reporting=true; string outcome=null;
+        try {
+            VoiceMode.RequireGameClosed(); bool install=!japanesePack.HasPack(root,language);
+            if(install && koreanPack.HasPack(root,language)) throw new InvalidOperationException(L("Retirez d’abord le pack coréen avant d’activer les voix japonaises.","Remove the Korean pack before enabling Japanese voices.","Entfernen Sie zuerst das koreanische Paket, bevor Sie japanische Stimmen aktivieren."));
+            string source=null;
+            if(install && !japanesePack.HasCache(root)) using(var dialog=new FolderBrowserDialog { Description=L("Choisir le dossier extrait du pack japonais (voice, npc, system…)","Select extracted Japanese pack folder (voice, npc, system…)","Entpackten japanischen Stimmenordner wählen (voice, npc, system…)") }) { if(dialog.ShowDialog(this)!=DialogResult.OK)return; source=dialog.SelectedPath; }
+            SetBusy(true); cts=new System.Threading.CancellationTokenSource(); progressBar.Value=0; progressBar.Style=ProgressBarStyle.Marquee;
+            statusLabel.Text=L("Contrôle du pack japonais…","Checking Japanese voice pack…","Japanisches Stimmenpaket wird geprüft…");
+            var progress=new Progress<VerificationProgress>(delegate(VerificationProgress p) { if(!reporting||IsDisposed)return; progressBar.Style=ProgressBarStyle.Continuous; progressBar.Value=(int)(100L*p.Completed/p.Total); statusLabel.Text=(install?L("Installation des voix","Installing voices","Stimmen installieren"):L("Retrait des voix","Removing voices","Stimmen entfernen"))+" : "+p.Completed+" / "+p.Total; });
+            await japanesePack.Change(root,language,install,source,progress,cts.Token); progressBar.Value=100;
+            outcome=install?L("Voix japonaises installées. Textes conservés.","Japanese voices installed. Text unchanged.","Japanische Stimmen installiert. Texte unverändert."):L("Pack japonais retiré. Voix d’origine restaurées.","Japanese pack removed. Original voices restored.","Japanisches Paket entfernt. Originalstimmen wiederhergestellt.");
+        } catch(OperationCanceledException) { outcome=L("Opération interrompue. Les fichiers ajoutés restent contrôlés.","Operation interrupted. Added files remain protected.","Vorgang unterbrochen. Hinzugefügte Dateien bleiben geschützt."); }
+        catch(Exception ex) { outcome=TranslateMessage(ex.Message); MessageBox.Show(this,outcome,"AionCL",MessageBoxButtons.OK,MessageBoxIcon.Error); }
+        finally { reporting=false; progressBar.Style=ProgressBarStyle.Continuous; SetBusy(false); if(outcome!=null){statusLabel.Text=outcome;Log(outcome);} }
     }
     private void UpdateVersionText() {
         bool prior=changingLanguage;changingLanguage=true;
