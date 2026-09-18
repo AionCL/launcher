@@ -126,10 +126,22 @@ namespace AionCL
                 {
                     cts = new CancellationTokenSource();
 
-                    if (manifest == null) manifest = await network.ManifestAsync(
-                        config,
-                        cts.Token
-                    );
+                    if (manifest == null) {
+                        try {
+                            manifest = await network.ManifestAsync(config, cts.Token);
+                        }
+                        catch (Exception ex) {
+                            // A stale launcher may still carry an obsolete manifest
+                            // URL while the update feed is temporarily unavailable.
+                            // Keep the UI usable and let the explicit retry refresh it;
+                            // do not show a blocking 404 dialog during startup.
+                            Log("Manifest indisponible au démarrage : " + ex.Message);
+                            statusLabel.Text = L("Mises à jour indisponibles. Cliquez sur Rechercher les mises à jour.", "Updates unavailable. Click Check for updates to retry.", "Updates nicht verfügbar. Klicke auf Updates suchen, um es erneut zu versuchen.");
+                            RefreshUpdateUi();
+                            updateTimer.Start();
+                            return;
+                        }
+                    }
                 }
 
                 Log(
@@ -204,7 +216,8 @@ namespace AionCL
             if (manifest == null ||
                 String.IsNullOrWhiteSpace(pathBox.Text))
             {
-                playButton.Enabled = false;
+                playButton.Enabled = manifest != null;
+                playButton.Text = L("⬇   TÉLÉCHARGER LE JEU", "⬇   DOWNLOAD GAME", "⬇   SPIEL HERUNTERLADEN");
                 return;
             }
 
@@ -218,12 +231,17 @@ namespace AionCL
 
                 statusLabel.Text = ClientStateText(state);
 
-                playButton.Enabled =
-                    state == ClientState.Valid;
+                playButton.Enabled = true;
+                playButton.Text = state == ClientState.Valid
+                    ? L("▶   JOUER", "▶   PLAY", "▶   SPIELEN")
+                    : state == ClientState.Absent
+                        ? L("⬇   TÉLÉCHARGER LE JEU", "⬇   DOWNLOAD GAME", "⬇   SPIEL HERUNTERLADEN")
+                        : L("⚙   INSTALLER / RÉPARER", "⚙   INSTALL / REPAIR", "⚙   INSTALLIEREN / REPARIEREN");
             }
             catch (Exception ex)
             {
-                playButton.Enabled = false;
+                playButton.Enabled = manifest != null;
+                playButton.Text = L("⬇   TÉLÉCHARGER LE JEU", "⬇   DOWNLOAD GAME", "⬇   SPIEL HERUNTERLADEN");
                 statusLabel.Text =
                     "État du client : erreur";
                 Log(ex.Message);
@@ -633,11 +651,7 @@ namespace AionCL
                                     manifest != null;
             verifyButton.Enabled = !busy &&
                                    manifest != null;
-            playButton.Enabled = !busy &&
-                                 manifest != null &&
-                                 !String.IsNullOrWhiteSpace(
-                                     pathBox.Text
-                                 );
+            playButton.Enabled = !busy && manifest != null;
             cancelButton.Enabled = busy;
             cancelButton.Visible = busy;
             playButton.Visible = !busy;

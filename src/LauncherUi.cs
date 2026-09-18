@@ -81,7 +81,7 @@ public sealed partial class MainForm {
         youtubeButton=ButtonAt(this,"",478,26,36,36,false); youtubeButton.Tag="youtube"; youtubeButton.AccessibleName="YouTube"; youtubeButton.FlatAppearance.BorderSize=0; youtubeButton.Click += delegate { OpenCommunity(config==null?null:config.youtubeUrl); };
         footer=new Panel { BackColor=Color.FromArgb(215,12,15,21) }; Controls.Add(footer);
         authSectionLabel=LabelAt(footer,"Connexion au jeu",28,3,130,18,9,accent);
-        accountBox.DropDownStyle=ComboBoxStyle.DropDownList; accountBox.FlatStyle=FlatStyle.Flat; accountBox.BackColor=Color.FromArgb(35,43,56); accountBox.ForeColor=ForeColor; accountBox.AccessibleName="Compte enregistré"; accountBox.IntegralHeight=false; accountBox.DropDownHeight=28; footer.Controls.Add(accountBox);
+        accountBox.DropDownStyle=ComboBoxStyle.DropDownList; accountBox.FlatStyle=FlatStyle.Flat; accountBox.BackColor=Color.FromArgb(35,43,56); accountBox.ForeColor=ForeColor; accountBox.AccessibleName="Compte enregistré"; accountBox.IntegralHeight=false; accountBox.MaxDropDownItems=1; accountBox.DropDownHeight=26; accountBox.DropDownWidth=180; footer.Controls.Add(accountBox);
         accountBox.SelectedIndexChanged += delegate { if(loadingAccounts||accountBox.SelectedItem==null)return; var saved=launcherAuth.Find(accountBox.SelectedItem.ToString()); if(saved!=null){authUser.Text=saved.username;authPassword.Text=saved.password;authRemember.Checked=true;authStatus.Text=L("Compte enregistré sélectionné.","Saved account selected.","Gespeichertes Konto ausgewählt.");} };
         authUserLabel=LabelAt(footer,"Identifiant",28,20,150,16,8,muted);
         authPasswordLabel=LabelAt(footer,"Mot de passe",206,20,150,16,8,muted);
@@ -93,7 +93,14 @@ public sealed partial class MainForm {
         progressBar.SetBounds(28,98,650,5); footer.Controls.Add(progressBar);
         statusLabel.SetBounds(28,104,430,18); statusLabel.ForeColor=muted; footer.Controls.Add(statusLabel);
         StyleButton(cancelButton,"",footer,500,85,178,28,false); cancelButton.Enabled=false; cancelButton.Visible=false; cancelButton.Click += delegate { if(cts!=null) cts.Cancel(); };
-        StyleButton(playButton,"",footer,720,24,330,76,true); playButton.Font=new Font("Segoe UI",20,FontStyle.Bold); playButton.Enabled=false; playButton.Click += async delegate { await PlayAsync(); };
+        StyleButton(playButton,"",footer,720,24,330,76,true); playButton.Font=new Font("Segoe UI",20,FontStyle.Bold); playButton.Enabled=false; playButton.Click += async delegate {
+            if (manifest == null) return;
+            if (String.IsNullOrWhiteSpace(pathBox.Text)) { Browse(); if (String.IsNullOrWhiteSpace(pathBox.Text)) return; }
+            ClientState state;
+            try { state = Installation.Detect(pathBox.Text, manifest); }
+            catch (Exception ex) { Log(ex.Message); state = ClientState.Absent; }
+            if (state == ClientState.Valid) await PlayAsync(); else await InstallAsync();
+        };
         logBox.Multiline=true; logBox.ReadOnly=true; logBox.ScrollBars=ScrollBars.Vertical; logBox.BackColor=BackColor; logBox.ForeColor=ForeColor; logBox.BorderStyle=BorderStyle.None;
         journalPanel = new SurfacePanel { BackColor=Color.FromArgb(14,21,30), Visible=false, Padding=new Padding(18) };
         StyleButton(diagnosticsButton,"",journalPanel,18,10,200,32,false); diagnosticsButton.Click += async delegate { await RunDiagnosticsAsync(); };
@@ -165,7 +172,7 @@ public sealed partial class MainForm {
             int checkWidth=Math.Max(210,TextRenderer.MeasureText(checkUpdatesButton.Text,checkUpdatesButton.Font).Width+30);
             bool showDownload=releases!=null&&Updates.Newer(releases.launcher.version,Updates.LauncherVersion);
             launcherUpdateButton.SetBounds(updatePanel.Width-downloadWidth-10,12,downloadWidth,40);
-            launcherUpdateButton.Visible=showDownload;
+            launcherUpdateButton.Visible=false;
             checkUpdatesButton.SetBounds(updatePanel.Width-checkWidth-(showDownload?downloadWidth+20:10),12,checkWidth,40);
             updateNotice.SetBounds(16,10,Math.Max(180,checkUpdatesButton.Left-24),42); updateNotice.TextAlign=ContentAlignment.MiddleLeft;
         }
