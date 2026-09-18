@@ -7,7 +7,7 @@ if ($LASTEXITCODE -ne 0) { throw 'Tests failed; distribution cancelled.' }
 $stamp = Get-Date -Format 'yyyyMMdd-HHmmss-fff'
 $stage = Join-Path $root "out\distribution-$stamp"
 New-Item -ItemType Directory -Path $stage | Out-Null
-foreach ($name in @('AionCL.Launcher.exe', 'AionCL.Launcher.exe.config', 'launcher.json')) {
+foreach ($name in @('AionCL.Launcher.exe', 'AionCL.Launcher.exe.config', 'AionCL.Updater.exe', 'launcher.json')) {
     Copy-Item -LiteralPath (Join-Path $root "out\$name") -Destination $stage
 }
 Copy-Item -LiteralPath (Join-Path $root 'DISTRIBUTION.md') -Destination $stage

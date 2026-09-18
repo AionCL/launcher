@@ -19,7 +19,7 @@ public sealed partial class MainForm {
     Label authSectionLabel, authUserLabel, authPasswordLabel;
     Button homeButton, helpButton, journalButton, discordButton, youtubeButton;
     ComboBox languageBox;
-    Button koreanVoices;
+    Button koreanVoices, shortcutsButton;
     readonly KoreanPack koreanPack = KoreanPack.Load();
     readonly HitFont hitFont = HitFont.Load();
     Button hitFontButton;
@@ -77,6 +77,7 @@ public sealed partial class MainForm {
         };
         StyleButton(installButton,"",installPanel,24,319,282,32,false); installButton.Enabled=false; installButton.Click += async delegate { await InstallAsync(); };
         StyleButton(verifyButton,"",installPanel,24,360,282,30,false); verifyButton.Enabled=false; verifyButton.Click += async delegate { await VerifyAsync(); };
+        shortcutsButton=ButtonAt(installPanel,"",24,395,282,30,false); shortcutsButton.Click += delegate { CreateShortcuts(); };
         discordButton=ButtonAt(this,"",370,26,36,36,false); discordButton.Tag="discord"; discordButton.AccessibleName="Discord"; discordButton.FlatAppearance.BorderSize=0; discordButton.Click += delegate { OpenCommunity(config==null?null:config.discordUrl); };
         youtubeButton=ButtonAt(this,"",478,26,36,36,false); youtubeButton.Tag="youtube"; youtubeButton.AccessibleName="YouTube"; youtubeButton.FlatAppearance.BorderSize=0; youtubeButton.Click += delegate { OpenCommunity(config==null?null:config.youtubeUrl); };
         footer=new Panel { BackColor=Color.FromArgb(215,12,15,21) }; Controls.Add(footer);
@@ -183,13 +184,34 @@ public sealed partial class MainForm {
             noticeMessage.SetBounds(18,50,cardW-36,58); noticeAction.SetBounds(18,112,170,32);
         }
     }
+    private void CreateShortcuts() {
+        try {
+            string exe=Application.ExecutablePath;
+            string start=Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.StartMenu),"Programs","AionCL Launcher.lnk");
+            string desktop=Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory),"AionCL Launcher.lnk");
+            Type shellType=Type.GetTypeFromProgID("WScript.Shell");
+            if(shellType==null) throw new InvalidOperationException("Le composant de raccourcis Windows est indisponible.");
+            object shell=Activator.CreateInstance(shellType);
+            foreach(string path in new[]{start,desktop}) {
+                Directory.CreateDirectory(Path.GetDirectoryName(path));
+                object shortcut=shellType.InvokeMember("CreateShortcut",System.Reflection.BindingFlags.InvokeMethod,null,shell,new object[]{path});
+                Type shortcutType=shortcut.GetType();
+                shortcutType.InvokeMember("TargetPath",System.Reflection.BindingFlags.SetProperty,null,shortcut,new object[]{exe});
+                shortcutType.InvokeMember("WorkingDirectory",System.Reflection.BindingFlags.SetProperty,null,shortcut,new object[]{AppDomain.CurrentDomain.BaseDirectory});
+                shortcutType.InvokeMember("IconLocation",System.Reflection.BindingFlags.SetProperty,null,shortcut,new object[]{exe+",0"});
+                shortcutType.InvokeMember("Description",System.Reflection.BindingFlags.SetProperty,null,shortcut,new object[]{"Lancer AionCL Classic 2.4"});
+                shortcutType.InvokeMember("Save",System.Reflection.BindingFlags.InvokeMethod,null,shortcut,null);
+            }
+            statusLabel.Text=L("Raccourcis créés dans le Menu Démarrer et sur le Bureau.","Shortcuts created in the Start menu and on the Desktop.","Verknüpfungen im Startmenü und auf dem Desktop erstellt.");
+        } catch(Exception ex) { MessageBox.Show(this,ex.Message,"AionCL",MessageBoxButtons.OK,MessageBoxIcon.Error); }
+    }
     private void LayoutInstallPanel(int width,int height) {
         int inner=Math.Max(220,width-44), y=18;
         clientTitle.SetBounds(22,y,inner,32); y+=40; versionLabel.SetBounds(22,y,inner,24); y+=34;
         pathLabel.SetBounds(22,y,inner,20); y+=24; pathBox.SetBounds(22,y,inner-52,30); browseButton.SetBounds(width-66,y-3,42,36); y+=48;
         languageLabel.SetBounds(22,y,inner,20); y+=24; languageBox.SetBounds(22,y,inner,32); y+=44;
         koreanVoices.SetBounds(22,y,inner,34); y+=42; hitFontButton.SetBounds(22,y,inner,34); y+=42;
-        installButton.SetBounds(22,y,inner,38); y+=46; verifyButton.SetBounds(22,y,inner,38);
+        installButton.SetBounds(22,y,inner,38); y+=46; verifyButton.SetBounds(22,y,inner,38); y+=46; shortcutsButton.SetBounds(22,y,inner,34);
     }
     private void LayoutSettingsPanel(int width,int height) { LayoutInstallPanel(width,height); }
     private void LayoutFooter(int w, int h) {
@@ -283,7 +305,7 @@ public sealed partial class MainForm {
         authManualButton.Text=L("Utiliser ces identifiants","Use these credentials","Diese Zugangsdaten verwenden");
         homeButton.BackColor=storyPage=="home"?Color.FromArgb(44,61,75):BackColor; helpButton.BackColor=storyPage=="settings"?Color.FromArgb(44,61,75):BackColor; journalButton.BackColor=storyPage=="journal"?Color.FromArgb(44,61,75):BackColor;
         clientTitle.Text=L("Votre jeu","Your game","Dein Spiel");pathLabel.Text=L("DOSSIER DU CLIENT","GAME FOLDER","SPIELORDNER");languageLabel.Text=L("LANGUE DU JEU ET DU LAUNCHER","GAME & LAUNCHER LANGUAGE","SPIEL- UND LAUNCHERSPRACHE");
-        installButton.Text=L("Installer / reprendre","Install / resume","Installieren / fortsetzen");verifyButton.Text=L("Vérifier / réparer","Verify / repair","Prüfen / reparieren"); diagnosticsButton.Text=L("Tester la connexion","Run connection test","Verbindung testen"); forgetCredentialsButton.Text=L("Effacer les identifiants mémorisés","Clear saved credentials","Gespeicherte Zugangsdaten löschen"); cancelButton.Text=L("Interrompre","Interrupt","Unterbrechen"); playButton.Text=L("▶   JOUER","▶   PLAY","▶   SPIELEN");
+        installButton.Text=L("Installer / reprendre","Install / resume","Installieren / fortsetzen");verifyButton.Text=L("Vérifier / réparer","Verify / repair","Prüfen / reparieren"); shortcutsButton.Text=L("Créer les raccourcis Windows","Create Windows shortcuts","Windows-Verknüpfungen erstellen"); diagnosticsButton.Text=L("Tester la connexion","Run connection test","Verbindung testen"); forgetCredentialsButton.Text=L("Effacer les identifiants mémorisés","Clear saved credentials","Gespeicherte Zugangsdaten löschen"); cancelButton.Text=L("Interrompre","Interrupt","Unterbrechen"); playButton.Text=L("▶   JOUER","▶   PLAY","▶   SPIELEN");
         browseButton.AccessibleName=L("Choisir le dossier client","Choose game folder","Spielordner auswählen");
         storyTitle.Text=storyPage=="home"?L("Votre aventure reprend ici.","Your adventure continues here.","Dein Abenteuer geht weiter."):storyPage=="journal"?L("Journal du launcher","Launcher log","Launcher-Protokoll"):L("Paramètres du launcher","Launcher settings","Launcher-Einstellungen");
         storyBody.Text=storyPage=="home"?L("Retrouvez Atréia dans Aion Classic 2.4.\nChoisissez votre langue, puis entrez en jeu.","Return to Atreia in Aion Classic 2.4.\nChoose your language, then enter the game.","Kehre in Aion Classic 2.4 nach Atreia zurück.\nWähle deine Sprache und starte das Spiel."):storyPage=="journal"?L("Les opérations et diagnostics apparaissent ici.","Operations and diagnostics appear here.","Vorgänge und Diagnosen erscheinen hier."):L("Dossier du client, langue et outils facultatifs.\nLes modifications sont appliquées avant le prochain lancement.","Game folder, language and optional tools.\nChanges are applied before the next launch.","Spielordner, Sprache et optionale Werkzeuge.\nÄnderungen werden vor dem nächsten Start angewendet.");

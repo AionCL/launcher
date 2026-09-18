@@ -26,6 +26,7 @@ $appConfig      = Join-Path $root 'config\app.config'
 
 $launcherExe = Join-Path $out 'AionCL.Launcher.exe'
 $testsExe    = Join-Path $out 'AionCL.Tests.exe'
+$updaterExe  = Join-Path $out 'AionCL.Updater.exe'
 
 if (!(Test-Path $coreFile)) {
     throw "Missing source file: $coreFile"
@@ -72,6 +73,14 @@ Write-Host "Program : $programFile"
 if ($LASTEXITCODE -ne 0) {
     throw 'Launcher compilation failed.'
 }
+
+& $compiler `
+    /nologo `
+    /target:exe `
+    "/out:$updaterExe" `
+    '/r:System.dll' `
+    (Join-Path $root 'src\Updater.cs')
+if ($LASTEXITCODE -ne 0) { throw 'Updater compilation failed.' }
 
 $configBackup = Join-Path $root ('.local\backups\build-' + [Guid]::NewGuid().ToString('N'))
 foreach ($existing in @((Join-Path $out 'launcher.json'), "$launcherExe.config", "$testsExe.config")) {

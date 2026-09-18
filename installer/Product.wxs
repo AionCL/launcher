@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Wix xmlns="http://wixtoolset.org/schemas/v4/wxs">
-  <Package Name="AionCL Launcher" Manufacturer="AionCL" Version="2.5.6"
+  <Package Name="AionCL Launcher" Manufacturer="AionCL" Version="2.5.16"
            UpgradeCode="7E8E6F4D-6F1A-4D9A-9A6C-2A2B9D8D2C41"
            Scope="perMachine">
     <SummaryInformation Description="AionCL Classic 2.4 launcher" />
@@ -30,6 +30,7 @@
                     Description="Lancer AionCL Classic 2.4" WorkingDirectory="INSTALLFOLDER" />
         </File>
         <File Id="LauncherConfig" Source="$(var.SourceDir)\AionCL.Launcher.exe.config" />
+        <File Id="UpdaterExe" Source="$(var.SourceDir)\AionCL.Updater.exe" />
         <File Id="LauncherJson" Source="$(var.SourceDir)\launcher.json" />
       </Component>
     </ComponentGroup>

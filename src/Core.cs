@@ -196,6 +196,18 @@ public sealed class Network : IDisposable {
             }
         }
     }
+    public async Task Download(string url, string target, IProgress<long> progress, CancellationToken token) {
+        using (var request = new HttpRequestMessage(HttpMethod.Get, Safety.Https(url))) using (var response = await Send(request, token).ConfigureAwait(false)) {
+            if (!response.IsSuccessStatusCode) throw new IOException("HTTP " + (int)response.StatusCode + " lors du téléchargement du launcher.");
+            string directory = Path.GetDirectoryName(target); if (!String.IsNullOrEmpty(directory)) Directory.CreateDirectory(directory);
+            string part = target + ".part"; if (File.Exists(part)) File.Delete(part);
+            using (var input = await response.Content.ReadAsStreamAsync().ConfigureAwait(false)) using (var output = new FileStream(part, FileMode.CreateNew, FileAccess.Write, FileShare.None, 131072, true)) {
+                var buffer = new byte[131072]; long total = 0; int n;
+                while ((n = await Read(input, buffer, token).ConfigureAwait(false)) > 0) { await output.WriteAsync(buffer, 0, n, token).ConfigureAwait(false); total += n; if (progress != null) progress.Report(total); }
+            }
+            if (File.Exists(target)) File.Delete(target); File.Move(part, target);
+        }
+    }
     public async Task<ManifestResult> ManifestAsync(LauncherConfig config, CancellationToken token) {
         byte[] data = await Small(config.manifestUrl, token).ConfigureAwait(false); var m = Json.Parse<Manifest>(Encoding.UTF8.GetString(data));
         if (m == null) throw new InvalidDataException("Manifest vide."); m.Validate(config.clientBaseVersion); return new ManifestResult { Manifest = m, Hash = Safety.Sha(data) };

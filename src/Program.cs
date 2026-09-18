@@ -69,6 +69,7 @@ namespace AionCL
         public MainForm(bool preview)
         {
             Text = "AionCL - Classic 2.4";
+            try { Icon = Icon.ExtractAssociatedIcon(Application.ExecutablePath); } catch { }
             ClientSize = new Size(1100, 700);
             MinimumSize = ClientSize;
             MaximumSize = ClientSize;
@@ -115,6 +116,7 @@ namespace AionCL
                     );
 
                 config.Validate();
+                Text = "AionCL - Classic 2.4 · Launcher " + config.launcherVersion;
                 RefreshAccountBox(null);
                 authStatus.Text = launcherAuth.Accounts.Count == 0 ? "Saisis tes identifiants pour lancer le client." : "Identifiants mémorisés disponibles.";
                 await CheckUpdates(true);

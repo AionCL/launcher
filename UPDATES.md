@@ -20,7 +20,7 @@ Le bouton du client devient METTRE À JOUR LE JEU. Lors du clic, le launcher vé
 3. Publier le ZIP dans une release launcher.
 4. Modifier launcher.version et launcher.downloadPage dans config/updates.json. downloadPage doit être l’URL HTTPS de la release contenant le ZIP. Publier le flux EN DERNIER.
 
-Une notification propose Télécharger le launcher. Cette version ouvre la page de release ; elle NE remplace PAS automatiquement l’exécutable en cours. L’utilisateur extrait la nouvelle version et la lance. Préférences et packs client restent séparés du launcher. Un installateur automatique avec sauvegarde/rollback reste une amélioration distincte.
+Le feed peut fournir `assetUrl` et `sha256` pour une mise à jour directe. Le launcher télécharge l’archive, vérifie son SHA-256, la prépare dans un dossier temporaire puis délègue le remplacement à `AionCL.Updater.exe` après fermeture du processus principal. Le helper conserve une sauvegarde temporaire et restaure les fichiers remplacés si l’opération échoue. Si le feed ne fournit pas ces deux champs, le bouton ouvre la page de release comme solution de secours.
 
 ## Première activation du flux préparé
 
