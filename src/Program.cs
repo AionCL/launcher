@@ -218,6 +218,7 @@ namespace AionCL
             {
                 playButton.Enabled = manifest != null;
                 playButton.Text = L("⬇   TÉLÉCHARGER LE JEU", "⬇   DOWNLOAD GAME", "⬇   SPIEL HERUNTERLADEN");
+                playButton.Font = new Font("Segoe UI", 15F, FontStyle.Bold);
                 return;
             }
 
@@ -237,11 +238,13 @@ namespace AionCL
                     : state == ClientState.Absent
                         ? L("⬇   TÉLÉCHARGER LE JEU", "⬇   DOWNLOAD GAME", "⬇   SPIEL HERUNTERLADEN")
                         : L("⚙   INSTALLER / RÉPARER", "⚙   INSTALL / REPAIR", "⚙   INSTALLIEREN / REPARIEREN");
+                playButton.Font = new Font("Segoe UI", state == ClientState.Valid ? 20F : 15F, FontStyle.Bold);
             }
             catch (Exception ex)
             {
                 playButton.Enabled = manifest != null;
                 playButton.Text = L("⬇   TÉLÉCHARGER LE JEU", "⬇   DOWNLOAD GAME", "⬇   SPIEL HERUNTERLADEN");
+                playButton.Font = new Font("Segoe UI", 15F, FontStyle.Bold);
                 statusLabel.Text =
                     "État du client : erreur";
                 Log(ex.Message);
