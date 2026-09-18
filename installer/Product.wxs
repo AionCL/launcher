@@ -7,7 +7,6 @@
     <SummaryInformation Description="AionCL Classic 2.4 launcher" />
     <MajorUpgrade DowngradeErrorMessage="Une version plus récente du launcher est déjà installée." />
     <MediaTemplate EmbedCab="yes" />
-    <Property Id="WIXUI_INSTALLDIR" Value="INSTALLFOLDER" />
     <ui:WixUI Id="WixUI_Mondo" InstallDirectory="INSTALLFOLDER" />
     <Feature Id="MainFeature" Title="AionCL Launcher" Description="Fichiers nécessaires au fonctionnement du launcher." Level="1" Display="expand">
       <ComponentGroupRef Id="LauncherComponents" />
