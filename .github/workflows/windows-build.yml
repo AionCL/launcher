@@ -20,6 +20,7 @@ jobs:
         shell: pwsh
         run: |
           dotnet tool install --global wix --version 4.0.5
+          wix extension add -g WixToolset.UI.wixext/4.0.5
           $stage = Get-ChildItem -Directory out\distribution-* | Sort-Object LastWriteTime -Descending | Select-Object -First 1
           if (-not $stage) { throw 'Distribution staging directory not found.' }
           wix build installer\Product.wxs -ext WixToolset.UI.wixext -d SourceDir="$($stage.FullName)" -o out\AionCL-Launcher-2.5.17.msi
