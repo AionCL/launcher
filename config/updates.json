@@ -6,8 +6,8 @@
     "manifestUrl": "https://github.com/AionCL/client-2.4/releases/download/v2.4.2-mouse-fix/install-manifest.json"
   },
   "launcher": {
-    "version": "2.5.7",
-    "downloadPage": "https://github.com/AionCL/launcher/releases/tag/launcher-v2.5.7-home-download"
+    "version": "2.5.8",
+    "downloadPage": "https://github.com/AionCL/launcher/releases/tag/launcher-v2.5.8-network-status"
   },
   "notice": {
     "title": "AionCL ouvre ses portes",
