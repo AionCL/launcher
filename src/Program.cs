@@ -377,6 +377,14 @@ namespace AionCL
                     MessageBox.Show(this,L("Client plus récent : recherchez les mises à jour avant de vérifier.","Newer client installed: check for updates before verifying.","Neuerer Client installiert: vor der Prüfung nach Updates suchen."),"AionCL");return;
                 }
             }
+            else {
+                // No marker means the previous installation was interrupted.
+                // Reuse the package cache and resume directly instead of hashing
+                // the entire client before starting the repair.
+                statusLabel.Text=L("Installation partielle : reprise du client…","Partial installation: resuming the client…","Teilinstallation: Client wird fortgesetzt…");
+                await InstallAsync();
+                return;
+            }
 
             SetBusy(true);
 

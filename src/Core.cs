@@ -434,12 +434,23 @@ public static class Installation {
                 Directory.CreateDirectory(Path.GetDirectoryName(destination));
                 if (File.Exists(destination)) File.Replace(staged, destination, null); else File.Move(staged, destination);
             }
-            log("Validation finale des fichiers..."); var issues = await Verify(root, plan.Target.Manifest, token).ConfigureAwait(false);
+            log("Validation finale des fichiers..."); var issues = ValidateEffectiveFiles(root, plan.Target.Manifest);
             if (issues.Count != 0) throw new InvalidDataException("Installation incomplete : " + issues.Count + " fichiers.");
             token.ThrowIfCancellationRequested();
             Json.Atomic(version, new LocalVersion { version = plan.Target.Manifest.clientVersion, installedAt = DateTime.UtcNow.ToString("o"), manifestHash = plan.Target.Hash });
             log("Installation validee.");
         }
+    }
+    private static List<FileIssue> ValidateEffectiveFiles(string root, Manifest manifest) {
+        var result=new List<FileIssue>(); var latest=new Dictionary<string,Tuple<ClientFile,string>>(StringComparer.OrdinalIgnoreCase);
+        foreach(var package in manifest.packages) foreach(var file in package.files) latest[file.path]=Tuple.Create(file,package.name);
+        foreach(var item in latest) {
+            var file=item.Value.Item1; if(IsMutable(file.path)) continue;
+            string path=VoiceMode.FilePath(root,file.path);
+            if(ShopPatchIntegrity.Matches(path,file)) continue;
+            if(!File.Exists(path)||new FileInfo(path).Length!=file.size) result.Add(new FileIssue { Path=file.path, Package=item.Value.Item2, Reason="absent ou taille" });
+        }
+        return result;
     }
 }
 public sealed class ServerService {
