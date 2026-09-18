@@ -55,7 +55,7 @@ public sealed class Manifest {
     public Package[] packages { get; set; }
     public void Validate(string version) {
         if (formatVersion != 1 || product != "AionCL" || gameVersion != "2.4" || clientVersion != version || archiveFormat != "zip" || packages == null || packages.Length == 0 || packages.Length > 998) throw new InvalidDataException("Manifest non pris en charge.");
-        var paths = new HashSet<string>(StringComparer.OrdinalIgnoreCase); var names = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        var paths = new HashSet<string>(StringComparer.OrdinalIgnoreCase); var pathPackages = new Dictionary<string,int>(StringComparer.OrdinalIgnoreCase); var names = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
         long bytes = 0, compressed = 0; int count = 0;
         checked { foreach (var p in packages) {
             if (p == null || !Regex.IsMatch(p.name ?? "", "^aioncl-client-2\\.4\\.[0-9]+-[0-9]{3}\\.zip$") || !names.Add(p.name) || p.size <= 0 || p.size >= 2147483648L || p.files == null || p.files.Length == 0 || p.files.Length != p.fileCount || p.mirrors == null || p.mirrors.Length == 0) throw new InvalidDataException("Package invalide.");
@@ -63,7 +63,15 @@ public sealed class Manifest {
             long packageBytes = 0;
             foreach (var f in p.files) {
                 if (f == null) throw new InvalidDataException("Fichier invalide."); Safety.Relative(f.path); Safety.Hash(f.sha256);
-                if (f.path.Split('/')[0].Equals(".aioncl", StringComparison.OrdinalIgnoreCase) || !paths.Add(f.path) || f.size < 0) throw new InvalidDataException("Chemin reserve, duplique ou taille invalide.");
+                if (f.path.Split('/')[0].Equals(".aioncl", StringComparison.OrdinalIgnoreCase) || f.size < 0) throw new InvalidDataException("Chemin reserve, duplique ou taille invalide.");
+                int previousPackage;
+                if (pathPackages.TryGetValue(f.path, out previousPackage)) {
+                    // A later patch package may intentionally replace one file
+                    // from the base client. Same-package duplicates and reverse
+                    // overrides remain invalid.
+                    if (previousPackage >= Array.IndexOf(packages, p)) throw new InvalidDataException("Chemin reserve, duplique ou taille invalide.");
+                } else { paths.Add(f.path); }
+                pathPackages[f.path] = Array.IndexOf(packages, p);
                 packageBytes += f.size; count++;
             }
             if (packageBytes != p.uncompressedSize) throw new InvalidDataException("Total package incoherent."); bytes += packageBytes; compressed += p.size;
@@ -320,7 +328,9 @@ public static class Installation {
         IProgress<VerificationProgress> progress = null)
     {
         var result = new List<FileIssue>();
-        int total = manifest.packages.SelectMany(p => p.files).Count(f => !IsMutable(f.path));
+        var latest = new Dictionary<string, ClientFile>(StringComparer.OrdinalIgnoreCase);
+        foreach (var package in manifest.packages) foreach (var file in package.files) latest[file.path] = file;
+        int total = latest.Values.Count(f => !IsMutable(f.path));
         int completed = 0;
 
         foreach (var p in manifest.packages)
@@ -328,6 +338,12 @@ public static class Installation {
             foreach (var f in p.files)
             {
                 token.ThrowIfCancellationRequested();
+
+                // Later patch packages override files from the base client.
+                // Validate only the effective entry so an intentional override
+                // does not also report the superseded hash as corrupt.
+                ClientFile effective;
+                if (!latest.TryGetValue(f.path, out effective) || !Object.ReferenceEquals(effective, f)) continue;
 
                 // Runtime cache files are intentionally excluded from integrity checks.
                 if (IsMutable(f.path))
