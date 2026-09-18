@@ -16,6 +16,15 @@ public sealed class JapanesePack {
     public static JapanesePack Load() { using(var s=typeof(JapanesePack).Assembly.GetManifestResourceStream("AionCL.japanese-pack.json")) using(var r=new StreamReader(s)) return new JapanesePack(Json.Parse<ClientFile[]>(r.ReadToEnd())); }
     static string Prefix(string language) { if(language!="FRA"&&language!="ENG"&&language!="DEU")throw new InvalidDataException("Unsupported language.");return "L10N/"+language+"/sounds/"; }
     string Active(string root,string language,ClientFile f){return Safety.Under(root,Prefix(language)+f.path);}
+    static string SourceFile(string root,string relative) {
+        var direct=Safety.Under(root,relative);
+        if(File.Exists(direct)) return direct;
+        if(!Directory.Exists(root)) return direct;
+        var suffix=relative.Replace('/',Path.DirectorySeparatorChar);
+        foreach(var candidate in Directory.GetFiles(root,Path.GetFileName(relative),SearchOption.AllDirectories))
+            if(candidate.EndsWith(suffix,StringComparison.OrdinalIgnoreCase)) return candidate;
+        return direct;
+    }
     string Cached(string root,ClientFile f){return Safety.Under(root,".aioncl/japanese-pack-cache/"+f.path);}
     string Marker(string root,string language){Prefix(language);return Safety.Under(root,".aioncl/japanese-pack-"+language+".json");}
     public int Present(string root,string language){return files.Count(f=>File.Exists(Active(root,language,f)));}
@@ -45,7 +54,7 @@ public sealed class JapanesePack {
             if(install && !File.Exists(active)) {
                 var candidate=Cached(root,f);
                 if(!await Safety.Matches(candidate,f.size,f.sha256,token).ConfigureAwait(false)) {
-                    if(String.IsNullOrEmpty(source)||!await Safety.Matches(Safety.Under(source,f.path),f.size,f.sha256,token).ConfigureAwait(false)) throw new IOException("Japanese source missing or invalid: "+f.path);
+                    if(String.IsNullOrEmpty(source)||!await Safety.Matches(SourceFile(source,f.path),f.size,f.sha256,token).ConfigureAwait(false)) throw new IOException("Japanese source missing or invalid: "+f.path+" (select the extracted pack folder or its parent)");
                 }
             }
             if(!install && File.Exists(active) && File.Exists(Cached(root,f)) && !await Safety.Matches(Cached(root,f),f.size,f.sha256,token).ConfigureAwait(false)) throw new IOException("Modified Japanese cache preserved: "+f.path);
@@ -57,7 +66,7 @@ public sealed class JapanesePack {
         foreach(var f in files) {
             token.ThrowIfCancellationRequested();var active=Active(root,language,f);var cache=Cached(root,f);
             if(install && !File.Exists(active)) {
-                string candidate=await Safety.Matches(cache,f.size,f.sha256,token).ConfigureAwait(false)?cache:Safety.Under(source,f.path);
+                string candidate=await Safety.Matches(cache,f.size,f.sha256,token).ConfigureAwait(false)?cache:SourceFile(source,f.path);
                 Directory.CreateDirectory(Path.GetDirectoryName(active));
                 var temp=Safety.Under(root,".aioncl/voice-copy-"+Guid.NewGuid().ToString("N")+".tmp");
                 try {
