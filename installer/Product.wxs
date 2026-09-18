@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Wix xmlns="http://wixtoolset.org/schemas/v4/wxs"
      xmlns:ui="http://wixtoolset.org/schemas/v4/wxs/ui">
-  <Package Name="AionCL Launcher" Manufacturer="AionCL" Version="2.5.17"
+    <Package Name="AionCL Launcher" Manufacturer="AionCL" Version="2.5.18"
            UpgradeCode="7E8E6F4D-6F1A-4D9A-9A6C-2A2B9D8D2C41"
            Scope="perMachine">
     <SummaryInformation Description="AionCL Classic 2.4 launcher" />
