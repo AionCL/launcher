@@ -95,7 +95,7 @@ public sealed partial class MainForm {
         StyleButton(cancelButton,"",footer,500,85,178,28,false); cancelButton.Enabled=false; cancelButton.Visible=false; cancelButton.Click += delegate { if(cts!=null) cts.Cancel(); };
         StyleButton(playButton,"",footer,720,24,330,76,true); playButton.Font=new Font("Segoe UI",20,FontStyle.Bold); playButton.Enabled=false; playButton.Click += async delegate {
             if (manifest == null) return;
-            if (String.IsNullOrWhiteSpace(pathBox.Text)) { Browse(); if (String.IsNullOrWhiteSpace(pathBox.Text)) return; }
+            if (String.IsNullOrWhiteSpace(pathBox.Text)) { Browse(null, EventArgs.Empty); if (String.IsNullOrWhiteSpace(pathBox.Text)) return; }
             ClientState state;
             try { state = Installation.Detect(pathBox.Text, manifest); }
             catch (Exception ex) { Log(ex.Message); state = ClientState.Absent; }
