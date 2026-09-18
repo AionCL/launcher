@@ -2,6 +2,10 @@ using System;
 using System.Diagnostics;
 using System.Drawing;
 using System.IO;
+using System.Net;
+using System.Net.Http;
+using System.Net.NetworkInformation;
+using System.Net.Sockets;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -49,7 +53,8 @@ public sealed partial class MainForm {
         string available=launcherAvailable?L("Nouveau launcher disponible dans le journal. ","A new launcher is available in the log. ","Ein neuer Launcher ist im Journal verfügbar. "):"";
         if(ClientUpdateAvailable()){available+=L("Mise à jour du jeu : ","Game update: ","Spielupdate: ")+manifest.Manifest.clientVersion;installButton.Text=L("METTRE À JOUR LE JEU","UPDATE GAME","SPIEL AKTUALISIEREN");}
         else if(!busy)installButton.Text=L("Installer / reprendre","Install / resume","Installieren / fortsetzen");
-        updateNotice.Text=checkingUpdates?L("Recherche des mises à jour…","Checking for updates…","Suche nach Updates…"):available.Length>0?available:updateError!=null?L("Recherche indisponible. Réessayez avec le bouton.","Update check unavailable. Retry with the button.","Updatesuche nicht verfügbar. Erneut versuchen."):releases==null?L("Mises à jour du jeu et du launcher","Game and launcher updates","Spiel- und Launcherupdates"):L("Vous êtes à jour","You are up to date","Du bist auf dem neuesten Stand")+" · Launcher "+Updates.LauncherVersion;
+        updateNotice.ForeColor=updateError!=null?Color.FromArgb(255,202,125):Color.FromArgb(176,218,233);
+        updateNotice.Text=checkingUpdates?L("Recherche des mises à jour…","Checking for updates…","Suche nach Updates…"):available.Length>0?available:updateError!=null?updateError:releases==null?L("Mises à jour du jeu et du launcher","Game and launcher updates","Spiel- und Launcherupdates"):L("Vous êtes à jour","You are up to date","Du bist auf dem neuesten Stand")+" · Launcher "+Updates.LauncherVersion;
         RefreshNoticeUi();
         LayoutLauncher();
     }
@@ -74,8 +79,26 @@ public sealed partial class MainForm {
                 config=target;manifest=next;releases=feed;
             }
             Log(L("Recherche des mises à jour terminée.","Update check complete.","Updatesuche abgeschlossen."));
-        }catch(Exception ex){updateError=ex.Message;Log(L("Recherche des mises à jour : ","Update check: ","Updatesuche: ")+ex.Message);}
+        }catch(OperationCanceledException){updateError=L("Recherche interrompue. Réessayez.","Update check interrupted. Retry.","Updatesuche unterbrochen. Erneut versuchen.");}
+        catch(Exception ex){updateError=DescribeUpdateFailure(ex);Log(L("Recherche des mises à jour : ","Update check: ","Updatesuche: ")+ex.Message);}
         finally {checkingUpdates=false;if(!IsDisposed){if(!startup)SetBusy(false);UpdateVersionText();RefreshUpdateUi();}}
+    }
+    private string DescribeUpdateFailure(Exception error) {
+        string details=error==null?"":error.Message??"";
+        int http=details.IndexOf("HTTP ",StringComparison.OrdinalIgnoreCase);
+        if(http>=0) {
+            int end=details.IndexOf(' ',http+5);
+            string code=end>http?details.Substring(http+5,end-http-5):details.Substring(http+5);
+            return L("⚠ Service de mise à jour inaccessible (HTTP "+code+"). Réessayez plus tard.","⚠ Update service unavailable (HTTP "+code+"). Try again later.","⚠ Update-Dienst nicht erreichbar (HTTP "+code+"). Später erneut versuchen.");
+        }
+        if(!NetworkInterface.GetIsNetworkAvailable() || IsNetworkException(error))
+            return L("⚠ Connexion Internet indisponible. Vérifiez le réseau puis réessayez.","⚠ No Internet connection. Check the network and retry.","⚠ Keine Internetverbindung. Netzwerk prüfen und erneut versuchen.");
+        return L("⚠ Service de mise à jour indisponible. Réessayez plus tard.","⚠ Update service unavailable. Try again later.","⚠ Update-Dienst nicht verfügbar. Später erneut versuchen.");
+    }
+    private bool IsNetworkException(Exception error) {
+        for(Exception current=error;current!=null;current=current.InnerException)
+            if(current is HttpRequestException||current is WebException||current is SocketException||current is TimeoutException)return true;
+        return false;
     }
 }
 }
