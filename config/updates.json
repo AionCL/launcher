@@ -6,9 +6,9 @@
     "manifestUrl": "https://github.com/AionCL/client-2.4/releases/download/v2.4.3/install-manifest.json"
   },
   "launcher": {
-    "version": "2.5.25",
-    "downloadPage": "https://github.com/AionCL/launcher/releases/tag/launcher-v2.5.25",
-    "assetUrl": "https://github.com/AionCL/launcher/releases/download/launcher-v2.5.25/AionCL-Launcher-20260919-120409-076.zip",
+    "version": "2.5.26",
+    "downloadPage": "https://github.com/AionCL/launcher/releases/tag/launcher-v2.5.26",
+    "assetUrl": "https://github.com/AionCL/launcher/releases/download/launcher-v2.5.26/AionCL-Launcher-20260919-voicepacks.zip",
     "sha256": "a8ebb66e1d9173231e0fb82334e56af96047633efa57d1b5c05031643c5a40f5"
   },
   "notice": {
