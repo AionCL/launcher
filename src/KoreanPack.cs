@@ -14,7 +14,7 @@ public sealed class KoreanPack {
         files=catalog;
     }
     public static KoreanPack Load() { using(var s=typeof(KoreanPack).Assembly.GetManifestResourceStream("AionCL.korean-pack.json")) using(var r=new StreamReader(s)) return new KoreanPack(Json.Parse<ClientFile[]>(r.ReadToEnd())); }
-    static string Prefix(string language) { if(language!="FRA"&&language!="ENG"&&language!="DEU"&&language!="RUS")throw new InvalidDataException("Unsupported language.");return "L10N/"+language+"/sounds/"; }
+    static string Prefix(string language) { if(language!="FRA"&&language!="ENG"&&language!="DEU"&&language!="RUS")throw new InvalidDataException("Unsupported language.");return "L10N/"+GameLanguage.Runtime(language)+"/sounds/"; }
     string Active(string root,string language,ClientFile f){return Safety.Under(root,Prefix(language)+f.path);}
     static string SourceFile(string root,string relative) {
         var direct=Safety.Under(root,relative);

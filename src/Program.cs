@@ -572,7 +572,8 @@ namespace AionCL
                             ip
                         );
 
-                    if (!File.Exists(Safety.Under(pathBox.Text, "L10N/" + selectedLanguage + "/" + selectedLanguage + ".pak")))
+                    string runtimeLanguage = GameLanguage.Runtime(selectedLanguage);
+                    if (!File.Exists(Safety.Under(pathBox.Text, "L10N/" + runtimeLanguage + "/" + runtimeLanguage + ".pak")))
                         throw new InvalidOperationException(L("Les fichiers de cette langue sont absents. Vérifiez / réparez le client.", "Files for this language are missing. Verify / repair the game.", "Die Sprachdateien fehlen. Bitte das Spiel prüfen / reparieren."));
                     command.Arguments = GameLanguage.Apply(command.Arguments, selectedLanguage);
 

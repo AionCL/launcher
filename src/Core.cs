@@ -550,11 +550,12 @@ public static class VoiceMode {
     }
 }
 public static class GameLanguage {
+    public static string Runtime(string language) { if(language=="RUS") return "ENG"; return language; }
     public static string Apply(string arguments, string language) {
         if (language != "FRA" && language != "ENG" && language != "DEU" && language != "RUS") throw new InvalidDataException("Unsupported game language.");
         var pattern = new Regex(@"(?<!\S)-lang:[A-Za-z]{3}(?!\S)");
         if (pattern.Matches(arguments ?? "").Count != 1) throw new InvalidDataException("Expected one game language argument.");
-        return pattern.Replace(arguments, "-lang:" + language);
+        return pattern.Replace(arguments, "-lang:" + Runtime(language));
     }
 }
 public sealed class GameLauncher {

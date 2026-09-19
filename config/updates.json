@@ -6,9 +6,9 @@
     "manifestUrl": "https://github.com/AionCL/client-2.4/releases/download/v2.4.4/install-manifest.json"
   },
   "launcher": {
-    "version": "2.5.31",
-    "downloadPage": "https://github.com/AionCL/launcher/releases/tag/launcher-v2.5.31",
-    "assetUrl": "https://github.com/AionCL/launcher/releases/download/launcher-v2.5.31/AionCL-Launcher-20260919-rus-persist.zip",
+    "version": "2.5.32",
+    "downloadPage": "https://github.com/AionCL/launcher/releases/tag/launcher-v2.5.32",
+    "assetUrl": "https://github.com/AionCL/launcher/releases/download/launcher-v2.5.32/AionCL-Launcher-20260919-rus-persist.zip",
     "sha256": "df29993b815b70fea7ee5b24fdd5fc70b7eb84b0dda827ccbef79621bbd0ea2c"
   },
   "notice": {
