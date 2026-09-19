@@ -6,10 +6,10 @@
     "manifestUrl": "https://github.com/AionCL/client-2.4/releases/download/v2.4.3/install-manifest.json"
   },
   "launcher": {
-    "version": "2.5.20",
-    "downloadPage": "https://github.com/AionCL/launcher/releases/tag/launcher-v2.5.20",
-    "assetUrl": "https://github.com/AionCL/launcher/releases/download/launcher-v2.5.20/AionCL-Launcher-20260918-205959-805.zip",
-    "sha256": "99339348804bdb95923d28c59f28961e9e702fdef8dd8105a072128ae4605283"
+    "version": "2.5.21",
+    "downloadPage": "https://github.com/AionCL/launcher/releases/tag/launcher-v2.5.21",
+    "assetUrl": "https://github.com/AionCL/launcher/releases/download/launcher-v2.5.21/AionCL-Launcher-20260919-064718-375.zip",
+    "sha256": "bc9af70d908870f6bdb27c298ca16cbba42397f31649a472ea48d0ee586ce35e"
   },
   "notice": {
     "title": "AionCL ouvre ses portes",
