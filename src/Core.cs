@@ -559,21 +559,10 @@ public static class GameLanguage {
 }
 public sealed class GameLauncher {
     readonly LauncherConfig config; public GameLauncher(LauncherConfig config) { this.config = config; }
-    static void EnsureFreeFlightClientSetting(string root) {
-        string path = Safety.Under(root, "system.ovr");
-        string content = File.Exists(path) ? File.ReadAllText(path, Encoding.UTF8) : "";
-        string line = "g_freefly = \"1\"";
-        if (Regex.IsMatch(content, @"(?m)^\s*g_freefly\s*=.*$"))
-            content = Regex.Replace(content, @"(?m)^\s*g_freefly\s*=.*$", line);
-        else
-            content = content.TrimEnd() + (content.Length == 0 ? "" : Environment.NewLine) + line + Environment.NewLine;
-        File.WriteAllText(path, content, new UTF8Encoding(false));
-    }
     public void ValidateInstallation(string root, ManifestResult manifest) { if (Installation.Detect(root, manifest) != ClientState.Valid || !File.Exists(Safety.Under(root, config.gameExecutable))) throw new InvalidOperationException("Client incomplet : installer ou reparer avant de jouer."); }
     public Task<IPAddress> ResolveServer(ServerConfig server, CancellationToken token) { server.Validate(); if (server.maintenance) throw new InvalidOperationException("Serveur en maintenance."); return ServerService.Resolve(server.loginHost, token); }
     public ProcessStartInfo BuildLaunchCommand(string root, ServerConfig server, IPAddress address) {
         server.Validate(); if (server.maintenance) throw new InvalidOperationException("Serveur en maintenance."); if (address.AddressFamily != AddressFamily.InterNetwork) throw new InvalidOperationException("IPv4 requise par ce profil.");
-        EnsureFreeFlightClientSetting(root);
         return new ProcessStartInfo { FileName = Safety.Under(root, config.gameExecutable), WorkingDirectory = Path.GetFullPath(root), Arguments = config.launchArguments.Replace("{ip}", address.ToString()).Replace("{port}", server.loginPort.ToString(CultureInfo.InvariantCulture)), UseShellExecute = false };
     }
     public Process StartGame(ProcessStartInfo command) { return Process.Start(command); }
