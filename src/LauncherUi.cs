@@ -62,7 +62,7 @@ public sealed partial class MainForm {
         languageLabel = LabelAt(installPanel,"",24,171,282,24,9,muted);
         languageBox = new ComboBox { DropDownStyle=ComboBoxStyle.DropDownList, FlatStyle=FlatStyle.Flat, BackColor=Color.FromArgb(35,43,56), ForeColor=ForeColor, Bounds=new Rectangle(24,199,282,30) };
         languageBox.Items.AddRange(new object[] { "Français", "English", "Deutsch", "Русский" }); installPanel.Controls.Add(languageBox);
-        try { if (File.Exists(languagePreference)) { var saved=File.ReadAllText(languagePreference).Trim(); if (saved=="ENG" || saved=="DEU") selectedLanguage=saved; } } catch (IOException) {} catch (UnauthorizedAccessException) {}
+        try { if (File.Exists(languagePreference)) { var saved=File.ReadAllText(languagePreference).Trim(); if (saved=="ENG" || saved=="DEU" || saved=="RUS") selectedLanguage=saved; } } catch (IOException) {} catch (UnauthorizedAccessException) {}
         languageBox.SelectedIndex=selectedLanguage=="ENG" ? 1 : selectedLanguage=="DEU" ? 2 : selectedLanguage=="RUS" ? 3 : 0;
         languageBox.SelectedIndexChanged += delegate { if (changingLanguage) return; selectedLanguage=new[] { "FRA","ENG","DEU","RUS" }[languageBox.SelectedIndex]; SavePreference(languagePreference,selectedLanguage); ApplyLanguage(); };
         koreanVoices = ButtonAt(installPanel,"",24,239,282,30,false);
