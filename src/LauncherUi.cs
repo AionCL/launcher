@@ -324,18 +324,29 @@ public sealed partial class MainForm {
         bool present=false;
         try { if(!String.IsNullOrWhiteSpace(pathBox.Text))present=koreanPack.HasPack(pathBox.Text,selectedLanguage); }
         catch(IOException){koreanVoices.Enabled=false;return;} catch(ArgumentException){koreanVoices.Enabled=false;return;}
-        koreanVoices.Text=present?L("Voix coréennes : retirer","Korean voices: remove","Koreanische Stimmen: entfernen"):L("Installer les voix coréennes","Install Korean voices","Koreanische Stimmen installieren");
         koreanVoices.Enabled=manifest!=null && !String.IsNullOrWhiteSpace(pathBox.Text);
+        SetVoiceButtonState(koreanVoices, present,
+            L("Voix coréennes","Korean voices","Koreanische Stimmen"),
+            L("Supprimer et restaurer l’original","Remove and restore original","Entfernen und Original wiederherstellen"));
         bool japanesePresent=false;
         try { if(!String.IsNullOrWhiteSpace(pathBox.Text))japanesePresent=japanesePack.HasPack(pathBox.Text,selectedLanguage); }
         catch(IOException){japaneseVoices.Enabled=false;return;} catch(ArgumentException){japaneseVoices.Enabled=false;return;}
-        japaneseVoices.Text=japanesePresent?L("Voix japonaises : retirer","Japanese voices: remove","Japanische Stimmen: entfernen"):L("Installer les voix japonaises","Install Japanese voices","Japanische Stimmen installieren");
         japaneseVoices.Enabled=manifest!=null && !String.IsNullOrWhiteSpace(pathBox.Text);
+        SetVoiceButtonState(japaneseVoices, japanesePresent,
+            L("Voix japonaises","Japanese voices","Japanische Stimmen"),
+            L("Supprimer et restaurer l’original","Remove and restore original","Entfernen und Original wiederherstellen"));
         if(hitFontButton!=null) {
             bool installed=!String.IsNullOrWhiteSpace(pathBox.Text)&&hitFont.Installed(pathBox.Text,selectedLanguage);
             hitFontButton.Text=installed?L("Japan hit font : retirer","Japan hit font: remove","Japan Hit Font: entfernen"):L("Installer Japan hit font","Install Japan hit font","Japan Hit Font installieren");
             hitFontButton.Enabled=koreanVoices.Enabled;
         }
+    }
+    private void SetVoiceButtonState(Button button, bool installed, string name, string removeLabel) {
+        if(button==null)return;
+        button.Text=installed ? "✓  "+name+" — "+L("ACTIVÉ","ENABLED","AKTIV") : "○  "+name+" — "+L("DÉSACTIVÉ · Installer","DISABLED · Install","DEAKTIVIERT · Installieren");
+        button.BackColor=installed?Color.FromArgb(38,112,83):Color.FromArgb(119,78,39);
+        button.FlatAppearance.BorderColor=installed?Color.FromArgb(89,190,137):Color.FromArgb(217,148,74);
+        button.AccessibleName=installed?removeLabel:L("Installer "+name,"Install "+name,"Installieren: "+name);
     }
     private async System.Threading.Tasks.Task ToggleKoreanPack() {
         if(!EnsurePath())return;
@@ -349,7 +360,7 @@ public sealed partial class MainForm {
             string source=null;
             if(install && !koreanPack.HasCache(root)) {
                 source=koreanPack.PreviousSource(root,language);
-                if(source==null)using(var dialog=new FolderBrowserDialog { Description=L("Choisir le dossier extrait du pack coréen (voice, npc, system…)","Select extracted Korean pack folder (voice, npc, system…)","Entpackten koreanischen Stimmenordner wählen (voice, npc, system…)") }) {
+                if(source==null)using(var dialog=new FolderBrowserDialog { Description=L("Choisir le dossier extrait du pack coréen (pas le dossier du jeu). Le dossier doit contenir gossip, npc et system.","Select the extracted Korean pack folder (not the game folder). It must contain gossip, npc and system.","Den entpackten koreanischen Stimmenordner wählen (nicht den Spielordner). Er muss gossip, npc und system enthalten.") }) {
                     if(dialog.ShowDialog(this)!=DialogResult.OK)return;source=dialog.SelectedPath;
                 }
             }
@@ -375,7 +386,7 @@ public sealed partial class MainForm {
             VoiceMode.RequireGameClosed(); bool install=!japanesePack.HasPack(root,language);
             if(install && koreanPack.HasPack(root,language)) throw new InvalidOperationException(L("Retirez d’abord le pack coréen avant d’activer les voix japonaises.","Remove the Korean pack before enabling Japanese voices.","Entfernen Sie zuerst das koreanische Paket, bevor Sie japanische Stimmen aktivieren."));
             string source=null;
-            if(install && !japanesePack.HasCache(root)) using(var dialog=new FolderBrowserDialog { Description=L("Choisir le dossier extrait du pack japonais (voice, npc, system…)","Select extracted Japanese pack folder (voice, npc, system…)","Entpackten japanischen Stimmenordner wählen (voice, npc, system…)") }) { if(dialog.ShowDialog(this)!=DialogResult.OK)return; source=dialog.SelectedPath; }
+            if(install && !japanesePack.HasCache(root)) using(var dialog=new FolderBrowserDialog { Description=L("Choisir le dossier extrait du pack japonais (pas le dossier du jeu). Le dossier doit contenir gossip, npc et system.","Select the extracted Japanese pack folder (not the game folder). It must contain gossip, npc and system.","Den entpackten japanischen Stimmenordner wählen (nicht den Spielordner). Er muss gossip, npc und system enthalten.") }) { if(dialog.ShowDialog(this)!=DialogResult.OK)return; source=dialog.SelectedPath; }
             SetBusy(true); cts=new System.Threading.CancellationTokenSource(); progressBar.Value=0; progressBar.Style=ProgressBarStyle.Marquee;
             statusLabel.Text=L("Contrôle du pack japonais…","Checking Japanese voice pack…","Japanisches Stimmenpaket wird geprüft…");
             var progress=new Progress<VerificationProgress>(delegate(VerificationProgress p) { if(!reporting||IsDisposed)return; progressBar.Style=ProgressBarStyle.Continuous; progressBar.Value=(int)(100L*p.Completed/p.Total); statusLabel.Text=(install?L("Installation des voix","Installing voices","Stimmen installieren"):L("Retrait des voix","Removing voices","Stimmen entfernen"))+" : "+p.Completed+" / "+p.Total; });
