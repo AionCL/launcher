@@ -75,7 +75,7 @@ public sealed partial class MainForm {
             ZipFile.ExtractToDirectory(zip,extract);
             string stagedExe=Path.Combine(extract,"AionCL.Launcher.exe"); if(!File.Exists(stagedExe)) throw new InvalidDataException("Archive launcher invalide.");
             string helper=Path.Combine(Path.GetTempPath(),"AionCL-updater-"+Guid.NewGuid().ToString("N")+".exe"); File.Copy(helperSource,helper);
-            var start=new ProcessStartInfo { FileName=helper,UseShellExecute=false,CreateNoWindow=true,Arguments="--pid "+Process.GetCurrentProcess().Id.ToString()+" --source \""+extract.Replace("\"","\\\"")+"\" --target \""+root.Replace("\"","\\\"")+"\" --exe AionCL.Launcher.exe" };
+            var start=new ProcessStartInfo { FileName=helper,UseShellExecute=true,Verb="runas",Arguments="--pid "+Process.GetCurrentProcess().Id.ToString()+" --source \""+extract.Replace("\"","\\\"")+"\" --target \""+root.Replace("\"","\\\"")+"\" --exe AionCL.Launcher.exe" };
             Process.Start(start); Application.Exit();
         } catch(OperationCanceledException) { statusLabel.Text=L("Mise à jour interrompue.","Update interrupted.","Update unterbrochen."); }
         catch(Exception ex) { statusLabel.Text=L("Échec de la mise à jour du launcher.","Launcher update failed.","Launcher-Update fehlgeschlagen."); Log(ex.Message); MessageBox.Show(this,ex.Message,"AionCL",MessageBoxButtons.OK,MessageBoxIcon.Error); }
