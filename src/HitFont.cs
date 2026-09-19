@@ -6,7 +6,7 @@ public sealed class HitFont {
     readonly string hash;
     public HitFont(byte[] data) { bytes=(byte[])data.Clone(); hash=Safety.Sha(bytes); }
     public static HitFont Load() { using(var stream=typeof(HitFont).Assembly.GetManifestResourceStream("AionCL.hit-font.pak")) using(var memory=new MemoryStream()) { stream.CopyTo(memory);return new HitFont(memory.ToArray()); } }
-    string Target(string root,string language) { if(language!="FRA"&&language!="ENG"&&language!="DEU")throw new InvalidDataException("Unsupported language.");return Safety.Under(root,"L10N/"+language+"/textures/ui/hit_number.pak"); }
+    string Target(string root,string language) { if(language!="FRA"&&language!="ENG"&&language!="DEU"&&language!="RUS")throw new InvalidDataException("Unsupported language.");return Safety.Under(root,"L10N/"+language+"/textures/ui/hit_number.pak"); }
     public bool Installed(string root,string language) { return File.Exists(Target(root,language)); }
     public bool Valid(string root,string language) { string p=Target(root,language);return File.Exists(p)&&new FileInfo(p).Length==bytes.Length&&Safety.Sha(File.ReadAllBytes(p))==hash; }
     public void Change(string root,string language,bool install) {

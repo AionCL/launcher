@@ -61,10 +61,10 @@ public sealed partial class MainForm {
         StyleButton(browseButton,"…",installPanel,266,129,40,32,false); browseButton.Click += Browse;
         languageLabel = LabelAt(installPanel,"",24,171,282,24,9,muted);
         languageBox = new ComboBox { DropDownStyle=ComboBoxStyle.DropDownList, FlatStyle=FlatStyle.Flat, BackColor=Color.FromArgb(35,43,56), ForeColor=ForeColor, Bounds=new Rectangle(24,199,282,30) };
-        languageBox.Items.AddRange(new object[] { "Français", "English", "Deutsch" }); installPanel.Controls.Add(languageBox);
+        languageBox.Items.AddRange(new object[] { "Français", "English", "Deutsch", "Русский" }); installPanel.Controls.Add(languageBox);
         try { if (File.Exists(languagePreference)) { var saved=File.ReadAllText(languagePreference).Trim(); if (saved=="ENG" || saved=="DEU") selectedLanguage=saved; } } catch (IOException) {} catch (UnauthorizedAccessException) {}
-        languageBox.SelectedIndex=selectedLanguage=="ENG" ? 1 : selectedLanguage=="DEU" ? 2 : 0;
-        languageBox.SelectedIndexChanged += delegate { if (changingLanguage) return; selectedLanguage=new[] { "FRA","ENG","DEU" }[languageBox.SelectedIndex]; SavePreference(languagePreference,selectedLanguage); ApplyLanguage(); };
+        languageBox.SelectedIndex=selectedLanguage=="ENG" ? 1 : selectedLanguage=="DEU" ? 2 : selectedLanguage=="RUS" ? 3 : 0;
+        languageBox.SelectedIndexChanged += delegate { if (changingLanguage) return; selectedLanguage=new[] { "FRA","ENG","DEU","RUS" }[languageBox.SelectedIndex]; SavePreference(languagePreference,selectedLanguage); ApplyLanguage(); };
         koreanVoices = ButtonAt(installPanel,"",24,239,282,30,false);
         koreanVoices.Click += async delegate { await ToggleKoreanPack(); };
         japaneseVoices = ButtonAt(installPanel,"",24,274,282,30,false);
@@ -301,7 +301,7 @@ public sealed partial class MainForm {
     }
     private void ApplyLanguage() {
         changingLanguage=true;
-        languageBox.SelectedIndex=selectedLanguage=="ENG"?1:selectedLanguage=="DEU"?2:0;
+        languageBox.SelectedIndex=selectedLanguage=="ENG"?1:selectedLanguage=="DEU"?2:selectedLanguage=="RUS"?3:0;
         homeButton.Text=L("Accueil","Home","Start"); helpButton.Text=L("Paramètres","Settings","Einstellungen"); journalButton.Text=L("Journal","Log","Protokoll");
         discordButton.Text=""; youtubeButton.Text="";
         authSectionLabel.Text=L("Connexion au jeu","Game login","Spielanmeldung"); authUserLabel.Text=L("Identifiant","Username","Benutzername"); authPasswordLabel.Text=L("Mot de passe","Password","Passwort"); authRemember.Text=L("Mémoriser dans Windows","Remember in Windows","In Windows speichern");

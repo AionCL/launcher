@@ -551,7 +551,7 @@ public static class VoiceMode {
 }
 public static class GameLanguage {
     public static string Apply(string arguments, string language) {
-        if (language != "FRA" && language != "ENG" && language != "DEU") throw new InvalidDataException("Unsupported game language.");
+        if (language != "FRA" && language != "ENG" && language != "DEU" && language != "RUS") throw new InvalidDataException("Unsupported game language.");
         var pattern = new Regex(@"(?<!\S)-lang:[A-Za-z]{3}(?!\S)");
         if (pattern.Matches(arguments ?? "").Count != 1) throw new InvalidDataException("Expected one game language argument.");
         return pattern.Replace(arguments, "-lang:" + language);
