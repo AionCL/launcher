@@ -259,6 +259,8 @@ namespace AionCL
                     "Executable path mismatch."
                 );
                 Assert(command.WorkingDirectory == Path.GetFullPath(root), "Working directory mismatch.");
+                string freeFly = File.ReadAllText(Path.Combine(root, "system.ovr"));
+                Assert(freeFly.Contains("g_freefly = \"1\""), "Free-flight client setting missing.");
             }
             finally
             {

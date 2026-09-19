@@ -23,7 +23,7 @@ jobs:
           wix extension add -g WixToolset.UI.wixext/4.0.5
           $stage = Get-ChildItem -Directory out\distribution-* | Sort-Object LastWriteTime -Descending | Select-Object -First 1
           if (-not $stage) { throw 'Distribution staging directory not found.' }
-          wix build installer\Product.wxs -ext WixToolset.UI.wixext -culture fr-FR -d SourceDir="$($stage.FullName)" -d LicenseRtf="$((Resolve-Path installer\license.rtf).Path)" -o out\AionCL-Launcher-2.5.21.msi
+          wix build installer\Product.wxs -ext WixToolset.UI.wixext -culture fr-FR -d SourceDir="$($stage.FullName)" -d LicenseRtf="$((Resolve-Path installer\license.rtf).Path)" -o out\AionCL-Launcher-2.5.22.msi
       - name: Detect Authenticode signing configuration
         shell: pwsh
         env:
@@ -47,7 +47,7 @@ jobs:
             Where-Object { $_.FullName -match '\\x64\\signtool\.exe$' } |
             Sort-Object FullName -Descending | Select-Object -First 1
           if (-not $signtool) { throw 'signtool.exe not found.' }
-          $targets = @('out\AionCL.Launcher.exe', 'out\AionCL.Updater.exe', 'out\AionCL-Launcher-2.5.21.msi')
+          $targets = @('out\AionCL.Launcher.exe', 'out\AionCL.Updater.exe', 'out\AionCL-Launcher-2.5.22.msi')
           foreach ($target in $targets) {
             & $signtool.FullName sign /fd SHA256 /td SHA256 /tr http://timestamp.digicert.com /f $pfx /p $env:AIONCL_SIGNING_CERT_PASSWORD $target
             if ($LASTEXITCODE -ne 0) { throw "Signing failed: $target" }
