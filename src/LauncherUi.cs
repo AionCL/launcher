@@ -176,7 +176,7 @@ public sealed partial class MainForm {
             int checkWidth=Math.Max(210,TextRenderer.MeasureText(checkUpdatesButton.Text,checkUpdatesButton.Font).Width+30);
             bool showDownload=releases!=null&&Updates.Newer(releases.launcher.version,Updates.LauncherVersion);
             launcherUpdateButton.SetBounds(updatePanel.Width-downloadWidth-10,12,downloadWidth,40);
-            launcherUpdateButton.Visible=false;
+            launcherUpdateButton.Visible=showDownload&&!busy&&!checkingUpdates;
             checkUpdatesButton.SetBounds(updatePanel.Width-checkWidth-(showDownload?downloadWidth+20:10),12,checkWidth,40);
             updateNotice.SetBounds(16,10,Math.Max(180,checkUpdatesButton.Left-24),42); updateNotice.TextAlign=ContentAlignment.MiddleLeft;
         }

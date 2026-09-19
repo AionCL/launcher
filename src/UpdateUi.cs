@@ -45,7 +45,7 @@ public sealed partial class MainForm {
     private void RefreshUpdateUi() {
         if(updatePanel==null)return;
         checkUpdatesButton.Text=L("Rechercher les mises à jour","Check for updates","Updates suchen");
-        launcherUpdateButton.Text=L("Télécharger le launcher","Download launcher","Launcher herunterladen");
+        launcherUpdateButton.Text=L("Mettre à jour le launcher","Update launcher","Launcher aktualisieren");
         checkUpdatesButton.Enabled=!busy&&!checkingUpdates&&config!=null;
         bool launcherAvailable=releases!=null&&Updates.Newer(releases.launcher.version,Updates.LauncherVersion);
         bool directLauncherUpdate=launcherAvailable&&releases.launcher!=null&&!String.IsNullOrWhiteSpace(releases.launcher.assetUrl)&&!String.IsNullOrWhiteSpace(releases.launcher.sha256);
