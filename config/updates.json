@@ -2,13 +2,13 @@
   "schemaVersion": 1,
   "product": "AionCL",
   "client": {
-    "version": "2.4.3",
-    "manifestUrl": "https://github.com/AionCL/client-2.4/releases/download/v2.4.3/install-manifest.json"
+    "version": "2.4.4",
+    "manifestUrl": "https://github.com/AionCL/client-2.4/releases/download/v2.4.4/install-manifest.json"
   },
   "launcher": {
-    "version": "2.5.28",
-    "downloadPage": "https://github.com/AionCL/launcher/releases/tag/launcher-v2.5.28",
-    "assetUrl": "https://github.com/AionCL/launcher/releases/download/launcher-v2.5.28/AionCL-Launcher-20260919-voice-detection.zip",
+    "version": "2.5.29",
+    "downloadPage": "https://github.com/AionCL/launcher/releases/tag/launcher-v2.5.29",
+    "assetUrl": "https://github.com/AionCL/launcher/releases/download/launcher-v2.5.29/AionCL-Launcher-20260919-voice-detection.zip",
     "sha256": "7e4a59499863f828517c1589b3ef6e30eb80edb8ffdf924ed095a209be0881eb"
   },
   "notice": {
