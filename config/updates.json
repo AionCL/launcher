@@ -8,8 +8,8 @@
   "launcher": {
     "version": "2.5.31",
     "downloadPage": "https://github.com/AionCL/launcher/releases/tag/launcher-v2.5.31",
-    "assetUrl": "https://github.com/AionCL/launcher/releases/download/launcher-v2.5.31/AionCL-Launcher-20260919-stable.zip",
-    "sha256": "1b9b47a4990dea126995264a313251c30e0e1b33c0ce65fc4f3b05abb63e16c0"
+    "assetUrl": "https://github.com/AionCL/launcher/releases/download/launcher-v2.5.31/AionCL-Launcher-20260919-rus-persist.zip",
+    "sha256": "df29993b815b70fea7ee5b24fdd5fc70b7eb84b0dda827ccbef79621bbd0ea2c"
   },
   "notice": {
     "title": "AionCL ouvre ses portes",
