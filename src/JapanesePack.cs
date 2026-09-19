@@ -28,7 +28,7 @@ public sealed class JapanesePack {
     string Cached(string root,ClientFile f){return Safety.Under(root,".aioncl/japanese-pack-cache/"+f.path);}
     string Marker(string root,string language){Prefix(language);return Safety.Under(root,".aioncl/japanese-pack-"+language+".json");}
     public int Present(string root,string language){return files.Count(f=>File.Exists(Active(root,language,f)));}
-    public bool HasPack(string root,string language){return Present(root,language)>0 || File.Exists(Marker(root,language));}
+    public bool HasPack(string root,string language){return File.Exists(Marker(root,language)) || Present(root,language)==files.Length;}
     public bool HasCache(string root){return files.All(f=>File.Exists(Cached(root,f)));}
     public string PreviousSource(string root,string language){
         var path=Safety.Under(root,".aioncl/japanese-trial-"+language+".json");
