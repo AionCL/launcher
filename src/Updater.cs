@@ -28,7 +28,14 @@ namespace AionCLUpdater {
                 TryDelete(source); TryDelete(backup); return 0;
             } catch(Exception ex) { try { File.WriteAllText(Path.Combine(Path.GetTempPath(),"AionCL-update-error.log"),ex.ToString()); } catch {} return 1; }
         }
-        static string Value(string[] args,string name) { for(int i=0;i<args.Length-1;i++) if(String.Equals(args[i],name,StringComparison.OrdinalIgnoreCase)) return args[i+1]; return null; }
+        static string Value(string[] args,string name) {
+            string prefix=name+"=";
+            for(int i=0;i<args.Length;i++) {
+                if(String.Equals(args[i],name,StringComparison.OrdinalIgnoreCase) && i+1<args.Length) return args[i+1].Trim('\"');
+                if(args[i].StartsWith(prefix,StringComparison.OrdinalIgnoreCase)) return args[i].Substring(prefix.Length).Trim('\"');
+            }
+            return null;
+        }
         static void TryDelete(string path) { try { if(Directory.Exists(path))Directory.Delete(path,true); } catch {} }
     }
 }
