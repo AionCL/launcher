@@ -291,24 +291,8 @@ public static class Installation {
                     return ClientState.Incomplete;
                 }
 
-                foreach (var f in manifest.Manifest.packages.SelectMany(p => p.files))
-                {
-                    // Runtime cache files can be generated, changed or removed by Aion.
-                    if (IsMutable(f.path))
-                        continue;
-
-                    var path = VoiceMode.FilePath(root, f.path);
-                    if (ShopPatchIntegrity.Matches(path, f)) continue;
-
-                    if (!File.Exists(path) ||
-                        new FileInfo(path).Length != f.size)
-                    {
-                        return ClientState.Incomplete;
-                    }
-                }
-
-                // Fast startup check: presence and size only.
-                // Full SHA-256 checks are handled by Verify/Repair.
+                // Startup detection is deliberately lightweight. Full integrity
+                // verification belongs exclusively to the explicit Repair action.
                 return ClientState.Valid;
             }
             catch (Exception ex)
