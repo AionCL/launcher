@@ -9,7 +9,8 @@ namespace AionCL {
     public static class ShugoConsoleIntegration {
         public static void Install(string clientRoot) {
             string destination = Path.Combine(clientRoot, "bin64", "version.dll");
-            if (File.Exists(destination)) return;
+            string backup = destination + ".aioncl-original";
+            if (File.Exists(destination) && !File.Exists(backup)) File.Copy(destination, backup);
             using (var input = typeof(ShugoConsoleIntegration).Assembly.GetManifestResourceStream("AionCL.shugoconsole-version.dll")) {
                 if (input == null) return;
                 Directory.CreateDirectory(Path.GetDirectoryName(destination));
