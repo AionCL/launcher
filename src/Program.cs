@@ -589,7 +589,8 @@ namespace AionCL
                         RedactSessionKey(command.Arguments)
                     );
 
-                    // Configure the optional camera patch before the game loads its DLL.
+                    // Install and configure the camera patch before the game loads its DLL.
+                    ShugoConsoleIntegration.Install(pathBox.Text);
                     ShugoConsoleIntegration.Configure(80, 30);
                     game.StartGame(command);
                 }

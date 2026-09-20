@@ -71,7 +71,8 @@ Write-Host "Program : $programFile"
     "/resource:$(Join-Path $root 'assets\portal.png'),AionCL.portal.png" `
     "/resource:$(Join-Path $root 'config\korean-pack.json'),AionCL.korean-pack.json" `
     "/resource:$(Join-Path $root 'config\japanese-pack.json'),AionCL.japanese-pack.json" `
-    "/resource:$(Join-Path $root 'assets\japanese-hit-font.pak'),AionCL.hit-font.pak"
+    "/resource:$(Join-Path $root 'assets\japanese-hit-font.pak'),AionCL.hit-font.pak" `
+    "/resource:$(Join-Path $root 'assets\shugoconsole-version.dll'),AionCL.shugoconsole-version.dll"
 
 if ($LASTEXITCODE -ne 0) {
     throw 'Launcher compilation failed.'
