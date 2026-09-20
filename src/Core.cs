@@ -268,7 +268,7 @@ public static class Installation {
         return path.StartsWith(
             "Shaders/Cache/",
             StringComparison.OrdinalIgnoreCase
-        );
+        ) || String.Equals(path, "bin64/version.dll", StringComparison.OrdinalIgnoreCase);
     }
     public static ClientState Detect(string root, ManifestResult manifest)
     {
