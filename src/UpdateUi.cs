@@ -51,6 +51,7 @@ public sealed partial class MainForm {
         bool directLauncherUpdate=launcherAvailable&&releases.launcher!=null&&!String.IsNullOrWhiteSpace(releases.launcher.assetUrl)&&!String.IsNullOrWhiteSpace(releases.launcher.sha256);
         launcherUpdateButton.Visible=directLauncherUpdate&&!busy&&!checkingUpdates;
         string available=launcherAvailable?L(directLauncherUpdate?"Nouveau launcher disponible. ":"Nouveau launcher disponible dans le journal. ",directLauncherUpdate?"New launcher available. ":"A new launcher is available in the log. ",directLauncherUpdate?"Neuer Launcher verfügbar. ":"Ein neuer Launcher ist im Journal verfügbar. "):"";
+        if(ClientUpdateAvailable()) { playButton.Text=L("↻   METTRE À JOUR LE JEU","↻   UPDATE GAME","↻   SPIEL AKTUALISIEREN"); ApplyActionStyle(playButton,Color.FromArgb(205,125,32),Color.FromArgb(230,151,48),15F); }
         if(ClientUpdateAvailable()){available+=L("Mise à jour du jeu : ","Game update: ","Spielupdate: ")+manifest.Manifest.clientVersion;installButton.Text=L("METTRE À JOUR LE JEU","UPDATE GAME","SPIEL AKTUALISIEREN");ApplyActionStyle(installButton,Color.FromArgb(205,125,32),Color.FromArgb(230,151,48),10F);}
         else if(!busy){installButton.Text=L("Installer / reprendre","Install / resume","Installieren / fortsetzen");ApplyActionStyle(installButton,Color.FromArgb(31,145,123),Color.FromArgb(43,170,145),10F);}
         ApplyActionStyle(verifyButton,Color.FromArgb(123,83,166),Color.FromArgb(148,106,193),10F);

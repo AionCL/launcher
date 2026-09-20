@@ -251,7 +251,7 @@ namespace AionCL
                 playButton.Text=L("▶   JOUER","▶   PLAY","▶   SPIELEN");
                 ApplyActionStyle(playButton,Color.FromArgb(25,135,190),Color.FromArgb(41,163,215),20F);
             } else if (state == ClientState.Absent) {
-                playButton.Text=L("⬇   TÉLÉCHARGER LE JEU","⬇   DOWNLOAD GAME","⬇   SPIEL HERUNTERLADEN");
+                playButton.Text=L("⬇   INSTALLER LE JEU","⬇   INSTALL GAME","⬇   SPIEL INSTALLIEREN");
                 ApplyActionStyle(playButton,Color.FromArgb(31,145,123),Color.FromArgb(43,170,145),15F);
             } else {
                 playButton.Text=L("⚙   INSTALLER / RÉPARER","⚙   INSTALL / REPAIR","⚙   INSTALLIEREN / REPARIEREN");
