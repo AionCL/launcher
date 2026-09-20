@@ -589,9 +589,9 @@ namespace AionCL
                         RedactSessionKey(command.Arguments)
                     );
 
-                    game.StartGame(command);
-                    // Optional helper supplied by the camera patch package.
+                    // Configure the optional camera patch before the game loads its DLL.
                     ShugoConsoleIntegration.Configure(80, 30);
+                    game.StartGame(command);
                 }
             }
             catch (Exception ex)
