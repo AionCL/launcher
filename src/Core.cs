@@ -265,10 +265,11 @@ public static class Installation {
 
         path = path.Replace('\\', '/');
 
-        return path.StartsWith(
-            "Shaders/Cache/",
-            StringComparison.OrdinalIgnoreCase
-        ) || String.Equals(path, "bin64/version.dll", StringComparison.OrdinalIgnoreCase);
+        return path.StartsWith("Shaders/Cache/", StringComparison.OrdinalIgnoreCase)
+            || String.Equals(path, "bin64/version.dll", StringComparison.OrdinalIgnoreCase)
+            || path.StartsWith("sounds/", StringComparison.OrdinalIgnoreCase)
+            || path.StartsWith("L10N/", StringComparison.OrdinalIgnoreCase)
+            || path.EndsWith("/system.cfg", StringComparison.OrdinalIgnoreCase);
     }
     public static ClientState Detect(string root, ManifestResult manifest)
     {
