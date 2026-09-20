@@ -56,6 +56,7 @@ Write-Host "Program : $programFile"
     "/out:$launcherExe" `
     @references `
     $coreFile `
+    (Join-Path $root 'src\ShugoConsoleIntegration.cs') `
     (Join-Path $root 'src\Updates.cs') `
     (Join-Path $root 'src\UpdateUi.cs') `
     (Join-Path $root 'src\KoreanPack.cs') `

@@ -590,6 +590,8 @@ namespace AionCL
                     );
 
                     game.StartGame(command);
+                    // Optional helper supplied by the camera patch package.
+                    ShugoConsoleIntegration.Configure(80, 30);
                 }
             }
             catch (Exception ex)
