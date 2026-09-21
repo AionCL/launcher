@@ -73,6 +73,14 @@ public static class RegressionTests {
     static void Cleanup(string p) { if (!Path.GetFullPath(p).StartsWith(Path.Combine(Path.GetTempPath(), "AionCL-Regression-"), StringComparison.OrdinalIgnoreCase)) throw new Exception("Unsafe cleanup"); Directory.Delete(p, true); }
     static ServerConfig Server(bool maintenance) { return new ServerConfig { version = 1, serverName = "AionCL", loginHost = "localhost", loginPort = 2106, gamePort = 7777, maintenance = maintenance }; }
     public static async Task ServerScenarios() {
+        var legacy = new LauncherConfig { gameExecutable = "bin64/aionclassic.bin", launchArguments = "-ip:{ip} -port:{port} -lang:FRA -INGAMEWEBSHOP -shop -ingameshop -dnpshop -dingameshop -noweb" };
+        var command = new GameLauncher(legacy).BuildLaunchCommand(Path.GetTempPath(), Server(false), IPAddress.Loopback);
+        var flags = command.Arguments.Split(new[] { ' ', '\t' }, StringSplitOptions.RemoveEmptyEntries);
+        Check(!flags.Any(f => new[] { "-shop", "-ingameshop", "-ingamewebshop" }.Contains(f.ToLowerInvariant())), "Legacy profile re-enabled native shop");
+        Check(flags.Count(f => f == "-dnpshop") == 1 && flags.Count(f => f == "-dingameshop") == 1, "Missing or duplicated native shop disable flags");
+        Check(flags.Contains("-lang:FRA") && flags.Contains("-noweb") && flags.Contains("-ip:127.0.0.1") && flags.Contains("-port:2106"), "Shop policy changed unrelated launch options");
+        Check(GameLauncher.DisableNativeShops(command.Arguments) == command.Arguments, "Shop policy is not idempotent");
+        Check(legacy.launchArguments.Contains("-INGAMEWEBSHOP"), "Launch mutated stored profile");
         string voices = Temp();
         try {
             Directory.CreateDirectory(Path.Combine(voices, "Sounds", "voice"));

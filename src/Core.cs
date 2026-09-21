@@ -547,7 +547,13 @@ public sealed class GameLauncher {
     public Task<IPAddress> ResolveServer(ServerConfig server, CancellationToken token) { server.Validate(); if (server.maintenance) throw new InvalidOperationException("Serveur en maintenance."); return ServerService.Resolve(server.loginHost, token); }
     public ProcessStartInfo BuildLaunchCommand(string root, ServerConfig server, IPAddress address) {
         server.Validate(); if (server.maintenance) throw new InvalidOperationException("Serveur en maintenance."); if (address.AddressFamily != AddressFamily.InterNetwork) throw new InvalidOperationException("IPv4 requise par ce profil.");
-        return new ProcessStartInfo { FileName = Safety.Under(root, config.gameExecutable), WorkingDirectory = Path.GetFullPath(root), Arguments = config.launchArguments.Replace("{ip}", address.ToString()).Replace("{port}", server.loginPort.ToString(CultureInfo.InvariantCulture)), UseShellExecute = false };
+        return new ProcessStartInfo { FileName = Safety.Under(root, config.gameExecutable), WorkingDirectory = Path.GetFullPath(root), Arguments = DisableNativeShops(config.launchArguments).Replace("{ip}", address.ToString()).Replace("{port}", server.loginPort.ToString(CultureInfo.InvariantCulture)), UseShellExecute = false };
+    }
+    // Enforce this for older external launcher.json files as well as our default
+    // profile. Credentials are appended later, so they never pass through here.
+    public static string DisableNativeShops(string arguments) {
+        var switches = new Regex(@"(?<!\S)-(?:shop|ingameshop|ingamewebshop|dnpshop|dingameshop)(?!\S)", RegexOptions.IgnoreCase);
+        return switches.Replace(arguments ?? "", "").TrimEnd() + " -dnpshop -dingameshop";
     }
     public Process StartGame(ProcessStartInfo command) { return Process.Start(command); }
 }

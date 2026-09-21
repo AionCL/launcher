@@ -1,6 +1,6 @@
 {
   "product": "AionCL",
-  "launcherVersion": "2.5.41",
+  "launcherVersion": "2.5.42",
   "updateFeedUrl": "https://github.com/AionCL/launcher/raw/refs/heads/main/config/updates.json",
   "portalUrl": "https://aioncl.com",
   "discordUrl": "https://discord.gg/vPn4YTF6V",
@@ -11,5 +11,5 @@
   "maxParallelDownloads": 2,
   "requestTimeoutSeconds": 30,
   "gameExecutable": "bin64/aionclassic.bin",
-  "launchArguments": "-ip:{ip} -port:{port} -cc:2 -lang:FRA -loginex -noweb -nokicks -ncg -noauthgg -charnamemenu -disable-xigncode -DEVMODE -ingamewebshop"
+  "launchArguments": "-ip:{ip} -port:{port} -cc:2 -lang:FRA -loginex -noweb -nokicks -ncg -noauthgg -charnamemenu -disable-xigncode -DEVMODE -dnpshop -dingameshop"
 }
