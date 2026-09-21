@@ -4,7 +4,7 @@ param(
 )
 $ErrorActionPreference = 'Stop'
 # Runs without credentials and does not enter a character. No client file patch.
-if (Get-Process aionclassic -ErrorAction SilentlyContinue) { throw 'Aion already running; test refused' }
+if (Get-Process aionclassic* -ErrorAction SilentlyContinue) { throw 'Aion already running; test refused' }
 $gameDll = Join-Path $Client 'bin64\Game.dll'
 if ((Get-FileHash $gameDll).Hash.ToLowerInvariant() -ne 'f259b60f74768c226eafff085551700bcaf3aa43a20ede7fe3925e0e31daaf0f') {
     throw 'Unrecognized Game.dll; refusing version-specific memory read'
@@ -55,8 +55,8 @@ try {
         $module = $process.Modules | Where-Object { $_.ModuleName -ieq 'Game.dll' } | Select-Object -First 1
         if (!$module) { continue }
         if ($module.FileName -ine $gameDll) { throw 'Unexpected game module path' }
-        # CGame singleton RVA 0xe42670 + native flags offset 0xfb0.
-        $flags = [ShopFlagsReader]::Read($process.Id, $module.BaseAddress.ToInt64() + 0xe43620)
+        # CGame singleton RVA 0xe42670 + native flags offset 0xfa8 (two 64-bit words).
+        $flags = [ShopFlagsReader]::Read($process.Id, $module.BaseAddress.ToInt64() + 0xe43618)
         $low = [BitConverter]::ToUInt64($flags, 0)
         $high = [BitConverter]::ToUInt64($flags, 8)
         if (($high -band 0x4800) -eq 0x4800 -and ($low -band 0x400000000000) -eq 0) {
@@ -67,7 +67,7 @@ try {
             }
         } else { $validSince = $null }
     } while ([datetime]::UtcNow -lt $deadline)
-    throw 'Native shop flags not confirmed within 90 seconds'
+    throw ('Native shop flags not confirmed within 90 seconds: low={0:X16} high={1:X16}' -f $low,$high)
 } finally {
     if ($process) {
         $process.Refresh()
