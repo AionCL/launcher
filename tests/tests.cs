@@ -24,6 +24,7 @@ namespace AionCL
             Run("Detect potential", TestDetectPotential);
             Run("Launch command dry-run", TestLaunchCommand);
             Run("Camera preference bounds and persistence", TestCameraSettings);
+            RunAsync("Camera helper integrity gate", TestCameraHelper).GetAwaiter().GetResult();
             RunAsync("ZIP extraction", TestZipExtraction).GetAwaiter().GetResult();
             RunAsync("Server configuration scenarios", RegressionTests.ServerScenarios).GetAwaiter().GetResult();
             RunAsync("Korean pack install remove cache and cancellation", RegressionTests.KoreanPackScenarios).GetAwaiter().GetResult();
@@ -54,7 +55,38 @@ namespace AionCL
                     try { settings.Validate(); } catch (InvalidDataException) { rejected = true; }
                     if (!rejected) throw new Exception("Camera distance bound not enforced");
                 }
+                settings.distance = 32;
+                foreach (int invalid in new[] { 59, 171 }) {
+                    settings.fov = invalid;
+                    bool rejected = false;
+                    try { settings.Validate(); } catch (InvalidDataException) { rejected = true; }
+                    if (!rejected) throw new Exception("Camera FOV bound not enforced");
+                }
             } finally { if (Directory.Exists(directory)) Directory.Delete(directory, true); }
+        }
+
+        static async Task TestCameraHelper() {
+            string root = Path.Combine(Path.GetTempPath(), "aioncl-helper-" + Guid.NewGuid().ToString("N"));
+            try {
+                Directory.CreateDirectory(Path.Combine(root, "tools"));
+                string path = Path.Combine(root, "tools", "AionCL.Camera.exe");
+                byte[] bytes = Encoding.ASCII.GetBytes("fixture-not-executable");
+                File.WriteAllBytes(path, bytes);
+                var manifest = new Manifest { packages = new[] { new Package { files = new[] {
+                    new ClientFile { path = "tools/AionCL.Camera.exe", size = bytes.Length, sha256 = Safety.Sha(bytes) }
+                } } } };
+                if (await CameraSettings.VerifyHelper(root, manifest, CancellationToken.None) != path)
+                    throw new Exception("Wrong helper path");
+                bytes[0]++; File.WriteAllBytes(path, bytes);
+                bool rejected = false;
+                try { await CameraSettings.VerifyHelper(root, manifest, CancellationToken.None); }
+                catch (InvalidDataException) { rejected = true; }
+                if (!rejected) throw new Exception("Corrupt helper accepted");
+                File.Delete(path); rejected = false;
+                try { await CameraSettings.VerifyHelper(root, manifest, CancellationToken.None); }
+                catch (InvalidDataException) { rejected = true; }
+                if (!rejected) throw new Exception("Missing helper accepted");
+            } finally { if (Directory.Exists(root)) Directory.Delete(root, true); }
         }
 
         static void Run(string name, Action test)
