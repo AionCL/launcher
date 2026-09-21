@@ -589,9 +589,14 @@ namespace AionCL
                         RedactSessionKey(command.Arguments)
                     );
 
-                    // Install and configure the camera patch before the game loads its DLL.
-                    ShugoConsoleIntegration.Configure(80, 30);
-                    game.StartGame(command);
+                    var camera = CameraSettings.Load(cameraPreference);
+                    string cameraHelper = camera.enabled
+                        ? await CameraSettings.VerifyHelper(pathBox.Text, manifest, cts.Token) : null;
+                    var process = game.StartGame(command);
+                    if (camera.enabled) {
+                        try { camera.Start(cameraHelper, process); }
+                        catch (Exception cameraError) { Log("Camera: " + cameraError.Message); }
+                    }
                 }
             }
             catch (Exception ex)

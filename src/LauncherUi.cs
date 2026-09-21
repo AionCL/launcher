@@ -81,6 +81,8 @@ public sealed partial class MainForm {
         StyleButton(installButton,"",installPanel,24,354,282,32,false); installButton.Enabled=false; installButton.Click += async delegate { await InstallAsync(); };
         StyleButton(verifyButton,"",installPanel,24,395,282,30,false); verifyButton.Enabled=false; verifyButton.Click += async delegate { await VerifyAsync(); };
         shortcutsButton=ButtonAt(installPanel,"",24,430,282,30,false); shortcutsButton.Click += delegate { CreateShortcuts(); };
+        cameraButton=ButtonAt(installPanel,"Camera / FOV",24,470,282,34,false);
+        cameraButton.Click += delegate { OpenCameraSettings(); };
         discordButton=ButtonAt(this,"",370,26,36,36,false); discordButton.Tag="discord"; discordButton.AccessibleName="Discord"; discordButton.FlatAppearance.BorderSize=0; discordButton.Click += delegate { OpenCommunity(config==null?null:config.discordUrl); };
         youtubeButton=ButtonAt(this,"",478,26,36,36,false); youtubeButton.Tag="youtube"; youtubeButton.AccessibleName="YouTube"; youtubeButton.FlatAppearance.BorderSize=0; youtubeButton.Click += delegate { OpenCommunity(config==null?null:config.youtubeUrl); };
         footer=new Panel { BackColor=Color.FromArgb(215,12,15,21) }; Controls.Add(footer);
@@ -216,7 +218,17 @@ public sealed partial class MainForm {
         koreanVoices.SetBounds(22,y,inner,34); y+=42; japaneseVoices.SetBounds(22,y,inner,34); y+=42; hitFontButton.SetBounds(22,y,inner,34); y+=42;
         installButton.SetBounds(22,y,inner,38); y+=46; verifyButton.SetBounds(22,y,inner,38); y+=46; shortcutsButton.SetBounds(22,y,inner,34);
     }
-    private void LayoutSettingsPanel(int width,int height) { LayoutInstallPanel(width,height); }
+    private void LayoutSettingsPanel(int width,int height) {
+        int column=(width-66)/2, right=44+column;
+        clientTitle.SetBounds(22,18,width-44,32); versionLabel.SetBounds(22,58,width-44,24);
+        pathLabel.SetBounds(22,96,width-44,20);
+        pathBox.SetBounds(22,122,width-100,30); browseButton.SetBounds(width-66,119,42,36);
+        languageLabel.SetBounds(22,174,column,20); languageBox.SetBounds(22,200,column,32);
+        koreanVoices.SetBounds(22,248,column,34); japaneseVoices.SetBounds(22,292,column,34);
+        hitFontButton.SetBounds(22,336,column,34);
+        cameraButton.SetBounds(right,200,column,34); installButton.SetBounds(right,248,column,34);
+        verifyButton.SetBounds(right,292,column,34); shortcutsButton.SetBounds(right,336,column,34);
+    }
     private void LayoutFooter(int w, int h) {
         if(w<930) {
             int playX=Math.Max(430,w-300), playW=Math.Max(250,w-playX-28);

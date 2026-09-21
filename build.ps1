@@ -53,10 +53,11 @@ Write-Host "Program : $programFile"
 & $compiler `
     /nologo `
     /target:winexe `
+    /define:CAMERA_UI `
     "/out:$launcherExe" `
     @references `
     $coreFile `
-    (Join-Path $root 'src\ShugoConsoleIntegration.cs') `
+    (Join-Path $root 'src\CameraSettings.cs') `
     (Join-Path $root 'src\Updates.cs') `
     (Join-Path $root 'src\UpdateUi.cs') `
     (Join-Path $root 'src\KoreanPack.cs') `
@@ -71,8 +72,7 @@ Write-Host "Program : $programFile"
     "/resource:$(Join-Path $root 'assets\portal.png'),AionCL.portal.png" `
     "/resource:$(Join-Path $root 'config\korean-pack.json'),AionCL.korean-pack.json" `
     "/resource:$(Join-Path $root 'config\japanese-pack.json'),AionCL.japanese-pack.json" `
-    "/resource:$(Join-Path $root 'assets\japanese-hit-font.pak'),AionCL.hit-font.pak" `
-    "/resource:$(Join-Path $root 'assets\shugoconsole-version.dll'),AionCL.shugoconsole-version.dll"
+    "/resource:$(Join-Path $root 'assets\japanese-hit-font.pak'),AionCL.hit-font.pak"
 
 if ($LASTEXITCODE -ne 0) {
     throw 'Launcher compilation failed.'
@@ -114,6 +114,7 @@ if ($Tests) {
         (Join-Path $root 'src\KoreanPack.cs') `
         (Join-Path $root 'src\HitFont.cs') `
         $testsFile `
+        (Join-Path $root 'src\CameraSettings.cs') `
         (Join-Path $root 'tests\RegressionTests.cs')
 
     if ($LASTEXITCODE -ne 0) {

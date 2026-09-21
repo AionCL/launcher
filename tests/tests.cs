@@ -23,6 +23,7 @@ namespace AionCL
             Run("Detect absent", TestDetectAbsent);
             Run("Detect potential", TestDetectPotential);
             Run("Launch command dry-run", TestLaunchCommand);
+            Run("Camera preference bounds and persistence", TestCameraSettings);
             RunAsync("ZIP extraction", TestZipExtraction).GetAwaiter().GetResult();
             RunAsync("Server configuration scenarios", RegressionTests.ServerScenarios).GetAwaiter().GetResult();
             RunAsync("Korean pack install remove cache and cancellation", RegressionTests.KoreanPackScenarios).GetAwaiter().GetResult();
@@ -34,6 +35,26 @@ namespace AionCL
             Console.WriteLine("Failed: " + failed);
 
             Environment.Exit(failed == 0 ? 0 : 1);
+        }
+
+        static void TestCameraSettings() {
+            var settings = new CameraSettings { enabled = true, fov = 170, distance = 100 };
+            settings.Validate();
+            string directory = Path.Combine(Path.GetTempPath(), "aioncl-camera-" + Guid.NewGuid().ToString("N"));
+            string path = Path.Combine(directory, "camera.json");
+            try {
+                settings.Save(path);
+                var loaded = CameraSettings.Load(path);
+                if (!loaded.enabled || loaded.fov != 170 || loaded.distance != 100) throw new Exception("Camera roundtrip failed");
+                settings.distance = 5; settings.fov = 60; settings.Save(path);
+                if (CameraSettings.Load(path).distance != 5) throw new Exception("Camera replacement failed");
+                foreach (int invalid in new[] { 4, 101 }) {
+                    settings.distance = invalid;
+                    bool rejected = false;
+                    try { settings.Validate(); } catch (InvalidDataException) { rejected = true; }
+                    if (!rejected) throw new Exception("Camera distance bound not enforced");
+                }
+            } finally { if (Directory.Exists(directory)) Directory.Delete(directory, true); }
         }
 
         static void Run(string name, Action test)
