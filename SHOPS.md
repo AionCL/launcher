@@ -83,3 +83,16 @@ reader offset was corrected before the successful run.
 
 The remaining acceptance is visual and interactive: icons, service menu,
 shortcuts, and normal merchant controls after entering a character.
+
+## User acceptance follow-up — client 2.4.7
+
+The user confirmed Luna/Quna disappeared and the Aion shop was inactive, but
+its gift icon remained visible. The startup flag test established functional
+disabling; it did not establish removal of every UI visual.
+
+Client patch 2.4.7 suppresses that remaining icon/background and the secondary
+character-info shop button in the four localized UI PAKs, while preserving
+native widget identities. It is offered by the existing launcher 2.5.42 through
+the normal client update. No new launcher executable is required. See
+https://github.com/AionCL/client-2.4/releases/tag/v2.4.7 for package validation and
+the remaining visual recipe. No browser redirect is introduced.
