@@ -1,4 +1,4 @@
-# Launcher Linux — 2.5.42-linux-preview.6
+# Launcher Linux — 2.5.42-linux-preview.7
 
 Première adaptation expérimentale du launcher Windows 2.5.42. Même interface,
 assets, moteur de téléchargement/reprise, SHA-256, réparation, flux client et
@@ -16,7 +16,7 @@ docker run --rm --user "$(id -u):$(id -g)" -e HOME=/tmp -v "$PWD:/src" aioncl-li
 Ou installer Mono (compilateur `mcs`), libgdiplus, Xvfb, xauth et DejaVu puis
 exécuter `./linux/build.sh`. Le script compile, exécute les régressions du cœur
 et les tests Linux, rend l'interface sous Xvfb puis produit
-`out/AionCL-Launcher-2.5.42-linux-preview.6.tar.gz` et son SHA-256.
+`out/AionCL-Launcher-2.5.42-linux-preview.7.tar.gz` et son SHA-256.
 Le rendu de contrôle reste dans `out/linux/linux-preview.png`.
 
 ## Lancer sur un bureau Linux
@@ -90,3 +90,51 @@ OpenSSL 3 lorsque disponible, avec repli géré si absent. L'extraction emploie
 jusqu'à quatre workers ; les packages qui remplacent les mêmes chemins restent
 ordonnés. Aucun contrôle d'intégrité n'est supprimé.
 Référence EVP : https://docs.openssl.org/3.0/man3/EVP_DigestInit/
+
+## Connexion Wine et bibliothèques graphiques
+
+Preview.7 impose `version=n,b` pour le processus du jeu, tout en conservant les
+surcharges des autres DLL. Sans cela, Wine ignore `bin64/version.dll`, le correctif
+No-IP livré et vérifié avec le client : l'identification et la liste des serveurs
+fonctionnent, mais la sélection affiche l'erreur (6) sans connexion au port7777.
+Le rôle de cette DLL est documenté par son auteur :
+https://github.com/beyond-aion/aion-version-dll
+
+Le moteur utilise aussi `d3dx9_38.dll`. Sous Wine10, son implémentation intégrée
+peut échouer à compiler les shaders (D3DCompile2 E5017) et produire un fond vert.
+Le script suivant installe uniquement la bibliothèque Microsoft x64 dans le
+préfixe dédié, à partir du redistribuable officiel DirectX Juin2010 dont le
+SHA-256 est contrôlé. Dépendances : curl, cabextract, Wine. Fermer le jeu et
+exécuter avec le compte propriétaire du préfixe, sans sudo :
+
+```sh
+./install-d3dx9.sh /chemin/absolu/du/prefixe-wine
+```
+
+Il conserve la DLL précédente dans `aioncl-runtime-backup`, puis configure la
+surcharge `d3dx9_38=native,builtin` dans ce préfixe. Les fichiers du client et
+les installations Wine système ne sont pas remplacés. Pour revenir au moteur
+intégré : `WINEPREFIX=/chemin/du/prefixe wine reg add
+'HKCU\Software\Wine\DllOverrides' /v d3dx9_38 /d builtin /f`.
+Méthode d'extraction et source Microsoft :
+https://github.com/Winetricks/winetricks/blob/master/src/winetricks
+
+Mesures ZBook Debian13/Wine10 : vérification complète client2.4.8 en43,6s ;
+installation/retrait des voix KR/JP et police de dégâts en15,3s ; extraction des
+deux premiers packages, contrôles SHA inclus, en16,5s. Ces mesures ne constituent
+pas une validation de connexion ou de rendu ingame.
+
+## Exécution manuelle et journaux
+
+Pour lancer le prochain build sur la VM sans surveillance interactive :
+`./linux/build-logged.sh`. Il regroupe compilation et tests automatisés, conserve
+la sortie dans `out/logs/build-*.log` et affiche le code de sortie final. Il ne
+déploie rien et ne lance pas le jeu.
+
+Sur le poste de recette, jeu et launcher fermés, appliquer une archive et son
+fichier `.sha256` adjacent avec :
+`bash apply-preview.sh /chemin/archive.tar.gz /chemin/launcher`.
+Le script contrôle le SHA, sauvegarde l'installation précédente et conserve un
+journal `apply-preview-*.log` à côté du dossier launcher. Il ne lance pas le jeu.
+Les scripts de build journalisé et d'application ont été ajoutés après le build
+preview.7 ; leur exécution reste à faire par l'opérateur.

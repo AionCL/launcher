@@ -14,10 +14,10 @@ xvfb-run -a mono "$out/AionCL.LinuxTests.exe"
 mcs -out:"$out/AionCL.GameSmoke.exe" "${refs[@]}" -r:"$out/AionCL.Launcher.Linux.exe" linux/GameSmoke.cs
 mcs -out:"$out/AionCL.RecipeCheck.exe" "${refs[@]}" -r:"$out/AionCL.Launcher.Linux.exe" linux/RecipeCheck.cs
 cp config/launcher.json "$out/launcher.json"
-cp linux/aioncl-launcher "$out/"
+cp linux/aioncl-launcher linux/install-d3dx9.sh "$out/"
 cp LINUX.md "$out/"
-chmod +x "$out/aioncl-launcher"
+chmod +x "$out/aioncl-launcher" "$out/install-d3dx9.sh"
 # Test binaries and screenshots stay in out/linux, outside the distributable.
-tar -czf out/AionCL-Launcher-2.5.42-linux-preview.6.tar.gz -C "$out" AionCL.Launcher.Linux.exe launcher.json aioncl-launcher LINUX.md
-(cd out && sha256sum AionCL-Launcher-2.5.42-linux-preview.6.tar.gz > AionCL-Launcher-2.5.42-linux-preview.6.tar.gz.sha256)
-cat out/AionCL-Launcher-2.5.42-linux-preview.6.tar.gz.sha256
+tar -czf out/AionCL-Launcher-2.5.42-linux-preview.7.tar.gz -C "$out" AionCL.Launcher.Linux.exe launcher.json aioncl-launcher install-d3dx9.sh LINUX.md
+(cd out && sha256sum AionCL-Launcher-2.5.42-linux-preview.7.tar.gz > AionCL-Launcher-2.5.42-linux-preview.7.tar.gz.sha256)
+cat out/AionCL-Launcher-2.5.42-linux-preview.7.tar.gz.sha256

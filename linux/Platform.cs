@@ -111,6 +111,11 @@ public static class LinuxPlatform {
             WorkingDirectory = game.WorkingDirectory, UseShellExecute = false
         };
         result.EnvironmentVariables["WINEPREFIX"] = prefix;
+        // The shipped No-IP patch is a version.dll proxy. Wine otherwise loads
+        // its builtin DLL and Aion rejects the game server locally with error 6.
+        string overrides = result.EnvironmentVariables["WINEDLLOVERRIDES"];
+        result.EnvironmentVariables["WINEDLLOVERRIDES"] =
+            (String.IsNullOrWhiteSpace(overrides) ? "" : overrides.TrimEnd(';') + ";") + "version=n,b";
         return result;
     }
     public static void CreateShortcut() {

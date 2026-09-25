@@ -21,12 +21,16 @@ class LinuxTests {
         try {
             Environment.SetEnvironmentVariable("AIONCL_WINE", "/bin/echo");
             Environment.SetEnvironmentVariable("AIONCL_WINEPREFIX", Path.Combine(root, "prefix with spaces"));
+            Environment.SetEnvironmentVariable("WINEDLLOVERRIDES", "d3d9=n;version=b");
             var command = LinuxPlatform.WineCommand(new ProcessStartInfo {
                 FileName="/tmp/client space/quote\"/aionclassic.bin", WorkingDirectory=root,
                 Arguments="-lang:FRA -dnpshop -dingameshop"
             });
             Check(command.FileName=="/bin/echo" && !command.UseShellExecute, "Runner and shell policy");
             Check(command.EnvironmentVariables["WINEPREFIX"]==Path.Combine(root,"prefix with spaces"), "Dedicated prefix");
+            Check(command.EnvironmentVariables["WINEDLLOVERRIDES"]=="d3d9=n;version=b;version=n,b", "Load client No-IP proxy and preserve other Wine overrides");
+            Environment.SetEnvironmentVariable("WINEDLLOVERRIDES", null);
+            Check(LinuxPlatform.WineCommand(command).EnvironmentVariables["WINEDLLOVERRIDES"]=="version=n,b", "No-IP proxy enabled without existing overrides");
             command.RedirectStandardOutput=true;
             using(var process=Process.Start(command)) {
                 string output=process.StandardOutput.ReadToEnd(); process.WaitForExit();
