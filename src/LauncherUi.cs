@@ -142,7 +142,12 @@ public sealed partial class MainForm {
         workspace.Controls.Add(contentArea);
         contentArea.Controls.Add(artwork); contentArea.Controls.Add(storyPanel); contentArea.Controls.Add(installPanel); contentArea.Controls.Add(journalPanel);
         workspace.Controls.Add(footer);
-        brand.Font=new Font("Georgia",22,FontStyle.Bold); brand.ForeColor=Color.White; brand.TextAlign=ContentAlignment.MiddleCenter;
+        brand.Font=new Font("Georgia",22,FontStyle.Bold);
+#if LINUX
+        // The Linux fallback serif can exceed this fixed 34px label at desktop DPI.
+        brand.Font=new Font("DejaVu Serif",26,FontStyle.Bold,GraphicsUnit.Pixel);
+#endif
+        brand.ForeColor=Color.White; brand.TextAlign=ContentAlignment.MiddleCenter;
         edition.TextAlign=ContentAlignment.MiddleCenter;
         edition.ForeColor=accent;
         navigation.BringToFront(); workspace.BringToFront(); navigation.BringToFront();

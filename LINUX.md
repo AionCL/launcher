@@ -1,4 +1,4 @@
-# Launcher Linux — 2.5.42-linux-preview.3
+# Launcher Linux — 2.5.42-linux-preview.4
 
 Première adaptation expérimentale du launcher Windows 2.5.42. Même interface,
 assets, moteur de téléchargement/reprise, SHA-256, réparation, flux client et
@@ -16,7 +16,7 @@ docker run --rm --user "$(id -u):$(id -g)" -e HOME=/tmp -v "$PWD:/src" aioncl-li
 Ou installer Mono (compilateur `mcs`), libgdiplus, Xvfb, xauth et DejaVu puis
 exécuter `./linux/build.sh`. Le script compile, exécute les régressions du cœur
 et les tests Linux, rend l'interface sous Xvfb puis produit
-`out/AionCL-Launcher-2.5.42-linux-preview.3.tar.gz` et son SHA-256.
+`out/AionCL-Launcher-2.5.42-linux-preview.4.tar.gz` et son SHA-256.
 Le rendu de contrôle reste dans `out/linux/linux-preview.png`.
 
 ## Lancer sur un bureau Linux
