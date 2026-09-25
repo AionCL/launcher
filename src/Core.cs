@@ -516,7 +516,10 @@ public static class VoiceMode {
     static string Backup(string language) { return ".aioncl/voice-original/" + language; }
     public static void RequireGameClosed() {
         foreach (var p in Process.GetProcesses()) using (p) {
-            if (p.ProcessName.Equals("aionclassic.bin", StringComparison.OrdinalIgnoreCase) || p.ProcessName.Equals("aionclassic", StringComparison.OrdinalIgnoreCase) || p.ProcessName.Equals("aion", StringComparison.OrdinalIgnoreCase))
+            string name;
+            try { name=p.ProcessName; }
+            catch(InvalidOperationException) { continue; } // Process exited after enumeration.
+            if (name.Equals("aionclassic.bin", StringComparison.OrdinalIgnoreCase) || name.Equals("aionclassic", StringComparison.OrdinalIgnoreCase) || name.Equals("aion", StringComparison.OrdinalIgnoreCase))
                 throw new InvalidOperationException("Close Aion before changing voices or repairing files.");
         }
     }

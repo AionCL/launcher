@@ -1,4 +1,4 @@
-# Launcher Linux — 2.5.42-linux-preview.5
+# Launcher Linux — 2.5.42-linux-preview.6
 
 Première adaptation expérimentale du launcher Windows 2.5.42. Même interface,
 assets, moteur de téléchargement/reprise, SHA-256, réparation, flux client et
@@ -16,7 +16,7 @@ docker run --rm --user "$(id -u):$(id -g)" -e HOME=/tmp -v "$PWD:/src" aioncl-li
 Ou installer Mono (compilateur `mcs`), libgdiplus, Xvfb, xauth et DejaVu puis
 exécuter `./linux/build.sh`. Le script compile, exécute les régressions du cœur
 et les tests Linux, rend l'interface sous Xvfb puis produit
-`out/AionCL-Launcher-2.5.42-linux-preview.5.tar.gz` et son SHA-256.
+`out/AionCL-Launcher-2.5.42-linux-preview.6.tar.gz` et son SHA-256.
 Le rendu de contrôle reste dans `out/linux/linux-preview.png`.
 
 ## Lancer sur un bureau Linux
@@ -84,7 +84,7 @@ contrôle sa présence pendant 120 secondes puis ferme uniquement le processus
 qu'il a créé. Un processus vivant ne prouve pas un rendu correct : inspecter
 la fenêtre et le GPU séparément. L'entrée en jeu reste une recette distincte.
 
-Preview.5 corrige les chemins Windows sur un disque Linux sensible à la casse
+Preview.6 corrige les chemins Windows sur un disque Linux sensible à la casse
 (`L10N`/`l10n`, y compris les voix et les dégâts). Les contrôles SHA-256 utilisent
 OpenSSL 3 lorsque disponible, avec repli géré si absent. L'extraction emploie
 jusqu'à quatre workers ; les packages qui remplacent les mêmes chemins restent
