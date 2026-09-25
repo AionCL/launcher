@@ -67,3 +67,19 @@ Valider ensuite audio, boutiques et stabilité. Conserver la version de Wine,
 la distribution, le GPU et le pilote avec les résultats.
 
 Référence technique : https://www.mono-project.com/docs/gui/winforms/
+
+## Test graphique borné sans identifiants
+
+Le build produit aussi `out/linux/AionCL.GameSmoke.exe` (outil de recette,
+non inclus dans l'archive utilisateur). Depuis une session graphique et avec
+les mêmes variables Wine que le launcher :
+
+```sh
+mono out/linux/AionCL.GameSmoke.exe /chemin/du/client 120
+```
+
+L'outil exige une installation validée et la configuration serveur hors
+maintenance. Il lance le client avec le moteur du launcher, sans identifiants,
+contrôle sa présence pendant 120 secondes puis ferme uniquement le processus
+qu'il a créé. Un processus vivant ne prouve pas un rendu correct : inspecter
+la fenêtre et le GPU séparément. L'entrée en jeu reste une recette distincte.
