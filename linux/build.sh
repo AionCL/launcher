@@ -12,6 +12,7 @@ mono "$out/AionCL.Tests.exe"
 mcs -out:"$out/AionCL.LinuxTests.exe" "${refs[@]}" -r:"$out/AionCL.Launcher.Linux.exe" linux/Tests.cs
 xvfb-run -a mono "$out/AionCL.LinuxTests.exe"
 mcs -out:"$out/AionCL.GameSmoke.exe" "${refs[@]}" -r:"$out/AionCL.Launcher.Linux.exe" linux/GameSmoke.cs
+mcs -out:"$out/AionCL.RecipeCheck.exe" "${refs[@]}" -r:"$out/AionCL.Launcher.Linux.exe" linux/RecipeCheck.cs
 cp config/launcher.json "$out/launcher.json"
 cp linux/aioncl-launcher "$out/"
 cp LINUX.md "$out/"
