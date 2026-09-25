@@ -115,7 +115,7 @@ public static class LinuxPlatform {
         // its builtin DLL and Aion rejects the game server locally with error 6.
         string overrides = result.EnvironmentVariables["WINEDLLOVERRIDES"];
         result.EnvironmentVariables["WINEDLLOVERRIDES"] =
-            (String.IsNullOrWhiteSpace(overrides) ? "" : overrides.TrimEnd(';') + ";") + "version=n,b";
+            (String.IsNullOrWhiteSpace(overrides) ? "" : overrides.TrimEnd(';') + ";") + "version=n,b;d3d9=n,b";
         return result;
     }
     public static void CreateShortcut() {

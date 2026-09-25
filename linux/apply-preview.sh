@@ -19,7 +19,7 @@ echo "Applying $archive to $target"
 # Accept only the files produced by the launcher build, without path components.
 while IFS= read -r entry; do
     case "$entry" in
-        AionCL.Launcher.Linux.exe|launcher.json|aioncl-launcher|install-d3dx9.sh|LINUX.md) ;;
+        AionCL.Launcher.Linux.exe|launcher.json|aioncl-launcher|install-d3dx9.sh|install-dxvk.sh|LINUX.md) ;;
         *) echo "Unexpected archive entry: $entry" >&2; exit 1 ;;
     esac
 done < <(tar -tzf "$archive")
