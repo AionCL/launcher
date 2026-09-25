@@ -28,6 +28,16 @@ public sealed class LinuxUiProgress<T> : IProgress<T>, IDisposable {
     }
 }
 public static class LinuxPlatform {
+    public static long DownloadBytesNeeded(Package[] packages, string cache) {
+        long remaining=0;
+        foreach(var package in packages) {
+            string archive=Safety.Under(cache,package.name), part=Safety.Under(cache,package.name+".part");
+            long occupied=Math.Max(File.Exists(archive)?new FileInfo(archive).Length:0,
+                                   File.Exists(part)?new FileInfo(part).Length:0);
+            remaining=checked(remaining+Math.Max(0,package.size-occupied));
+        }
+        return remaining;
+    }
     public static DriveInfo InstallationDrive(string path) {
         string full=Path.GetFullPath(path).TrimEnd('/') + "/";
         DriveInfo best=null;

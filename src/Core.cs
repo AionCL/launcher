@@ -409,6 +409,9 @@ public static class Installation {
             string cache = Safety.Under(metadata, "cache"); string stage = Safety.Under(metadata, "staging");
             long needed = plan.Target.Manifest.sourceBytes + plan.Packages.Sum(p => p.size);
 #if LINUX
+            // Cached bytes are already allocated: a resumed download only needs
+            // the remaining bytes (corrupt cache entries are removed before retry).
+            needed = plan.Target.Manifest.sourceBytes + LinuxPlatform.DownloadBytesNeeded(plan.Packages, cache);
             long freeBytes = LinuxPlatform.InstallationDrive(root).AvailableFreeSpace;
 #else
             long freeBytes = new DriveInfo(Path.GetPathRoot(Path.GetFullPath(root))).AvailableFreeSpace;

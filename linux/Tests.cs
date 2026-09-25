@@ -34,6 +34,12 @@ class LinuxTests {
             Check(File.ReadAllText(Path.Combine(root,"applications","aioncl-launcher.desktop")).Contains("Terminal=false"), "Desktop entry");
             var auth=new LauncherAuth(); auth.SaveCredentials("fixture", "not-a-real-password", false);
             Check(auth.Accounts.Count==0, "No credential persistence");
+            var package=new Package { name="fixture.zip",size=100 };
+            Check(LinuxPlatform.DownloadBytesNeeded(new[]{package},root)==100,"Fresh download capacity");
+            File.WriteAllBytes(Path.Combine(root,"fixture.zip.part"),new byte[60]);
+            Check(LinuxPlatform.DownloadBytesNeeded(new[]{package},root)==40,"Resume capacity excludes existing bytes");
+            File.WriteAllBytes(Path.Combine(root,"fixture.zip"),new byte[100]);
+            Check(LinuxPlatform.DownloadBytesNeeded(new[]{package},root)==0,"Complete cache capacity");
             Application.EnableVisualStyles();
             using(var form=new MainForm(true)) {
                 form.Show(); Application.DoEvents();
