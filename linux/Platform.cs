@@ -28,6 +28,54 @@ public sealed class LinuxUiProgress<T> : IProgress<T>, IDisposable {
     }
 }
 public static class LinuxPlatform {
+    public static System.Security.Cryptography.SHA256 CreateSha256() {
+        try { return new OpenSslSha256(); }
+        catch(DllNotFoundException) { return System.Security.Cryptography.SHA256.Create(); }
+        catch(EntryPointNotFoundException) { return System.Security.Cryptography.SHA256.Create(); }
+    }
+    public static string ResolveClientPath(string root,string relative) {
+        string current=Path.GetFullPath(root);
+        Safety.NoLinks(current);
+        foreach(string part in relative.Split('/')) {
+            string next=Path.Combine(current,part);
+            if(!File.Exists(next)&&!Directory.Exists(next)&&Directory.Exists(current)) {
+                string match=null;
+                foreach(string entry in Directory.EnumerateFileSystemEntries(current)) {
+                    if(!String.Equals(Path.GetFileName(entry),part,StringComparison.OrdinalIgnoreCase))continue;
+                    if(match!=null)throw new IOException("Ambiguous filename casing: "+next);
+                    match=entry;
+                }
+                if(match!=null)next=match;
+            }
+            Safety.NoLinks(next); current=next;
+        }
+        return current;
+    }
+    public static async System.Threading.Tasks.Task ExtractPackages(InstallPlan plan,string cache,string stage,
+        System.Threading.CancellationToken token,IProgress<ExtractionProgress> progress,Action<string> log) {
+        // Create common directories serially, including their canonical casing.
+        foreach(var package in plan.Packages)foreach(var file in package.files)
+            Directory.CreateDirectory(Path.GetDirectoryName(Safety.Under(stage,file.path)));
+        var wave=new System.Collections.Generic.List<System.Threading.Tasks.Task>();
+        var paths=new System.Collections.Generic.HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        using(var limit=new System.Threading.SemaphoreSlim(Math.Min(4,Math.Max(1,Environment.ProcessorCount)))) {
+            for(int index=0;index<plan.Packages.Length;index++) {
+                var package=plan.Packages[index]; bool overlaps=false;
+                foreach(var file in package.files)if(paths.Contains(file.path)){overlaps=true;break;}
+                if(overlaps) { await System.Threading.Tasks.Task.WhenAll(wave).ConfigureAwait(false); wave.Clear();paths.Clear(); }
+                foreach(var file in package.files)paths.Add(file.path);
+                int number=index+1;
+                wave.Add(System.Threading.Tasks.Task.Run(async delegate {
+                    await limit.WaitAsync(token).ConfigureAwait(false);
+                    try {
+                        log("Extraction : "+package.name);
+                        await Installation.Extract(Safety.Under(cache,package.name),package,stage,token,progress,number,plan.Packages.Length).ConfigureAwait(false);
+                    } finally {limit.Release();}
+                }));
+            }
+            await System.Threading.Tasks.Task.WhenAll(wave).ConfigureAwait(false);
+        }
+    }
     public static long DownloadBytesNeeded(Package[] packages, string cache) {
         long remaining=0;
         foreach(var package in packages) {

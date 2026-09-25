@@ -153,16 +153,26 @@ public static class Safety {
     public static string Under(string root, string relative) {
         Relative(relative); string prefix = Path.GetFullPath(root).TrimEnd(Path.DirectorySeparatorChar) + Path.DirectorySeparatorChar;
         string result = Path.GetFullPath(Path.Combine(prefix, relative.Replace('/', Path.DirectorySeparatorChar)));
+#if LINUX
+        result = LinuxPlatform.ResolveClientPath(root, relative);
+#endif
         if (!result.StartsWith(prefix, StringComparison.OrdinalIgnoreCase)) throw new InvalidDataException("Chemin hors installation."); NoLinks(result); return result;
     }
+    public static SHA256 CreateSha256() {
+#if LINUX
+        return LinuxPlatform.CreateSha256();
+#else
+        return SHA256.Create();
+#endif
+    }
     public static async Task<string> ShaAsync(string path, CancellationToken token) {
-        using (var sha = SHA256.Create()) using (var stream = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read, 131072, true)) {
+        using (var sha = CreateSha256()) using (var stream = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read, 131072, true)) {
             var buffer = new byte[131072]; int n;
             while ((n = await stream.ReadAsync(buffer, 0, buffer.Length, token).ConfigureAwait(false)) > 0) sha.TransformBlock(buffer, 0, n, buffer, 0);
             sha.TransformFinalBlock(new byte[0], 0, 0); return BitConverter.ToString(sha.Hash).Replace("-", "").ToLowerInvariant();
         }
     }
-    public static string Sha(byte[] bytes) { using (var sha = SHA256.Create()) return BitConverter.ToString(sha.ComputeHash(bytes)).Replace("-", "").ToLowerInvariant(); }
+    public static string Sha(byte[] bytes) { using (var sha = CreateSha256()) return BitConverter.ToString(sha.ComputeHash(bytes)).Replace("-", "").ToLowerInvariant(); }
     public static async Task<bool> Matches(string path, long size, string hash, CancellationToken token) {
         NoLinks(path); return File.Exists(path) && new FileInfo(path).Length == size && String.Equals(await ShaAsync(path, token).ConfigureAwait(false), hash, StringComparison.OrdinalIgnoreCase);
     }
@@ -421,8 +431,12 @@ public static class Installation {
             using (var semaphore = new SemaphoreSlim(config.maxParallelDownloads)) {
                 await Task.WhenAll(plan.Packages.Select(async p => { await semaphore.WaitAsync(token).ConfigureAwait(false); try { log("Telechargement / validation : " + p.name); await downloader.Get(p, cache, progress, token).ConfigureAwait(false); } finally { semaphore.Release(); } })).ConfigureAwait(false);
             }
+#if LINUX
+            await LinuxPlatform.ExtractPackages(plan,cache,stage,token,extractionProgress,log).ConfigureAwait(false);
+#else
             int packageIndex = 0;
             foreach (var p in plan.Packages) { packageIndex++; log("Extraction : " + p.name); await Extract(Safety.Under(cache, p.name), p, stage, token, extractionProgress, packageIndex, plan.Packages.Length).ConfigureAwait(false); }
+#endif
             // Commit is recoverable, not an atomic directory swap. No version marker until final verification.
             // A later patch package may replace a file from the base package;
             // only the effective (last) entry must be moved from staging.
