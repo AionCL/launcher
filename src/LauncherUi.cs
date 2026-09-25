@@ -121,6 +121,12 @@ public sealed partial class MainForm {
         FormClosed += delegate { if(journal!=null) journal.Dispose(); if(portal!=null) portal.Dispose(); };
         BuildShell();
         BuildUpdateUi(); LayoutLauncher(); ApplyLanguage();
+#if LINUX
+        authRemember.Checked=false; authRemember.Enabled=false;
+        authRemember.Text="Session";
+        cameraButton.Enabled=false;
+        cameraButton.Text="Camera / FOV (Windows)";
+#endif
     }
     private void BuildShell() {
         shell = new Panel { BackColor=Color.FromArgb(11,16,24), BackgroundImage=portal, BackgroundImageLayout=ImageLayout.Stretch, Dock=DockStyle.Fill };
@@ -176,7 +182,7 @@ public sealed partial class MainForm {
             updatePanel.SetBounds(outer,18,Math.Max(1,workW-outer*2),64);
             int downloadWidth=Math.Max(190,TextRenderer.MeasureText(launcherUpdateButton.Text,launcherUpdateButton.Font).Width+30);
             int checkWidth=Math.Max(210,TextRenderer.MeasureText(checkUpdatesButton.Text,checkUpdatesButton.Font).Width+30);
-            bool showDownload=releases!=null&&Updates.Newer(releases.launcher.version,Updates.LauncherVersion);
+            bool showDownload=LauncherUpdateAvailable();
             launcherUpdateButton.SetBounds(updatePanel.Width-downloadWidth-10,12,downloadWidth,40);
             launcherUpdateButton.Visible=showDownload&&!busy&&!checkingUpdates;
             checkUpdatesButton.SetBounds(updatePanel.Width-checkWidth-(showDownload?downloadWidth+20:10),12,checkWidth,40);
@@ -190,6 +196,10 @@ public sealed partial class MainForm {
         }
     }
     private void CreateShortcuts() {
+#if LINUX
+        try { LinuxPlatform.CreateShortcut(); statusLabel.Text="Raccourci créé dans le menu des applications."; }
+        catch(Exception ex) { Log(ex.Message); }
+#else
         try {
             string exe=Application.ExecutablePath;
             string start=Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.StartMenu),"Programs","AionCL Launcher.lnk");
@@ -209,6 +219,7 @@ public sealed partial class MainForm {
             }
             statusLabel.Text=L("Raccourcis créés dans le Menu Démarrer et sur le Bureau.","Shortcuts created in the Start menu and on the Desktop.","Verknüpfungen im Startmenü und auf dem Desktop erstellt.");
         } catch(Exception ex) { MessageBox.Show(this,ex.Message,"AionCL",MessageBoxButtons.OK,MessageBoxIcon.Error); }
+#endif
     }
     private void LayoutInstallPanel(int width,int height) {
         int inner=Math.Max(220,width-44), y=18;
@@ -321,6 +332,10 @@ public sealed partial class MainForm {
         homeButton.BackColor=storyPage=="home"?Color.FromArgb(44,61,75):BackColor; helpButton.BackColor=storyPage=="settings"?Color.FromArgb(44,61,75):BackColor; journalButton.BackColor=storyPage=="journal"?Color.FromArgb(44,61,75):BackColor;
         clientTitle.Text=L("Votre jeu","Your game","Dein Spiel");pathLabel.Text=L("DOSSIER DU CLIENT","GAME FOLDER","SPIELORDNER");languageLabel.Text=L("LANGUE DU JEU ET DU LAUNCHER","GAME & LAUNCHER LANGUAGE","SPIEL- UND LAUNCHERSPRACHE");
         installButton.Text=L("Installer / reprendre","Install / resume","Installieren / fortsetzen");verifyButton.Text=L("Vérifier / réparer","Verify / repair","Prüfen / reparieren"); shortcutsButton.Text=L("Créer les raccourcis Windows","Create Windows shortcuts","Windows-Verknüpfungen erstellen"); diagnosticsButton.Text=L("Tester la connexion","Run connection test","Verbindung testen"); forgetCredentialsButton.Text=L("Effacer les identifiants mémorisés","Clear saved credentials","Gespeicherte Zugangsdaten löschen"); cancelButton.Text=L("Interrompre","Interrupt","Unterbrechen"); playButton.Text=L("▶   JOUER","▶   PLAY","▶   SPIELEN");
+#if LINUX
+        authRemember.Text=L("Session","Session","Sitzung");
+        shortcutsButton.Text=L("Créer le raccourci Linux","Create Linux shortcut","Linux-Verknüpfung erstellen");
+#endif
         browseButton.AccessibleName=L("Choisir le dossier client","Choose game folder","Spielordner auswählen");
         storyTitle.Text=storyPage=="home"?L("Votre aventure reprend ici.","Your adventure continues here.","Dein Abenteuer geht weiter."):storyPage=="journal"?L("Journal du launcher","Launcher log","Launcher-Protokoll"):L("Paramètres du launcher","Launcher settings","Launcher-Einstellungen");
         storyBody.Text=storyPage=="home"?L("Retrouvez Atréia dans Aion Classic 2.4.\nChoisissez votre langue, puis entrez en jeu.","Return to Atreia in Aion Classic 2.4.\nChoose your language, then enter the game.","Kehre in Aion Classic 2.4 nach Atreia zurück.\nWähle deine Sprache und starte das Spiel."):storyPage=="journal"?L("Les opérations et diagnostics apparaissent ici.","Operations and diagnostics appear here.","Vorgänge und Diagnosen erscheinen hier."):L("Dossier du client, langue et outils facultatifs.\nLes modifications sont appliquées avant le prochain lancement.","Game folder, language and optional tools.\nChanges are applied before the next launch.","Spielordner, Sprache et optionale Werkzeuge.\nÄnderungen werden vor dem nächsten Start angewendet.");

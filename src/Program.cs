@@ -117,6 +117,9 @@ namespace AionCL
 
                 config.Validate();
                 Text = "AionCL - Classic 2.4 · Launcher " + config.launcherVersion;
+#if LINUX
+                Text += " · Linux preview.1";
+#endif
                 RefreshAccountBox(null);
                 authStatus.Text = launcherAuth.Accounts.Count == 0 ? "Saisis tes identifiants pour lancer le client." : "Identifiants mémorisés disponibles.";
                 await CheckUpdates(true);
@@ -589,7 +592,11 @@ namespace AionCL
                         RedactSessionKey(command.Arguments)
                     );
 
+#if LINUX
+                    var camera = new CameraSettings(); // Windows PID-based helper is not Wine-compatible.
+#else
                     var camera = CameraSettings.Load(cameraPreference);
+#endif
                     string cameraHelper = camera.enabled
                         ? await CameraSettings.VerifyHelper(pathBox.Text, manifest.Manifest, cts.Token) : null;
                     var process = game.StartGame(command);

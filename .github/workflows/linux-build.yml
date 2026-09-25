@@ -1,0 +1,21 @@
+name: Linux launcher preview
+on:
+  workflow_dispatch:
+  push:
+    branches: [main, feat/linux-launcher]
+    paths: ['src/**', 'linux/**', 'tests/**', 'assets/**', 'config/**', 'LINUX.md', '.github/workflows/linux-build.yml']
+permissions:
+  contents: read
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: docker build -t aioncl-linux-build -f linux/Dockerfile linux
+      - run: docker run --rm --user "$(id -u):$(id -g)" -e HOME=/tmp -v "$PWD:/src" aioncl-linux-build
+      - uses: actions/upload-artifact@v4
+        with:
+          name: aioncl-launcher-linux-${{ github.sha }}
+          path: |
+            out/AionCL-Launcher-*-linux-*.tar.gz*
+            out/linux/linux-preview.png

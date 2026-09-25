@@ -494,7 +494,7 @@ public static class VoiceMode {
     static string Backup(string language) { return ".aioncl/voice-original/" + language; }
     public static void RequireGameClosed() {
         foreach (var p in Process.GetProcesses()) using (p) {
-            if (p.ProcessName.Equals("aionclassic", StringComparison.OrdinalIgnoreCase) || p.ProcessName.Equals("aion", StringComparison.OrdinalIgnoreCase))
+            if (p.ProcessName.Equals("aionclassic.bin", StringComparison.OrdinalIgnoreCase) || p.ProcessName.Equals("aionclassic", StringComparison.OrdinalIgnoreCase) || p.ProcessName.Equals("aion", StringComparison.OrdinalIgnoreCase))
                 throw new InvalidOperationException("Close Aion before changing voices or repairing files.");
         }
     }
@@ -555,6 +555,12 @@ public sealed class GameLauncher {
         var switches = new Regex(@"(?<!\S)-(?:shop|ingameshop|ingamewebshop|dnpshop|dingameshop)(?!\S)", RegexOptions.IgnoreCase);
         return switches.Replace(arguments ?? "", "").TrimEnd() + " -dnpshop -dingameshop";
     }
-    public Process StartGame(ProcessStartInfo command) { return Process.Start(command); }
+    public Process StartGame(ProcessStartInfo command) {
+#if LINUX
+        return Process.Start(LinuxPlatform.WineCommand(command));
+#else
+        return Process.Start(command);
+#endif
+    }
 }
 }

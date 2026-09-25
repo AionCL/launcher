@@ -29,7 +29,10 @@ public static class Updates {
     }
     public static bool Newer(string remote,string local) {return Version(remote)>Version(local);}
     public static async Task<UpdateFeed> Fetch(Network network,string url,CancellationToken token) {
-        var feed=Json.Parse<UpdateFeed>(Encoding.UTF8.GetString(await network.Small(url,token).ConfigureAwait(false)));
+        var payload=Encoding.UTF8.GetString(await network.Small(url,token).ConfigureAwait(false));
+        UpdateFeed feed;
+        try { feed=Json.Parse<UpdateFeed>(payload); }
+        catch(ArgumentException ex) { throw new InvalidDataException("Invalid update feed JSON.",ex); }
         if(feed==null)throw new InvalidDataException("Empty update feed.");feed.Validate();return feed;
     }
     public static LauncherConfig Target(LauncherConfig original,UpdateFeed feed) {

@@ -37,6 +37,13 @@ public sealed partial class MainForm {
         updateTimer.Tick += async delegate { if(!busy&&!checkingUpdates)await CheckUpdates(false); };
         FormClosed += delegate {updateTimer.Stop();updateTimer.Dispose();};
     }
+    private bool LauncherUpdateAvailable() {
+#if LINUX
+        return false; // The public launcher feed distributes Windows binaries.
+#else
+        return releases!=null&&Updates.Newer(releases.launcher.version,Updates.LauncherVersion);
+#endif
+    }
     private bool ClientUpdateAvailable() {
         if(manifest==null||String.IsNullOrWhiteSpace(pathBox.Text))return false;
         try {var p=Safety.Under(pathBox.Text,".aioncl/version.json");if(!File.Exists(p))return false;var local=Json.Parse<LocalVersion>(File.ReadAllText(p));return local!=null&&Updates.Newer(manifest.Manifest.clientVersion,local.version);}
@@ -47,7 +54,7 @@ public sealed partial class MainForm {
         checkUpdatesButton.Text=L("Rechercher les mises à jour","Check for updates","Updates suchen");
         launcherUpdateButton.Text=L("Mettre à jour le launcher","Update launcher","Launcher aktualisieren");
         checkUpdatesButton.Enabled=!busy&&!checkingUpdates&&config!=null;
-        bool launcherAvailable=releases!=null&&Updates.Newer(releases.launcher.version,Updates.LauncherVersion);
+        bool launcherAvailable=LauncherUpdateAvailable();
         bool directLauncherUpdate=launcherAvailable&&releases.launcher!=null&&!String.IsNullOrWhiteSpace(releases.launcher.assetUrl)&&!String.IsNullOrWhiteSpace(releases.launcher.sha256);
         launcherUpdateButton.Visible=directLauncherUpdate&&!busy&&!checkingUpdates;
         string available=launcherAvailable?L(directLauncherUpdate?"Nouveau launcher disponible. ":"Nouveau launcher disponible dans le journal. ",directLauncherUpdate?"New launcher available. ":"A new launcher is available in the log. ",directLauncherUpdate?"Neuer Launcher verfügbar. ":"Ein neuer Launcher ist im Journal verfügbar. "):"";
@@ -61,6 +68,10 @@ public sealed partial class MainForm {
         LayoutLauncher();
     }
     private async Task UpdateLauncherAsync() {
+#if LINUX
+        await Task.Yield();
+        throw new PlatformNotSupportedException("Linux launcher updates require a Linux package.");
+#else
         if(releases==null||releases.launcher==null||String.IsNullOrWhiteSpace(releases.launcher.assetUrl)||String.IsNullOrWhiteSpace(releases.launcher.sha256)) { if(releases!=null) Process.Start(new ProcessStartInfo { FileName=Safety.Https(releases.launcher.downloadPage).AbsoluteUri,UseShellExecute=true }); return; }
         string root=AppDomain.CurrentDomain.BaseDirectory.TrimEnd(Path.DirectorySeparatorChar,Path.AltDirectorySeparatorChar);
         string staging=Path.Combine(Path.GetTempPath(),"AionCL-launcher-update-"+Guid.NewGuid().ToString("N")); string zip=Path.Combine(staging,"launcher.zip"); string extract=Path.Combine(staging,"new"); string helperSource=Path.Combine(root,"AionCL.Updater.exe");
@@ -81,6 +92,7 @@ public sealed partial class MainForm {
         } catch(OperationCanceledException) { statusLabel.Text=L("Mise à jour interrompue.","Update interrupted.","Update unterbrochen."); }
         catch(Exception ex) { statusLabel.Text=L("Échec de la mise à jour du launcher.","Launcher update failed.","Launcher-Update fehlgeschlagen."); Log(ex.Message); MessageBox.Show(this,ex.Message,"AionCL",MessageBoxButtons.OK,MessageBoxIcon.Error); }
         finally { if(!IsDisposed){ progressBar.Style=ProgressBarStyle.Continuous; SetBusy(false); } }
+#endif
     }
     private void RefreshNoticeUi() {
         if(noticeCard==null) return;

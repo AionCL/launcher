@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+set -euo pipefail
+base=$(CDPATH= cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)
+if ! command -v mono >/dev/null; then
+    echo 'Mono is required. See LINUX.md for runtime dependencies.' >&2
+    exit 1
+fi
+if [[ -z ${DISPLAY:-} ]]; then
+    echo 'An X11 or XWayland desktop session is required (DISPLAY is unset).' >&2
+    exit 1
+fi
+exec mono "$base/AionCL.Launcher.Linux.exe" "$@"
