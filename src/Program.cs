@@ -118,7 +118,7 @@ namespace AionCL
                 config.Validate();
                 Text = "AionCL - Classic 2.4 · Launcher " + config.launcherVersion;
 #if LINUX
-                Text += " · Linux preview.1";
+                Text += " · Linux preview.2";
 #endif
                 RefreshAccountBox(null);
                 authStatus.Text = launcherAuth.Accounts.Count == 0 ? "Saisis tes identifiants pour lancer le client." : "Identifiants mémorisés disponibles.";
@@ -274,7 +274,7 @@ namespace AionCL
             try
             {
                 var progress =
-                    new Progress<TransferProgress>(
+                    CreateUiProgress<TransferProgress>(
                         delegate(TransferProgress p)
                         {
                             int percent = p.Total > 0 ? (int)Math.Min(100, p.Bytes * 100L / p.Total) : 0;
@@ -303,7 +303,7 @@ namespace AionCL
                                 ) +
                                 "/s" + eta;
                         });
-                var extractionProgress = new Progress<ExtractionProgress>(delegate(ExtractionProgress p) {
+                var extractionProgress = CreateUiProgress<ExtractionProgress>(delegate(ExtractionProgress p) {
                     progressBar.Style = ProgressBarStyle.Continuous;
                     int packagePercent = p.PackageTotal == 0 ? 100 : (int)(100L * (p.PackageIndex - 1) / p.PackageTotal);
                     int filePercent = p.FileTotal == 0 ? 100 : (int)(100L * p.FileIndex / p.FileTotal);
@@ -403,7 +403,7 @@ namespace AionCL
                 statusLabel.Text = L("Vérification des fichiers en cours…", "Verifying game files…", "Spieldateien werden geprüft…");
                 progressBar.Value = 0;
                 progressBar.Style = ProgressBarStyle.Marquee;
-                var progress = new Progress<VerificationProgress>(delegate(VerificationProgress p) {
+                var progress = CreateUiProgress<VerificationProgress>(delegate(VerificationProgress p) {
                     if (!reporting || IsDisposed) return;
                     statusLabel.Text = L("Vérification", "Verifying", "Prüfung") + " : " + p.Completed + " / " + p.Total + Environment.NewLine + p.Path;
                     progressBar.Style = ProgressBarStyle.Continuous;
@@ -677,8 +677,23 @@ namespace AionCL
             return true;
         }
 
+#if LINUX
+        private readonly System.Collections.Generic.List<IDisposable> linuxProgress = new System.Collections.Generic.List<IDisposable>();
+#endif
+        private IProgress<T> CreateUiProgress<T>(Action<T> callback) {
+#if LINUX
+            var progress = new LinuxUiProgress<T>(this, callback);
+            linuxProgress.Add(progress);
+            return progress;
+#else
+            return new Progress<T>(callback);
+#endif
+        }
         private void SetBusy(bool busy)
         {
+#if LINUX
+            if (!busy) { foreach(var progress in linuxProgress) progress.Dispose(); linuxProgress.Clear(); }
+#endif
             this.busy = busy;
             languageBox.Enabled = !busy;
             koreanVoices.Enabled = !busy;

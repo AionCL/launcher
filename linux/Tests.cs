@@ -37,6 +37,14 @@ class LinuxTests {
             Application.EnableVisualStyles();
             using(var form=new MainForm(true)) {
                 form.Show(); Application.DoEvents();
+                int deliveries=0, last=-1;
+                using(var progress=new LinuxUiProgress<int>(form, value=>{deliveries++;last=value;})) {
+                    System.Threading.Tasks.Task.Run(()=>{for(int i=0;i<100000;i++)progress.Report(i);}).Wait();
+                    var deadline=DateTime.UtcNow.AddSeconds(2);
+                    while(last<0 && DateTime.UtcNow<deadline) { Application.DoEvents(); System.Threading.Thread.Sleep(10); }
+                    Check(deliveries==1 && last==99999,"Coalesce high-rate progress without flooding X11");
+                }
+                Check(LinuxPlatform.InstallationDrive(root).AvailableFreeSpace>0,"Filesystem capacity");
                 foreach(string field in new[]{"helpButton", "journalButton", "homeButton"}) {
                     var button=(Button)typeof(MainForm).GetField(field,BindingFlags.NonPublic|BindingFlags.Instance).GetValue(form);
                     button.PerformClick(); Application.DoEvents();

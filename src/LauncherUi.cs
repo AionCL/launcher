@@ -394,7 +394,7 @@ public sealed partial class MainForm {
             SetBusy(true);cts=new System.Threading.CancellationTokenSource();
             progressBar.Value=0;progressBar.Style=ProgressBarStyle.Marquee;
             statusLabel.Text=L("Contrôle du pack coréen…","Checking Korean voice pack…","Koreanisches Stimmenpaket wird geprüft…");
-            var progress=new Progress<VerificationProgress>(delegate(VerificationProgress p) {
+            var progress=CreateUiProgress<VerificationProgress>(delegate(VerificationProgress p) {
                 if(!reporting||IsDisposed)return;
                 progressBar.Style=ProgressBarStyle.Continuous;progressBar.Value=(int)(100L*p.Completed/p.Total);
                 statusLabel.Text=(install?L("Installation des voix","Installing voices","Stimmen installieren"):L("Retrait des voix","Removing voices","Stimmen entfernen"))+" : "+p.Completed+" / "+p.Total;
@@ -416,7 +416,7 @@ public sealed partial class MainForm {
             if(install && !japanesePack.HasCache(root)) using(var dialog=new FolderBrowserDialog { Description=L("Choisir le dossier extrait du pack japonais (pas le dossier du jeu). Le dossier doit contenir gossip, npc et system.","Select the extracted Japanese pack folder (not the game folder). It must contain gossip, npc and system.","Den entpackten japanischen Stimmenordner wählen (nicht den Spielordner). Er muss gossip, npc und system enthalten.") }) { if(dialog.ShowDialog(this)!=DialogResult.OK)return; source=dialog.SelectedPath; }
             SetBusy(true); cts=new System.Threading.CancellationTokenSource(); progressBar.Value=0; progressBar.Style=ProgressBarStyle.Marquee;
             statusLabel.Text=L("Contrôle du pack japonais…","Checking Japanese voice pack…","Japanisches Stimmenpaket wird geprüft…");
-            var progress=new Progress<VerificationProgress>(delegate(VerificationProgress p) { if(!reporting||IsDisposed)return; progressBar.Style=ProgressBarStyle.Continuous; progressBar.Value=(int)(100L*p.Completed/p.Total); statusLabel.Text=(install?L("Installation des voix","Installing voices","Stimmen installieren"):L("Retrait des voix","Removing voices","Stimmen entfernen"))+" : "+p.Completed+" / "+p.Total; });
+            var progress=CreateUiProgress<VerificationProgress>(delegate(VerificationProgress p) { if(!reporting||IsDisposed)return; progressBar.Style=ProgressBarStyle.Continuous; progressBar.Value=(int)(100L*p.Completed/p.Total); statusLabel.Text=(install?L("Installation des voix","Installing voices","Stimmen installieren"):L("Retrait des voix","Removing voices","Stimmen entfernen"))+" : "+p.Completed+" / "+p.Total; });
             await japanesePack.Change(root,language,install,source,progress,cts.Token); progressBar.Value=100;
             outcome=install?L("Voix japonaises installées. Textes conservés.","Japanese voices installed. Text unchanged.","Japanische Stimmen installiert. Texte unverändert."):L("Pack japonais retiré. Voix d’origine restaurées.","Japanese pack removed. Original voices restored.","Japanisches Paket entfernt. Originalstimmen wiederhergestellt.");
         } catch(OperationCanceledException) { outcome=L("Opération interrompue. Les fichiers ajoutés restent contrôlés.","Operation interrupted. Added files remain protected.","Vorgang unterbrochen. Hinzugefügte Dateien bleiben geschützt."); }

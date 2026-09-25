@@ -408,7 +408,12 @@ public static class Installation {
             string version = Safety.Under(metadata, "version.json"); if (File.Exists(version)) File.Delete(version);
             string cache = Safety.Under(metadata, "cache"); string stage = Safety.Under(metadata, "staging");
             long needed = plan.Target.Manifest.sourceBytes + plan.Packages.Sum(p => p.size);
-            if (new DriveInfo(Path.GetPathRoot(Path.GetFullPath(root))).AvailableFreeSpace < needed) throw new IOException("Espace disque insuffisant pour cache et preparation.");
+#if LINUX
+            long freeBytes = LinuxPlatform.InstallationDrive(root).AvailableFreeSpace;
+#else
+            long freeBytes = new DriveInfo(Path.GetPathRoot(Path.GetFullPath(root))).AvailableFreeSpace;
+#endif
+            if (freeBytes < needed) throw new IOException("Espace disque insuffisant pour cache et preparation.");
             var downloader = new Downloader(network);
             using (var semaphore = new SemaphoreSlim(config.maxParallelDownloads)) {
                 await Task.WhenAll(plan.Packages.Select(async p => { await semaphore.WaitAsync(token).ConfigureAwait(false); try { log("Telechargement / validation : " + p.name); await downloader.Get(p, cache, progress, token).ConfigureAwait(false); } finally { semaphore.Release(); } })).ConfigureAwait(false);

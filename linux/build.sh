@@ -16,6 +16,6 @@ cp linux/aioncl-launcher "$out/"
 cp LINUX.md "$out/"
 chmod +x "$out/aioncl-launcher"
 # Test binaries and screenshots stay in out/linux, outside the distributable.
-tar -czf out/AionCL-Launcher-2.5.42-linux-preview.1.tar.gz -C "$out" AionCL.Launcher.Linux.exe launcher.json aioncl-launcher LINUX.md
-(cd out && sha256sum AionCL-Launcher-2.5.42-linux-preview.1.tar.gz > AionCL-Launcher-2.5.42-linux-preview.1.tar.gz.sha256)
-cat out/AionCL-Launcher-2.5.42-linux-preview.1.tar.gz.sha256
+tar -czf out/AionCL-Launcher-2.5.42-linux-preview.2.tar.gz -C "$out" AionCL.Launcher.Linux.exe launcher.json aioncl-launcher LINUX.md
+(cd out && sha256sum AionCL-Launcher-2.5.42-linux-preview.2.tar.gz > AionCL-Launcher-2.5.42-linux-preview.2.tar.gz.sha256)
+cat out/AionCL-Launcher-2.5.42-linux-preview.2.tar.gz.sha256
