@@ -122,8 +122,7 @@ public sealed partial class MainForm {
         BuildShell();
         BuildUpdateUi(); LayoutLauncher(); ApplyLanguage();
 #if LINUX
-        authRemember.Checked=false; authRemember.Enabled=true;
-        authRemember.Text="Session";
+        authRemember.Checked=false; authRemember.Enabled=false; authRemember.Visible=false;
         cameraButton.Enabled=true;
         cameraButton.Text="Camera / FOV";
 #endif
@@ -273,7 +272,10 @@ public sealed partial class MainForm {
         accountBox.SetBounds(left+190,5,170,26);
         authUserLabel.SetBounds(x,36,userWidth,16); authUser.SetBounds(x,52,userWidth,30); x+=userWidth+gap;
         authPasswordLabel.SetBounds(x,36,userWidth,16); authPassword.SetBounds(x,52,userWidth,30); x+=userWidth+gap;
-        authRemember.SetBounds(x,55,rememberWidth,24); x+=rememberWidth+gap;
+        if(authRemember.Visible) { authRemember.SetBounds(x,55,rememberWidth,24); x+=rememberWidth+gap; }
+#if LINUX
+        manualWidth=Math.Max(manualWidth,210);
+#endif
         authManualButton.SetBounds(x,50,manualWidth,34);
         authStatus.SetBounds(left,88,Math.Max(300,available),20);
     }
@@ -338,7 +340,7 @@ public sealed partial class MainForm {
         clientTitle.Text=L("Votre jeu","Your game","Dein Spiel");pathLabel.Text=L("DOSSIER DU CLIENT","GAME FOLDER","SPIELORDNER");languageLabel.Text=L("LANGUE DU JEU ET DU LAUNCHER","GAME & LAUNCHER LANGUAGE","SPIEL- UND LAUNCHERSPRACHE");
         installButton.Text=L("Installer / reprendre","Install / resume","Installieren / fortsetzen");verifyButton.Text=L("Vérifier / réparer","Verify / repair","Prüfen / reparieren"); shortcutsButton.Text=L("Créer les raccourcis Windows","Create Windows shortcuts","Windows-Verknüpfungen erstellen"); diagnosticsButton.Text=L("Tester la connexion","Run connection test","Verbindung testen"); forgetCredentialsButton.Text=L("Effacer les identifiants mémorisés","Clear saved credentials","Gespeicherte Zugangsdaten löschen"); cancelButton.Text=L("Interrompre","Interrupt","Unterbrechen"); playButton.Text=L("▶   JOUER","▶   PLAY","▶   SPIELEN");
 #if LINUX
-        authRemember.Text=L("Session","Session","Sitzung");
+        authManualButton.Text=L("Sauvegarder ces identifiants","Save these credentials","Zugangsdaten speichern");
         shortcutsButton.Text=L("Créer le raccourci Linux","Create Linux shortcut","Linux-Verknüpfung erstellen");
 #endif
         browseButton.AccessibleName=L("Choisir le dossier client","Choose game folder","Spielordner auswählen");

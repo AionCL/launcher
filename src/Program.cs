@@ -118,7 +118,7 @@ namespace AionCL
                 config.Validate();
                 Text = "AionCL - Classic 2.4 · Launcher " + config.launcherVersion;
 #if LINUX
-                Text += " · Linux preview.10";
+                Text += " · Linux preview.11";
 #endif
                 RefreshAccountBox(null);
                 authStatus.Text = launcherAuth.Accounts.Count == 0 ? "Saisis tes identifiants pour lancer le client." : "Identifiants mémorisés disponibles.";
@@ -190,9 +190,15 @@ namespace AionCL
             }
             var validation = ValidateNativeCredentials(authUser.Text.Trim(), authPassword.Text);
             if (validation != null) { authStatus.Text = TranslateMessage(validation); return; }
-            launcherAuth.SaveCredentials(authUser.Text.Trim(), authPassword.Text, authRemember.Checked);
+            launcherAuth.SaveCredentials(authUser.Text.Trim(), authPassword.Text,
+#if LINUX
+                true
+#else
+                authRemember.Checked
+#endif
+            );
             RefreshAccountBox(authUser.Text.Trim());
-            authStatus.Text = TranslateMessage(authRemember.Checked ? "Identifiants enregistrés pour le client." : "Identifiants prêts pour le client.");
+            authStatus.Text = TranslateMessage("Identifiants enregistrés pour le client.");
             await Task.Yield();
         }
 
@@ -517,8 +523,10 @@ namespace AionCL
             }
             var credentialError = ValidateNativeCredentials(directAuthUser, directAuthPassword);
             if (credentialError != null) { authStatus.Text = TranslateMessage(credentialError); return; }
+#if !LINUX
             launcherAuth.SaveCredentials(directAuthUser, directAuthPassword, authRemember.Checked);
             RefreshAccountBox(directAuthUser);
+#endif
             authStatus.Text = TranslateMessage("Connexion directe en préparation…");
 
             SetBusy(true);

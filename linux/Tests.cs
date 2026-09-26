@@ -101,7 +101,7 @@ class LinuxTests {
                 Check(!update.Visible, "Never offer a Windows launcher update on Linux");
                 var camera=(Button)typeof(MainForm).GetField("cameraButton",BindingFlags.NonPublic|BindingFlags.Instance).GetValue(form);
                 var remember=(CheckBox)typeof(MainForm).GetField("authRemember",BindingFlags.NonPublic|BindingFlags.Instance).GetValue(form);
-                Check(camera.Enabled && remember.Enabled && !remember.Checked, "Linux session credentials and camera enabled");
+                Check(camera.Enabled && !remember.Visible, "Linux credential action and camera enabled");
                 using(var bitmap=new Bitmap(form.Width,form.Height)) {
                     using(var graphics=Graphics.FromImage(bitmap)) graphics.CopyFromScreen(form.Location,Point.Empty,bitmap.Size);
                     bitmap.Save(Path.Combine(AppDomain.CurrentDomain.BaseDirectory,"linux-preview.png"));

@@ -60,33 +60,36 @@ public sealed partial class MainForm {
             CameraSettings saved = CameraSettings.Load(cameraPreference);
             using (var dialog = new Form()) {
                 dialog.Text = L("Camera", "Camera", "Kamera");
-                dialog.ClientSize = new Size(580, 355); dialog.FormBorderStyle = FormBorderStyle.FixedDialog;
+                dialog.ClientSize = new Size(580, 330); dialog.FormBorderStyle = FormBorderStyle.FixedDialog;
                 dialog.MaximizeBox = false; dialog.MinimizeBox = false; dialog.StartPosition = FormStartPosition.CenterParent;
                 dialog.BackColor = BackColor; dialog.ForeColor = ForeColor; dialog.Font = Font;
-                var enabled = new CheckBox { Text = L("Activer les reglages camera", "Enable camera settings", "Kameraeinstellungen aktivieren"), Checked = saved.enabled, Bounds = new Rectangle(24, 22, 530, 30) };
-                dialog.Controls.Add(enabled);
-                LabelAt(dialog, L("Distance maximale", "Maximum distance", "Maximaler Abstand"), 24, 74, 420, 24, 10, ForeColor);
-                var distance = new TrackBar { Minimum = 5, Maximum = 100, Value = saved.distance, TickStyle = TickStyle.None, Bounds = new Rectangle(20, 106, 438, 40), AccessibleName = "Camera distance" };
-                var distanceValue = new NumericUpDown { Minimum = 5, Maximum = 100, Value = saved.distance, Bounds = new Rectangle(470, 108, 80, 28) };
-                LabelAt(dialog, L("Champ de vision (FOV)", "Field of view (FOV)", "Sichtfeld (FOV)"), 24, 160, 420, 24, 10, ForeColor);
-                var fov = new TrackBar { Minimum = 60, Maximum = 170, Value = saved.fov, TickStyle = TickStyle.None, Bounds = new Rectangle(20, 192, 438, 40), AccessibleName = "Field of view" };
-                var fovValue = new NumericUpDown { Minimum = 60, Maximum = 170, Value = saved.fov, Bounds = new Rectangle(470, 194, 80, 28) };
+                LabelAt(dialog, saved.enabled ? L("Actif au prochain lancement", "Active on next launch", "Beim nächsten Start aktiv") : L("Actuellement désactivé", "Currently disabled", "Derzeit deaktiviert"), 24, 18, 530, 26, 10, saved.enabled ? Color.FromArgb(92,210,160) : Color.FromArgb(210,170,110));
+                LabelAt(dialog, L("Distance maximale", "Maximum distance", "Maximaler Abstand"), 24, 55, 420, 24, 10, ForeColor);
+                var distance = new TrackBar { Minimum = 5, Maximum = 100, Value = saved.distance, TickStyle = TickStyle.None, Bounds = new Rectangle(20, 87, 438, 40), AccessibleName = "Camera distance" };
+                var distanceValue = new NumericUpDown { Minimum = 5, Maximum = 100, Value = saved.distance, Bounds = new Rectangle(470, 89, 80, 28) };
+                LabelAt(dialog, L("Champ de vision (FOV)", "Field of view (FOV)", "Sichtfeld (FOV)"), 24, 141, 420, 24, 10, ForeColor);
+                var fov = new TrackBar { Minimum = 60, Maximum = 170, Value = saved.fov, TickStyle = TickStyle.None, Bounds = new Rectangle(20, 173, 438, 40), AccessibleName = "Field of view" };
+                var fovValue = new NumericUpDown { Minimum = 60, Maximum = 170, Value = saved.fov, Bounds = new Rectangle(470, 175, 80, 28) };
                 dialog.Controls.AddRange(new Control[] { distance, distanceValue, fov, fovValue });
                 distance.ValueChanged += delegate { distanceValue.Value = distance.Value; };
                 distanceValue.ValueChanged += delegate { distance.Value = (int)distanceValue.Value; };
                 fov.ValueChanged += delegate { fovValue.Value = fov.Value; };
                 fovValue.ValueChanged += delegate { fov.Value = (int)fovValue.Value; };
-                var reset = ButtonAt(dialog, L("Valeurs par defaut", "Reset defaults", "Standardwerte"), 24, 249, 210, 34, false);
-                reset.Click += delegate { distance.Value = 32; fov.Value = 60; enabled.Checked = false; };
-                var cancel = ButtonAt(dialog, L("Annuler", "Cancel", "Abbrechen"), 270, 305, 130, 34, false);
+                var reset = ButtonAt(dialog, L("Valeurs par defaut", "Reset defaults", "Standardwerte"), 24, 224, 210, 34, false);
+                reset.Click += delegate { distance.Value = 32; fov.Value = 60; };
+                var disable = ButtonAt(dialog, L("Désactiver", "Disable", "Deaktivieren"), 24, 280, 150, 34, false);
+                disable.Click += delegate { new CameraSettings { enabled=false, fov=fov.Value, distance=distance.Value }.Save(cameraPreference); dialog.DialogResult=DialogResult.OK; };
+                var cancel = ButtonAt(dialog, L("Annuler", "Cancel", "Abbrechen"), 184, 280, 120, 34, false);
                 cancel.DialogResult = DialogResult.Cancel; dialog.CancelButton = cancel;
-                var save = ButtonAt(dialog, L("Enregistrer", "Save", "Speichern"), 412, 305, 140, 34, true);
+                var save = ButtonAt(dialog, L("Enregistrer et activer", "Save and enable", "Speichern und aktivieren"), 314, 280, 238, 34, true);
                 save.Click += delegate {
-                    new CameraSettings { enabled = enabled.Checked, fov = fov.Value, distance = distance.Value }.Save(cameraPreference);
+                    new CameraSettings { enabled = true, fov = fov.Value, distance = distance.Value }.Save(cameraPreference);
                     dialog.DialogResult = DialogResult.OK;
                 };
-                if (dialog.ShowDialog(this) == DialogResult.OK)
-                    statusLabel.Text = L("Camera enregistree pour le prochain lancement.", "Camera saved for the next launch.", "Kamera fur den nachsten Start gespeichert.");
+                if (dialog.ShowDialog(this) == DialogResult.OK) {
+                    var current=CameraSettings.Load(cameraPreference);
+                    statusLabel.Text = current.enabled ? L("Camera activée pour le prochain lancement.", "Camera enabled for the next launch.", "Kamera für den nächsten Start aktiviert.") : L("Camera désactivée.", "Camera disabled.", "Kamera deaktiviert.");
+                }
             }
         } catch (Exception ex) { MessageBox.Show(this, ex.Message, "AionCL", MessageBoxButtons.OK, MessageBoxIcon.Error); }
     }

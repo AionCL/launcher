@@ -18,6 +18,6 @@ cp linux/aioncl-launcher linux/aioncl-camera linux/install-d3dx9.sh linux/instal
 cp LINUX.md "$out/"
 chmod +x "$out/aioncl-launcher" "$out/aioncl-camera" "$out/install-d3dx9.sh" "$out/install-dxvk.sh" "$out/install-d3dcompiler.sh"
 # Test binaries and screenshots stay in out/linux, outside the distributable.
-tar -czf out/AionCL-Launcher-2.5.42-linux-preview.10.tar.gz -C "$out" AionCL.Launcher.Linux.exe launcher.json aioncl-launcher aioncl-camera install-d3dx9.sh install-dxvk.sh install-d3dcompiler.sh LINUX.md
-(cd out && sha256sum AionCL-Launcher-2.5.42-linux-preview.10.tar.gz > AionCL-Launcher-2.5.42-linux-preview.10.tar.gz.sha256)
-cat out/AionCL-Launcher-2.5.42-linux-preview.10.tar.gz.sha256
+tar -czf out/AionCL-Launcher-2.5.42-linux-preview.11.tar.gz -C "$out" AionCL.Launcher.Linux.exe launcher.json aioncl-launcher aioncl-camera install-d3dx9.sh install-dxvk.sh install-d3dcompiler.sh LINUX.md
+(cd out && sha256sum AionCL-Launcher-2.5.42-linux-preview.11.tar.gz > AionCL-Launcher-2.5.42-linux-preview.11.tar.gz.sha256)
+cat out/AionCL-Launcher-2.5.42-linux-preview.11.tar.gz.sha256
