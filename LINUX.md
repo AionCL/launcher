@@ -142,5 +142,7 @@ installer DXVK dans le client dédié avec :
 `./install-dxvk.sh /chemin/absolu/du/client`. Le script utilise DXVK 2.6.2,
 contrôle le SHA-256 de l'archive officielle, sauvegarde les éventuelles DLL
 précédentes sous `.aioncl/dxvk-backup` et écrit la configuration recommandée
-pour Aion. Le launcher force ensuite `d3d9=n,b` uniquement dans le processus jeu.
+pour Aion. Il déplace aussi le cache de shaders compilé par l'ancien renderer
+dans cette sauvegarde afin que le jeu le reconstruise avec DXVK. Le launcher
+force ensuite `d3d9=n,b` uniquement dans le processus jeu.
 Source : https://github.com/doitsujin/dxvk/releases/tag/v2.6.2

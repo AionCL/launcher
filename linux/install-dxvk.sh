@@ -68,4 +68,11 @@ d3d9.deferSurfaceCreation = True
 d3d9.forceSamplerTypeSpecConstants = True
 EOF
 mv -f -- "$config.aioncl-new" "$config"
+# Shader bytecode is renderer-specific. The No-IP DLL marker only tracks its own
+# source patch, so a cache built by WineD3D would otherwise survive the switch
+# to DXVK and cause angle-dependent black lighting/terrain passes.
+shader_cache="$client/Shaders/Cache"
+if [[ -d $shader_cache && ! -e $backup/Shaders-Cache-before-DXVK ]]; then
+    mv -- "$shader_cache" "$backup/Shaders-Cache-before-DXVK"
+fi
 printf 'DXVK_INSTALL_PASS version=%s client=%s backup=%s\n' "$version" "$client" "$backup"
