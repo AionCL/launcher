@@ -111,11 +111,12 @@ public static class LinuxPlatform {
             WorkingDirectory = game.WorkingDirectory, UseShellExecute = false
         };
         result.EnvironmentVariables["WINEPREFIX"] = prefix;
-        // The shipped No-IP patch is a version.dll proxy. Wine otherwise loads
-        // its builtin DLL and Aion rejects the game server locally with error 6.
+        // Load the shipped No-IP/DXVK proxies and Microsoft's shader compiler.
+        // Wine's compiler cannot compile some Aion shaders (E5017).
         string overrides = result.EnvironmentVariables["WINEDLLOVERRIDES"];
         result.EnvironmentVariables["WINEDLLOVERRIDES"] =
-            (String.IsNullOrWhiteSpace(overrides) ? "" : overrides.TrimEnd(';') + ";") + "version=n,b;d3d9=n,b";
+            (String.IsNullOrWhiteSpace(overrides) ? "" : overrides.TrimEnd(';') + ";") +
+            "version=n,b;d3d9=n,b;d3dcompiler_47=n,b";
         return result;
     }
     public static void CreateShortcut() {

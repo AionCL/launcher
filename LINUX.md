@@ -1,4 +1,4 @@
-# Launcher Linux — 2.5.42-linux-preview.8
+# Launcher Linux — 2.5.42-linux-preview.9
 
 Première adaptation expérimentale du launcher Windows 2.5.42. Même interface,
 assets, moteur de téléchargement/reprise, SHA-256, réparation, flux client et
@@ -16,7 +16,7 @@ docker run --rm --user "$(id -u):$(id -g)" -e HOME=/tmp -v "$PWD:/src" aioncl-li
 Ou installer Mono (compilateur `mcs`), libgdiplus, Xvfb, xauth et DejaVu puis
 exécuter `./linux/build.sh`. Le script compile, exécute les régressions du cœur
 et les tests Linux, rend l'interface sous Xvfb puis produit
-`out/AionCL-Launcher-2.5.42-linux-preview.8.tar.gz` et son SHA-256.
+`out/AionCL-Launcher-2.5.42-linux-preview.9.tar.gz` et son SHA-256.
 Le rendu de contrôle reste dans `out/linux/linux-preview.png`.
 
 ## Lancer sur un bureau Linux
@@ -146,3 +146,10 @@ pour Aion. Il déplace aussi le cache de shaders compilé par l'ancien renderer
 dans cette sauvegarde afin que le jeu le reconstruise avec DXVK. Le launcher
 force ensuite `d3d9=n,b` uniquement dans le processus jeu.
 Source : https://github.com/doitsujin/dxvk/releases/tag/v2.6.2
+
+Preview.9 ajoute `install-d3dcompiler.sh` pour les terrains absents accompagnés
+de `D3DCompile2 ... E5017` dans le terminal. Jeu fermé, exécuter :
+`./install-d3dcompiler.sh /chemin/absolu/du/prefixe-wine /chemin/absolu/du/client`.
+Le script installe le D3DCompiler 47 x64 officiel de Microsoft, vérifie son
+SHA-256, sauvegarde la DLL Wine et déplace les caches de shaders existants.
+Le launcher force ensuite son chargement natif uniquement pour le jeu.

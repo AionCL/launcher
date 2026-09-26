@@ -28,9 +28,9 @@ class LinuxTests {
             });
             Check(command.FileName=="/bin/echo" && !command.UseShellExecute, "Runner and shell policy");
             Check(command.EnvironmentVariables["WINEPREFIX"]==Path.Combine(root,"prefix with spaces"), "Dedicated prefix");
-            Check(command.EnvironmentVariables["WINEDLLOVERRIDES"]=="d3d9=n;version=b;version=n,b;d3d9=n,b", "Load client No-IP and DXVK proxies while preserving other Wine overrides");
+            Check(command.EnvironmentVariables["WINEDLLOVERRIDES"]=="d3d9=n;version=b;version=n,b;d3d9=n,b;d3dcompiler_47=n,b", "Load client proxies and native shader compiler while preserving other Wine overrides");
             Environment.SetEnvironmentVariable("WINEDLLOVERRIDES", null);
-            Check(LinuxPlatform.WineCommand(command).EnvironmentVariables["WINEDLLOVERRIDES"]=="version=n,b;d3d9=n,b", "No-IP and DXVK proxies enabled without existing overrides");
+            Check(LinuxPlatform.WineCommand(command).EnvironmentVariables["WINEDLLOVERRIDES"]=="version=n,b;d3d9=n,b;d3dcompiler_47=n,b", "No-IP, DXVK and native shader compiler enabled without existing overrides");
             command.RedirectStandardOutput=true;
             using(var process=Process.Start(command)) {
                 string output=process.StandardOutput.ReadToEnd(); process.WaitForExit();
