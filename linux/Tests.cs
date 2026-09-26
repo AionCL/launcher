@@ -42,8 +42,13 @@ class LinuxTests {
             Environment.SetEnvironmentVariable("XDG_DATA_HOME", root);
             LinuxPlatform.CreateShortcut();
             Check(File.ReadAllText(Path.Combine(root,"applications","aioncl-launcher.desktop")).Contains("Terminal=false"), "Desktop entry");
-            var auth=new LauncherAuth(); auth.SaveCredentials("fixture", "not-a-real-password", false);
-            Check(auth.Accounts.Count==0, "No credential persistence");
+            var auth=new LauncherAuth(); auth.SaveCredentials("first", "one", true); auth.SaveCredentials("second", "two", true);
+            Check(auth.Accounts.Count==2 && auth.Find("FIRST").password=="one", "Session account selection");
+            auth.SaveCredentials("first", "changed", true);
+            Check(auth.Accounts.Count==2 && auth.Accounts[0].username=="first" && auth.Find("first").password=="changed", "Session account replacement");
+            auth.SaveCredentials("first", "changed", false);
+            Check(auth.Accounts.Count==1 && auth.Find("first")==null, "Unchecked account is forgotten");
+            auth.ForgetCredentials(); Check(auth.Accounts.Count==0, "Clear session accounts");
             var package=new Package { name="fixture.zip",size=100 };
             Check(LinuxPlatform.DownloadBytesNeeded(new[]{package},root)==100,"Fresh download capacity");
             File.WriteAllBytes(Path.Combine(root,"fixture.zip.part"),new byte[60]);
@@ -96,7 +101,7 @@ class LinuxTests {
                 Check(!update.Visible, "Never offer a Windows launcher update on Linux");
                 var camera=(Button)typeof(MainForm).GetField("cameraButton",BindingFlags.NonPublic|BindingFlags.Instance).GetValue(form);
                 var remember=(CheckBox)typeof(MainForm).GetField("authRemember",BindingFlags.NonPublic|BindingFlags.Instance).GetValue(form);
-                Check(!camera.Enabled && !remember.Enabled && !remember.Checked, "Linux UI capability gates");
+                Check(camera.Enabled && remember.Enabled && !remember.Checked, "Linux session credentials and camera enabled");
                 using(var bitmap=new Bitmap(form.Width,form.Height)) {
                     using(var graphics=Graphics.FromImage(bitmap)) graphics.CopyFromScreen(form.Location,Point.Empty,bitmap.Size);
                     bitmap.Save(Path.Combine(AppDomain.CurrentDomain.BaseDirectory,"linux-preview.png"));

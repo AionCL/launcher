@@ -1,0 +1,21 @@
+#!/usr/bin/env bash
+# Bridge the Linux launcher to the Windows camera helper in the same Wine server.
+set -euo pipefail
+if [[ $# != 3 || ! -f $1 || ! $2 =~ ^[0-9]+$ || ! $3 =~ ^[0-9]+$ ]]; then
+    echo 'Usage: aioncl-camera /absolute/path/AionCL.Camera.exe fov distance' >&2
+    exit 2
+fi
+runner=${AIONCL_WINE:-wine}
+helper=$1
+fov=$2
+distance=$3
+for ((attempt=0; attempt<60; attempt++)); do
+    windows_pid=$("$runner" tasklist 2>/dev/null | tr -d '\r' |
+        awk 'tolower($1)=="aionclassic.bin" && $2 ~ /^[0-9]+$/ { print $2; exit }')
+    if [[ -n $windows_pid ]]; then
+        exec "$runner" "$helper" "$windows_pid" "$fov" "$distance"
+    fi
+    sleep 1
+done
+echo 'Camera: aionclassic.bin did not appear in the Wine process list.' >&2
+exit 3

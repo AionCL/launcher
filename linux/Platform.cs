@@ -119,6 +119,19 @@ public static class LinuxPlatform {
             "version=n,b;d3d9=n,b;d3dcompiler_47=n,b";
         return result;
     }
+    public static Process StartCamera(string helper, CameraSettings settings) {
+        string script=Path.Combine(AppDomain.CurrentDomain.BaseDirectory,"aioncl-camera");
+        if(!File.Exists(script))throw new FileNotFoundException("Linux camera bridge is missing.",script);
+        var start=new ProcessStartInfo {
+            FileName=script, WorkingDirectory=Path.GetDirectoryName(helper), UseShellExecute=false,
+            Arguments=Quote(helper)+" "+settings.fov.ToString()+" "+settings.distance.ToString()
+        };
+        string prefix=Environment.GetEnvironmentVariable("AIONCL_WINEPREFIX") ??
+            Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),"AionCL","wine");
+        if(!Path.IsPathRooted(prefix))throw new ArgumentException("AIONCL_WINEPREFIX must be an absolute path.");
+        start.EnvironmentVariables["WINEPREFIX"]=prefix;
+        return Process.Start(start);
+    }
     public static void CreateShortcut() {
         string data = Environment.GetEnvironmentVariable("XDG_DATA_HOME");
         if (String.IsNullOrEmpty(data) || !Path.IsPathRooted(data))
