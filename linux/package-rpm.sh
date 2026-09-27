@@ -4,7 +4,9 @@ cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.."
 payload=${1:-out/linux}
 destination=${2:-out}
 release=${AIONCL_RPM_RELEASE:-0.preview13}
+preview=${AIONCL_PREVIEW_NUMBER:-13}
 [[ $release =~ ^[A-Za-z0-9._+-]+$ ]] || { echo 'Invalid RPM package release.' >&2; exit 1; }
+[[ $preview =~ ^[0-9]+$ ]] || { echo 'Invalid Linux preview number.' >&2; exit 1; }
 [[ -f $payload/AionCL.Launcher.Linux.exe && -x $payload/aioncl-launcher && -f $payload/assets/aioncl-icon.png ]]
 command -v rpmbuild >/dev/null || { echo 'rpmbuild is required.' >&2; exit 1; }
 mkdir -p "$destination"
@@ -12,7 +14,7 @@ top=$(mktemp -d)
 trap 'rm -rf "$top"' EXIT
 mkdir -p "$top"/{BUILD,BUILDROOT,RPMS,SOURCES,SPECS,SRPMS,rpmdb}
 tar -czf "$top/SOURCES/aioncl-payload.tar.gz" -C "$payload" .
-install -m 644 linux/aioncl-launcher.desktop "$top/SOURCES/aioncl-launcher.desktop"
+sed "s/@PREVIEW@/$preview/g" linux/aioncl-launcher.desktop > "$top/SOURCES/aioncl-launcher.desktop"
 cat >"$top/SPECS/aioncl-launcher.spec" <<EOF
 Name:           aioncl-launcher
 Version:        2.5.42
@@ -39,11 +41,15 @@ tar -xzf %{SOURCE0} -C aioncl-payload
 %install
 mkdir -p %{buildroot}/opt/aioncl/launcher
 cp -a aioncl-payload/. %{buildroot}/opt/aioncl/launcher/
+chmod 0755 %{buildroot}/opt/aioncl %{buildroot}/opt/aioncl/launcher
 install -D -m 0644 %{SOURCE1} %{buildroot}/usr/share/applications/aioncl-launcher.desktop
 
 %files
 /opt/aioncl/launcher
 /usr/share/applications/aioncl-launcher.desktop
+
+%post
+chmod 0755 /opt/aioncl/launcher /opt/aioncl/launcher/aioncl-launcher
 
 %changelog
 * Sun Sep 27 2026 AionCL Project <support@aioncl.example> - 2.5.42-$release

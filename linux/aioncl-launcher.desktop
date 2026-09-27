@@ -1,6 +1,6 @@
 [Desktop Entry]
 Type=Application
-Name=AionCL Launcher
+Name=AionCL Launcher (Linux preview @PREVIEW@)
 Comment=Install and launch Aion Classic
 Exec=/opt/aioncl/launcher/aioncl-launcher
 Icon=/opt/aioncl/launcher/assets/aioncl-icon.png

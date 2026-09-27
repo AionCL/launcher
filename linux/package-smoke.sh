@@ -4,6 +4,7 @@ cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.."
 destination=${1:-out}
 version=${AIONCL_DEB_VERSION:-2.5.42~preview13}
 rpm_release=${AIONCL_RPM_RELEASE:-0.preview13}
+preview=${AIONCL_PREVIEW_NUMBER:-13}
 deb="$destination/aioncl-launcher_${version}_amd64.deb"
 rpm="$destination/aioncl-launcher-2.5.42-${rpm_release}.x86_64.rpm"
 [[ -f $deb && -f $rpm ]]
@@ -17,11 +18,17 @@ tmp=$(mktemp -d)
 trap 'rm -rf "$tmp"' EXIT
 mkdir -p "$tmp/rpmdb"
 dpkg-deb -x "$deb" "$tmp/deb"
+dpkg-deb -e "$deb" "$tmp/deb-control"
 [[ -x $tmp/deb/opt/aioncl/launcher/aioncl-launcher ]]
 [[ $(stat -c '%a' "$tmp/deb/opt/aioncl/launcher") == 755 ]]
 [[ -s $tmp/deb/opt/aioncl/launcher/assets/aioncl-icon.png ]]
 [[ -s $tmp/deb/usr/share/applications/aioncl-launcher.desktop ]]
+grep -Fqx "Name=AionCL Launcher (Linux preview $preview)" "$tmp/deb/usr/share/applications/aioncl-launcher.desktop"
 [[ $(dpkg-deb -f "$deb" Version) == "$version" ]]
+chmod 0700 "$tmp/deb/opt/aioncl/launcher"
+AIONCL_PACKAGE_ROOT="$tmp/deb" sh "$tmp/deb-control/postinst" configure
+[[ $(stat -c '%a' "$tmp/deb/opt/aioncl/launcher") == 755 ]]
+[[ -x $tmp/deb/opt/aioncl/launcher/aioncl-launcher ]]
 rpm --dbpath "$tmp/rpmdb" -qp --qf '%{NAME} %{VERSION}-%{RELEASE} %{ARCH}\n' "$rpm" | grep -Fx "aioncl-launcher 2.5.42-${rpm_release} x86_64"
 rpm --dbpath "$tmp/rpmdb" -qp --requires "$rpm" | grep -Fx mono-core >/dev/null
 rpm --dbpath "$tmp/rpmdb" -qp --requires "$rpm" | grep -Fx mono-winforms >/dev/null
