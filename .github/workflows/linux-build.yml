@@ -67,7 +67,14 @@ jobs:
           cd "$repo"
           apt-ftparchive packages pool/main > dists/preview/main/binary-amd64/Packages
           gzip -9n -c dists/preview/main/binary-amd64/Packages > dists/preview/main/binary-amd64/Packages.gz
-          apt-ftparchive release dists/preview > dists/preview/Release
+          apt-ftparchive \
+            -o APT::FTPArchive::Release::Origin=AionCL \
+            -o 'APT::FTPArchive::Release::Label=AionCL Linux Preview' \
+            -o APT::FTPArchive::Release::Suite=preview \
+            -o APT::FTPArchive::Release::Codename=preview \
+            -o APT::FTPArchive::Release::Architectures=amd64 \
+            -o APT::FTPArchive::Release::Components=main \
+            release dists/preview > dists/preview/Release
           gpg --batch --yes --clearsign --output dists/preview/InRelease dists/preview/Release
           gpg --batch --yes --armor --detach-sign --output dists/preview/Release.gpg dists/preview/Release
           git add pool dists
