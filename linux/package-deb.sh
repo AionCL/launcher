@@ -11,8 +11,8 @@ mkdir -p "$destination"
 stage=$(mktemp -d)
 trap 'rm -rf "$stage"' EXIT
 install -d -m 0755 "$stage/opt/aioncl/launcher" "$stage/usr/share/applications"
-chmod 0755 "$stage/opt/aioncl" "$stage/opt/aioncl/launcher"
 cp -a "$payload/." "$stage/opt/aioncl/launcher/"
+chmod 0755 "$stage/opt/aioncl" "$stage/opt/aioncl/launcher"
 install -m 644 linux/aioncl-launcher.desktop "$stage/usr/share/applications/aioncl-launcher.desktop"
 install -d "$stage/DEBIAN"
 cat >"$stage/DEBIAN/control" <<EOF
