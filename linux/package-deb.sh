@@ -10,7 +10,8 @@ command -v dpkg-deb >/dev/null || { echo 'dpkg-deb is required.' >&2; exit 1; }
 mkdir -p "$destination"
 stage=$(mktemp -d)
 trap 'rm -rf "$stage"' EXIT
-install -d "$stage/opt/aioncl/launcher" "$stage/usr/share/applications"
+install -d -m 0755 "$stage/opt/aioncl/launcher" "$stage/usr/share/applications"
+chmod 0755 "$stage/opt/aioncl" "$stage/opt/aioncl/launcher"
 cp -a "$payload/." "$stage/opt/aioncl/launcher/"
 install -m 644 linux/aioncl-launcher.desktop "$stage/usr/share/applications/aioncl-launcher.desktop"
 install -d "$stage/DEBIAN"

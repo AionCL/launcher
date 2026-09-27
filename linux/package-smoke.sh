@@ -18,6 +18,7 @@ trap 'rm -rf "$tmp"' EXIT
 mkdir -p "$tmp/rpmdb"
 dpkg-deb -x "$deb" "$tmp/deb"
 [[ -x $tmp/deb/opt/aioncl/launcher/aioncl-launcher ]]
+[[ $(stat -c '%a' "$tmp/deb/opt/aioncl/launcher") == 755 ]]
 [[ -s $tmp/deb/opt/aioncl/launcher/assets/aioncl-icon.png ]]
 [[ -s $tmp/deb/usr/share/applications/aioncl-launcher.desktop ]]
 [[ $(dpkg-deb -f "$deb" Version) == "$version" ]]
