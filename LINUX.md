@@ -1,4 +1,4 @@
-# Launcher Linux — 2.5.42-linux-preview.12
+# Launcher Linux — 2.5.42-linux-preview.13
 
 Première adaptation expérimentale du launcher Windows 2.5.42. Même interface,
 assets, moteur de téléchargement/reprise, SHA-256, réparation, flux client et
@@ -29,7 +29,13 @@ Les paquets `.deb` installent automatiquement les prérequis Debian/Ubuntu :
 `libssl3t64` (ou `libssl3`), `xdg-utils`, certificats et Wine. Le RPM déclare les
 équivalents Mono, OpenSSL, DejaVu et Wine dans ses dépendances. XWayland est requis
 sous Wayland. Le fichier de bureau et son icône sont installés dans le menu système.
-Installation, par exemple : `sudo apt install ./aioncl-launcher_..._amd64.deb` ou
+Installation initiale du `.deb` de préversion :
+`sudo apt install ./aioncl-launcher_..._amd64.deb`. Ce paquet configure la source
+APT preview et installe la clé publique qui authentifie ses métadonnées. Ensuite,
+les mises à jour se font avec `sudo apt update && sudo apt upgrade`. La branche
+`feat/linux-launcher` publie automatiquement chaque paquet testé dans le dépôt
+signé `https://raw.githubusercontent.com/AionCL/launcher/apt-repo/`. Cette source
+est réservée aux préversions. Le RPM reste installé manuellement pour le moment :
 `sudo dnf install ./aioncl-launcher-...x86_64.rpm`.
 
 Pour créer les paquets, le build demande `dpkg-deb`, `rpmbuild` et les outils déjà
@@ -66,8 +72,8 @@ client avec un jeu en cours d'exécution sur une autre machine.
   réduire la contention pendant le chargement. Les paramètres s'appliquent au
   lancement suivant du jeu.
 - Mises à jour du jeu actives. L'auto-update du launcher Windows est désactivé
-  pour éviter de remplacer le paquet Linux par un EXE Windows. Les prochains
-  paquets Linux s'installent manuellement pour le moment.
+  pour éviter de remplacer le paquet Linux par un EXE Windows. Les mises à jour
+  du paquet Debian passent par le dépôt APT preview signé.
 - Le paquet natif installe un raccourci système et l'icône. L'archive `.tar.gz`
   reste portable et peut créer un raccourci utilisateur depuis Paramètres.
 - La suite synthétique ne qualifie pas les packs de voix, le système de fichiers

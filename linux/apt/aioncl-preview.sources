@@ -1,0 +1,5 @@
+Types: deb
+URIs: https://raw.githubusercontent.com/AionCL/launcher/apt-repo/
+Suites: preview
+Components: main
+Signed-By: /usr/share/keyrings/aioncl-archive-keyring.gpg

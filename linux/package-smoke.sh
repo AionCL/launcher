@@ -2,7 +2,8 @@
 set -euo pipefail
 cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.."
 destination=${1:-out}
-deb="$destination/aioncl-launcher_2.5.42~preview12_amd64.deb"
+version=${AIONCL_DEB_VERSION:-2.5.42~preview13}
+deb="$destination/aioncl-launcher_${version}_amd64.deb"
 rpm="$destination/aioncl-launcher-2.5.42-0.preview12.x86_64.rpm"
 [[ -f $deb && -f $rpm ]]
 depends=$(dpkg-deb -f "$deb" Depends)
@@ -18,6 +19,8 @@ dpkg-deb -x "$deb" "$tmp/deb"
 [[ -x $tmp/deb/opt/aioncl/launcher/aioncl-launcher ]]
 [[ -s $tmp/deb/opt/aioncl/launcher/assets/aioncl-icon.png ]]
 [[ -s $tmp/deb/usr/share/applications/aioncl-launcher.desktop ]]
+[[ -s $tmp/deb/usr/share/keyrings/aioncl-archive-keyring.gpg ]]
+grep -Fqx 'URIs: https://raw.githubusercontent.com/AionCL/launcher/apt-repo/' "$tmp/deb/etc/apt/sources.list.d/aioncl-preview.sources"
 rpm --dbpath "$tmp/rpmdb" -qp --qf '%{NAME} %{VERSION}-%{RELEASE} %{ARCH}\n' "$rpm" | grep -Fx 'aioncl-launcher 2.5.42-0.preview12 x86_64'
 rpm --dbpath "$tmp/rpmdb" -qp --requires "$rpm" | grep -Fx mono-core >/dev/null
 rpm --dbpath "$tmp/rpmdb" -qp --requires "$rpm" | grep -Fx mono-winforms >/dev/null
