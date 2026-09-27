@@ -19,7 +19,7 @@ fi
 EOF
 chmod +x "$tmp/wine"
 AIONCL_WINE="$tmp/wine" AIONCL_CAMERA_START_DELAY=0 AIONCL_CAMERA_TEST_RESULT="$tmp/result" \
-    linux/aioncl-camera "$tmp/AionCL.Camera.exe" 130 85
+    bash linux/aioncl-camera "$tmp/AionCL.Camera.exe" 130 85
 expected="nice=10 args=<$tmp/AionCL.Camera.exe><1234><130><85>"
 grep -Fx -- "$expected" "$tmp/result" >/dev/null || {
     cat "$tmp/result" >&2
