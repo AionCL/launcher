@@ -3,6 +3,8 @@ set -euo pipefail
 cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.."
 payload=${1:-out/linux}
 destination=${2:-out}
+release=${AIONCL_RPM_RELEASE:-0.preview13}
+[[ $release =~ ^[A-Za-z0-9._+-]+$ ]] || { echo 'Invalid RPM package release.' >&2; exit 1; }
 [[ -f $payload/AionCL.Launcher.Linux.exe && -x $payload/aioncl-launcher && -f $payload/assets/aioncl-icon.png ]]
 command -v rpmbuild >/dev/null || { echo 'rpmbuild is required.' >&2; exit 1; }
 mkdir -p "$destination"
@@ -11,10 +13,10 @@ trap 'rm -rf "$top"' EXIT
 mkdir -p "$top"/{BUILD,BUILDROOT,RPMS,SOURCES,SPECS,SRPMS,rpmdb}
 tar -czf "$top/SOURCES/aioncl-payload.tar.gz" -C "$payload" .
 install -m 644 linux/aioncl-launcher.desktop "$top/SOURCES/aioncl-launcher.desktop"
-cat >"$top/SPECS/aioncl-launcher.spec" <<'EOF'
+cat >"$top/SPECS/aioncl-launcher.spec" <<EOF
 Name:           aioncl-launcher
 Version:        2.5.42
-Release:        0.preview12%{?dist}
+Release:        $release%{?dist}
 Summary:        AionCL launcher for Linux
 License:        Proprietary
 BuildArch:      x86_64
@@ -44,9 +46,9 @@ install -D -m 0644 %{SOURCE1} %{buildroot}/usr/share/applications/aioncl-launche
 /usr/share/applications/aioncl-launcher.desktop
 
 %changelog
-* Sun Sep 27 2026 AionCL Project <support@aioncl.example> - 2.5.42-0.preview12
+* Sun Sep 27 2026 AionCL Project <support@aioncl.example> - 2.5.42-$release
 - Add persistent Linux credentials, reduced-priority camera helper and native packages.
 EOF
 rpmbuild --dbpath "$top/rpmdb" --define "_topdir $top" --define '_build_id_links none' -bb "$top/SPECS/aioncl-launcher.spec" >/dev/null
 find "$top/RPMS" -type f -name '*.rpm' -exec cp {} "$destination/" \;
-echo "Created $destination/aioncl-launcher-2.5.42-0.preview12.x86_64.rpm"
+echo "Created $destination/aioncl-launcher-2.5.42-${release}.x86_64.rpm"

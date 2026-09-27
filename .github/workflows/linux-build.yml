@@ -11,10 +11,12 @@ jobs:
     runs-on: ubuntu-latest
     env:
       AIONCL_DEB_VERSION: 2.5.42~preview${{ github.run_number }}
+      AIONCL_RPM_RELEASE: 0.preview${{ github.run_number }}
+      AIONCL_PREVIEW_NUMBER: ${{ github.run_number }}
     steps:
       - uses: actions/checkout@v4
       - run: docker build -t aioncl-linux-build -f linux/Dockerfile linux
-      - run: docker run --rm --user "$(id -u):$(id -g)" -e HOME=/tmp -e AIONCL_DEB_VERSION="$AIONCL_DEB_VERSION" -v "$PWD:/src" aioncl-linux-build
+      - run: docker run --rm --user "$(id -u):$(id -g)" -e HOME=/tmp -e AIONCL_DEB_VERSION="$AIONCL_DEB_VERSION" -e AIONCL_RPM_RELEASE="$AIONCL_RPM_RELEASE" -e AIONCL_PREVIEW_NUMBER="$AIONCL_PREVIEW_NUMBER" -v "$PWD:/src" aioncl-linux-build
       - uses: actions/upload-artifact@v4
         with:
           name: aioncl-launcher-linux-${{ github.sha }}
@@ -24,12 +26,9 @@ jobs:
             out/aioncl-launcher-*.rpm
             out/linux/linux-preview.png
 
-  publish-apt-preview:
+  publish-preview-release:
     if: github.ref == 'refs/heads/feat/linux-launcher'
     needs: build
-    concurrency:
-      group: aioncl-apt-preview
-      cancel-in-progress: false
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -38,45 +37,17 @@ jobs:
         with:
           name: aioncl-launcher-linux-${{ github.sha }}
           path: packages
-      - name: Publish signed APT repository
+      - name: Publish Linux packages as a GitHub pre-release
         env:
           GH_TOKEN: ${{ github.token }}
-          APT_SIGNING_PRIVATE_KEY: ${{ secrets.APT_SIGNING_PRIVATE_KEY }}
-          AIONCL_DEB_VERSION: 2.5.42~preview${{ github.run_number }}
         run: |
           set -euo pipefail
-          sudo apt-get update
-          sudo apt-get install -y --no-install-recommends dpkg-dev apt-utils gnupg
-          test -n "$APT_SIGNING_PRIVATE_KEY"
-          mkdir -m 700 "$RUNNER_TEMP/gnupg"
-          export GNUPGHOME="$RUNNER_TEMP/gnupg"
-          printf '%s' "$APT_SIGNING_PRIVATE_KEY" | gpg --batch --import >/dev/null 2>&1
-          repo="$RUNNER_TEMP/apt-repo"
-          remote="https://x-access-token:${GH_TOKEN}@github.com/AionCL/launcher.git"
-          if git ls-remote --exit-code "$remote" refs/heads/apt-repo >/dev/null 2>&1; then
-            git clone --depth 1 --branch apt-repo "$remote" "$repo"
-          else
-            mkdir "$repo"
-            git -C "$repo" init -b apt-repo
-            git -C "$repo" remote add origin "$remote"
-          fi
-          git -C "$repo" config user.name 'github-actions[bot]'
-          git -C "$repo" config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          mkdir -p "$repo/pool/main" "$repo/dists/preview/main/binary-amd64"
-          install -m 0644 "packages/aioncl-launcher_${AIONCL_DEB_VERSION}_amd64.deb" "$repo/pool/main/"
-          cd "$repo"
-          apt-ftparchive packages pool/main > dists/preview/main/binary-amd64/Packages
-          gzip -9n -c dists/preview/main/binary-amd64/Packages > dists/preview/main/binary-amd64/Packages.gz
-          apt-ftparchive \
-            -o APT::FTPArchive::Release::Origin=AionCL \
-            -o 'APT::FTPArchive::Release::Label=AionCL Linux Preview' \
-            -o APT::FTPArchive::Release::Suite=preview \
-            -o APT::FTPArchive::Release::Codename=preview \
-            -o APT::FTPArchive::Release::Architectures=amd64 \
-            -o APT::FTPArchive::Release::Components=main \
-            release dists/preview > dists/preview/Release
-          gpg --batch --yes --clearsign --output dists/preview/InRelease dists/preview/Release
-          gpg --batch --yes --armor --detach-sign --output dists/preview/Release.gpg dists/preview/Release
-          git add pool dists
-          git commit -m "Publish AionCL preview ${AIONCL_DEB_VERSION}"
-          git push origin apt-repo
+          shopt -s nullglob
+          assets=(packages/*.deb packages/*.rpm packages/*.tar.gz packages/*.sha256)
+          test "${#assets[@]}" -ge 4
+          tag="aioncl-linux-preview-${GITHUB_RUN_NUMBER}"
+          gh release create "$tag" "${assets[@]}" \
+            --repo AionCL/launcher \
+            --title "AionCL Linux 2.5.42 Preview ${GITHUB_RUN_NUMBER}" \
+            --prerelease \
+            --notes "Linux launcher preview packages built and tested from ${GITHUB_SHA}. Install the .deb or .rpm manually; the launcher continues to manage game-client updates."
