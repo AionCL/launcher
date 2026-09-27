@@ -14,10 +14,23 @@ xvfb-run -a mono "$out/AionCL.LinuxTests.exe"
 mcs -out:"$out/AionCL.GameSmoke.exe" "${refs[@]}" -r:"$out/AionCL.Launcher.Linux.exe" linux/GameSmoke.cs
 mcs -out:"$out/AionCL.RecipeCheck.exe" "${refs[@]}" -r:"$out/AionCL.Launcher.Linux.exe" linux/RecipeCheck.cs
 cp config/launcher.json "$out/launcher.json"
+mkdir -p "$out/assets"
+cp assets/aioncl-icon.png "$out/assets/aioncl-icon.png"
 cp linux/aioncl-launcher linux/aioncl-camera linux/install-d3dx9.sh linux/install-dxvk.sh linux/install-d3dcompiler.sh "$out/"
 cp LINUX.md "$out/"
 chmod +x "$out/aioncl-launcher" "$out/aioncl-camera" "$out/install-d3dx9.sh" "$out/install-dxvk.sh" "$out/install-d3dcompiler.sh"
+package=$(mktemp -d "$out/package-preview12.XXXXXX")
+trap 'rm -rf "$package"' EXIT
+mkdir -p "$package/assets"
+cp "$out/AionCL.Launcher.Linux.exe" "$out/launcher.json" "$out/aioncl-launcher" "$out/aioncl-camera" \
+   "$out/install-d3dx9.sh" "$out/install-dxvk.sh" "$out/install-d3dcompiler.sh" "$out/LINUX.md" "$package/"
+cp "$out/assets/aioncl-icon.png" "$package/assets/"
+chmod +x "$package/aioncl-launcher" "$package/aioncl-camera" "$package/install-d3dx9.sh" "$package/install-dxvk.sh" "$package/install-d3dcompiler.sh"
+linux/camera-bridge-smoke.sh
 # Test binaries and screenshots stay in out/linux, outside the distributable.
-tar -czf out/AionCL-Launcher-2.5.42-linux-preview.11.tar.gz -C "$out" AionCL.Launcher.Linux.exe launcher.json aioncl-launcher aioncl-camera install-d3dx9.sh install-dxvk.sh install-d3dcompiler.sh LINUX.md
-(cd out && sha256sum AionCL-Launcher-2.5.42-linux-preview.11.tar.gz > AionCL-Launcher-2.5.42-linux-preview.11.tar.gz.sha256)
-cat out/AionCL-Launcher-2.5.42-linux-preview.11.tar.gz.sha256
+tar -czf out/AionCL-Launcher-2.5.42-linux-preview.12.tar.gz -C "$out" AionCL.Launcher.Linux.exe launcher.json assets/aioncl-icon.png aioncl-launcher aioncl-camera install-d3dx9.sh install-dxvk.sh install-d3dcompiler.sh LINUX.md
+(cd out && sha256sum AionCL-Launcher-2.5.42-linux-preview.12.tar.gz > AionCL-Launcher-2.5.42-linux-preview.12.tar.gz.sha256)
+cat out/AionCL-Launcher-2.5.42-linux-preview.12.tar.gz.sha256
+linux/package-deb.sh "$package" out
+linux/package-rpm.sh "$package" out
+linux/package-smoke.sh out

@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Name=AionCL Launcher
+Comment=Install and launch Aion Classic
+Exec=/opt/aioncl/launcher/aioncl-launcher
+Icon=/opt/aioncl/launcher/assets/aioncl-icon.png
+Terminal=false
+Categories=Game;
+StartupNotify=true

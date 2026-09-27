@@ -18,4 +18,6 @@ jobs:
           name: aioncl-launcher-linux-${{ github.sha }}
           path: |
             out/AionCL-Launcher-*-linux-*.tar.gz*
+            out/aioncl-launcher_*.deb
+            out/aioncl-launcher-*.rpm
             out/linux/linux-preview.png

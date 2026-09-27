@@ -1,4 +1,4 @@
-# Launcher Linux — 2.5.42-linux-preview.11
+# Launcher Linux — 2.5.42-linux-preview.12
 
 Première adaptation expérimentale du launcher Windows 2.5.42. Même interface,
 assets, moteur de téléchargement/reprise, SHA-256, réparation, flux client et
@@ -16,15 +16,24 @@ docker run --rm --user "$(id -u):$(id -g)" -e HOME=/tmp -v "$PWD:/src" aioncl-li
 Ou installer Mono (compilateur `mcs`), libgdiplus, Xvfb, xauth et DejaVu puis
 exécuter `./linux/build.sh`. Le script compile, exécute les régressions du cœur
 et les tests Linux, rend l'interface sous Xvfb puis produit
-`out/AionCL-Launcher-2.5.42-linux-preview.11.tar.gz` et son SHA-256.
+`out/AionCL-Launcher-2.5.42-linux-preview.12.tar.gz` et son SHA-256. Il produit
+aussi des paquets `.deb` et `.rpm`, avec contrôle de leur contenu et dépendances.
 Le rendu de contrôle reste dans `out/linux/linux-preview.png`.
 
 ## Lancer sur un bureau Linux
 
-Dépendances Debian/Ubuntu : `mono-runtime`, `libmono-system-windows-forms4.0-cil`,
+Les paquets `.deb` installent automatiquement les prérequis Debian/Ubuntu :
+`mono-runtime`, `libmono-system-windows-forms4.0-cil`,
 `libmono-system-web-extensions4.0-cil`, `libmono-system-net-http4.0-cil`,
 `libmono-system-io-compression-filesystem4.0-cil`, `libgdiplus`, `fonts-dejavu-core`,
-`xdg-utils` et Wine adapté à la distribution. XWayland est requis sous Wayland.
+`libssl3t64` (ou `libssl3`), `xdg-utils`, certificats et Wine. Le RPM déclare les
+équivalents Mono, OpenSSL, DejaVu et Wine dans ses dépendances. XWayland est requis
+sous Wayland. Le fichier de bureau et son icône sont installés dans le menu système.
+Installation, par exemple : `sudo apt install ./aioncl-launcher_..._amd64.deb` ou
+`sudo dnf install ./aioncl-launcher-...x86_64.rpm`.
+
+Pour créer les paquets, le build demande `dpkg-deb`, `rpmbuild` et les outils déjà
+présents dans le conteneur Linux fourni.
 
 Extraire l'archive dans un dossier permanent puis exécuter `./aioncl-launcher`.
 Choisir un dossier de client Linux dédié dans l'interface ; le launcher installe
@@ -45,16 +54,22 @@ Wine initialise ce préfixe au premier lancement du jeu. Un wrapper Wine peut
 être utilisé ; Proton n'est pas encore intégré. Ne pas partager le dossier de
 client avec un jeu en cours d'exécution sur une autre machine.
 
-## Limites de cette première recette
+## Données utilisateur et caméra
 
-- Les comptes cochés « Session » restent sélectionnables tant que le launcher
-  reste ouvert. Les mots de passe ne sont jamais écrits sur disque sous Linux.
-- Caméra/FOV utilise un pont Wine qui résout le PID Windows du client avant de
-  lancer le helper vérifié livré par le manifeste.
+- Les comptes sauvegardés sont conservés en clair dans
+  `~/.aioncl/credentials.json`. Le dossier est limité au propriétaire (`0700`)
+  et le fichier à `0600`. Ils survivent à la fermeture du launcher et restent
+  présents après désinstallation du paquet ; les supprimer depuis Paramètres
+  ou effacer ce fichier.
+- Caméra/FOV utilise un pont Wine qui attend 15 secondes après avoir détecté le
+  client, puis lance le helper vérifié à priorité CPU réduite (`nice +10`) pour
+  réduire la contention pendant le chargement. Les paramètres s'appliquent au
+  lancement suivant du jeu.
 - Mises à jour du jeu actives. L'auto-update du launcher Windows est désactivé
   pour éviter de remplacer le paquet Linux par un EXE Windows. Les prochains
   paquets Linux s'installent manuellement pour le moment.
-- Raccourci dans le menu des applications, pointant sur le dossier extrait.
+- Le paquet natif installe un raccourci système et l'icône. L'archive `.tar.gz`
+  reste portable et peut créer un raccourci utilisateur depuis Paramètres.
 - La suite synthétique ne qualifie pas les packs de voix, le système de fichiers
   sensible à la casse du client réel, DirectX, Wine ou la connexion ingame.
 

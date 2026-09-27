@@ -118,7 +118,7 @@ namespace AionCL
                 config.Validate();
                 Text = "AionCL - Classic 2.4 · Launcher " + config.launcherVersion;
 #if LINUX
-                Text += " · Linux preview.11";
+                Text += " · Linux preview.12";
 #endif
                 RefreshAccountBox(null);
                 authStatus.Text = launcherAuth.Accounts.Count == 0 ? "Saisis tes identifiants pour lancer le client." : "Identifiants mémorisés disponibles.";
@@ -589,8 +589,8 @@ namespace AionCL
                     command.Arguments = GameLanguage.Apply(command.Arguments, selectedLanguage);
 
                     // Explicit direct mode follows the native Aion launcher contract.
-                    // Credentials are held only in memory and are never persisted by
-                    // this mode unless the user separately checks Windows storage.
+                    // Linux persistence is explicit through its Save button; Windows
+                    // storage remains opt-in through its existing checkbox.
                     command.Arguments += " -account:" + NativeArgument(directAuthUser) + " -password:" + NativeArgument(directAuthPassword);
 
                     Log(

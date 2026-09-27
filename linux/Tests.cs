@@ -42,13 +42,17 @@ class LinuxTests {
             Environment.SetEnvironmentVariable("XDG_DATA_HOME", root);
             LinuxPlatform.CreateShortcut();
             Check(File.ReadAllText(Path.Combine(root,"applications","aioncl-launcher.desktop")).Contains("Terminal=false"), "Desktop entry");
+            Environment.SetEnvironmentVariable("AIONCL_CONFIG_DIR",Path.Combine(root,"credentials"));
             var auth=new LauncherAuth(); auth.SaveCredentials("first", "one", true); auth.SaveCredentials("second", "two", true);
             Check(auth.Accounts.Count==2 && auth.Find("FIRST").password=="one", "Session account selection");
+            auth=new LauncherAuth(); Check(auth.Accounts.Count==2 && auth.Find("first").password=="one", "Accounts persist across launcher instances");
+            Check(File.Exists(Path.Combine(root,"credentials","credentials.json")), "Plain JSON credentials file exists in user config directory");
             auth.SaveCredentials("first", "changed", true);
             Check(auth.Accounts.Count==2 && auth.Accounts[0].username=="first" && auth.Find("first").password=="changed", "Session account replacement");
             auth.SaveCredentials("first", "changed", false);
             Check(auth.Accounts.Count==1 && auth.Find("first")==null, "Unchecked account is forgotten");
-            auth.ForgetCredentials(); Check(auth.Accounts.Count==0, "Clear session accounts");
+            auth.ForgetCredentials(); Check(auth.Accounts.Count==0 && !File.Exists(Path.Combine(root,"credentials","credentials.json")), "Clear persisted accounts");
+            Environment.SetEnvironmentVariable("AIONCL_CONFIG_DIR",null);
             var package=new Package { name="fixture.zip",size=100 };
             Check(LinuxPlatform.DownloadBytesNeeded(new[]{package},root)==100,"Fresh download capacity");
             File.WriteAllBytes(Path.Combine(root,"fixture.zip.part"),new byte[60]);
