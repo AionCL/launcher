@@ -19,6 +19,9 @@ class LinuxTests {
         string root = Path.Combine(Path.GetTempPath(), "aioncl-linux-" + Guid.NewGuid().ToString("N"));
         Directory.CreateDirectory(root);
         try {
+            var buildInfo=typeof(LinuxPlatform).Assembly.GetType("AionCL.LinuxBuildInfo");
+            string expectedPreview=Environment.GetEnvironmentVariable("AIONCL_PREVIEW_NUMBER")??"13";
+            Check(buildInfo!=null && (string)buildInfo.GetField("PreviewNumber",BindingFlags.Static|BindingFlags.NonPublic).GetRawConstantValue()==expectedPreview, "Launcher title preview matches package build number");
             Environment.SetEnvironmentVariable("AIONCL_WINE", "/bin/echo");
             Environment.SetEnvironmentVariable("AIONCL_WINEPREFIX", Path.Combine(root, "prefix with spaces"));
             Environment.SetEnvironmentVariable("WINEDLLOVERRIDES", "d3d9=n;version=b");

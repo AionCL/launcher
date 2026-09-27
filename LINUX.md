@@ -16,7 +16,7 @@ docker run --rm --user "$(id -u):$(id -g)" -e HOME=/tmp -v "$PWD:/src" aioncl-li
 Ou installer Mono (compilateur `mcs`), libgdiplus, Xvfb, xauth et DejaVu puis
 exécuter `./linux/build.sh`. Le script compile, exécute les régressions du cœur
 et les tests Linux, rend l'interface sous Xvfb puis produit
-`out/AionCL-Launcher-2.5.42-linux-preview.12.tar.gz` et son SHA-256. Il produit
+`out/AionCL-Launcher-2.5.42-linux-preview.13.tar.gz` et son SHA-256 par défaut. Il produit
 aussi des paquets `.deb` et `.rpm`, avec contrôle de leur contenu et dépendances.
 Le rendu de contrôle reste dans `out/linux/linux-preview.png`.
 
