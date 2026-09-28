@@ -35,6 +35,20 @@ scratch=$(mktemp -d "$cache/extract.XXXXXXXX")
 trap 'rm -rf -- "$scratch"' EXIT
 tar -xzf "$archive" -C "$scratch" \
     "dxvk-$version/x64/d3d9.dll" "dxvk-$version/x32/d3d9.dll"
+config_expected=$(mktemp "$cache/dxvk.conf.XXXXXXXX")
+trap 'rm -rf -- "$scratch"; rm -f -- "$config_expected"' EXIT
+cat >"$config_expected" <<'EOF'
+dxvk.allowFse = False
+d3d9.cachedDynamicBuffers = True
+d3d9.deferSurfaceCreation = True
+d3d9.forceSamplerTypeSpecConstants = True
+EOF
+if cmp -s "$scratch/dxvk-$version/x64/d3d9.dll" "$client/bin64/d3d9.dll" \
+    && { [[ ! -d $client/bin32 ]] || cmp -s "$scratch/dxvk-$version/x32/d3d9.dll" "$client/bin32/d3d9.dll"; } \
+    && cmp -s "$config_expected" "$client/dxvk.conf"; then
+    printf 'DXVK_ALREADY_READY version=%s client=%s\n' "$version" "$client"
+    exit 0
+fi
 if pgrep -x aionclassic.bin >/dev/null; then
     echo 'Aion started during preparation; close it and run this command again.' >&2
     exit 1
@@ -61,12 +75,7 @@ config="$client/dxvk.conf"
 if [[ -e $config && ! -e $backup/dxvk.conf ]]; then
     cp -a -- "$config" "$backup/dxvk.conf"
 fi
-cat >"$config.aioncl-new" <<'EOF'
-dxvk.allowFse = False
-d3d9.cachedDynamicBuffers = True
-d3d9.deferSurfaceCreation = True
-d3d9.forceSamplerTypeSpecConstants = True
-EOF
+cp "$config_expected" "$config.aioncl-new"
 mv -f -- "$config.aioncl-new" "$config"
 # Shader bytecode is renderer-specific. The No-IP DLL marker only tracks its own
 # source patch, so a cache built by WineD3D would otherwise survive the switch

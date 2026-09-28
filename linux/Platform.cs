@@ -119,6 +119,56 @@ public static class LinuxPlatform {
             "version=n,b;d3d9=n,b;d3dcompiler_47=n,b";
         return result;
     }
+    public static void ConfigureGameWindowsVersion(ProcessStartInfo game) {
+        string runner=Environment.GetEnvironmentVariable("AIONCL_WINE") ?? "wine";
+        string prefix=Environment.GetEnvironmentVariable("AIONCL_WINEPREFIX") ??
+            Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),"AionCL","wine");
+        if(!Path.IsPathRooted(prefix))throw new ArgumentException("AIONCL_WINEPREFIX must be an absolute path.");
+        string executable=Path.GetFileName(game.FileName);
+        if(String.IsNullOrWhiteSpace(executable)||executable.IndexOfAny(new[]{'\\','/'})>=0)
+            throw new ArgumentException("Invalid game executable name.");
+        var setup=new ProcessStartInfo {
+            FileName=runner,
+            Arguments="reg add "+Quote("HKCU\\Software\\Wine\\AppDefaults\\"+executable)+" /v Version /t REG_SZ /d win7 /f",
+            WorkingDirectory=game.WorkingDirectory,
+            UseShellExecute=false
+        };
+        setup.EnvironmentVariables["WINEPREFIX"]=prefix;
+        using(var process=Process.Start(setup)) {
+            if(process==null)throw new InvalidOperationException("Could not configure the Wine game profile.");
+            process.WaitForExit();
+            if(process.ExitCode!=0)throw new InvalidOperationException("Could not set the Aion Wine profile to Windows 7 (exit "+process.ExitCode+").");
+        }
+    }
+    public static async System.Threading.Tasks.Task PrepareRuntime(string client,string baseDirectory,
+        System.Threading.CancellationToken token,Action<string> log) {
+        string prefix=Environment.GetEnvironmentVariable("AIONCL_WINEPREFIX") ??
+            Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),"AionCL","wine");
+        if(!Path.IsPathRooted(prefix))throw new ArgumentException("AIONCL_WINEPREFIX must be an absolute path.");
+        string script=Path.Combine(baseDirectory,"prepare-linux-runtime.sh");
+        if(!File.Exists(script))throw new FileNotFoundException("Linux runtime preparation script is missing.",script);
+        var start=new ProcessStartInfo {
+            FileName="bash",Arguments=Quote(script)+" "+Quote(Path.GetFullPath(prefix))+" "+Quote(Path.GetFullPath(client)),
+            WorkingDirectory=Path.GetFullPath(client),UseShellExecute=false,RedirectStandardOutput=true,RedirectStandardError=true
+        };
+        string runner=Environment.GetEnvironmentVariable("AIONCL_WINE");
+        if(!String.IsNullOrWhiteSpace(runner))start.EnvironmentVariables["AIONCL_WINE"]=runner;
+        start.EnvironmentVariables["WINEPREFIX"]=Path.GetFullPath(prefix);
+        using(var process=Process.Start(start)) {
+            if(process==null)throw new InvalidOperationException("Could not start Linux runtime preparation.");
+            process.OutputDataReceived+=delegate(object sender,DataReceivedEventArgs e){if(e.Data!=null&&log!=null)log(e.Data);};
+            process.ErrorDataReceived+=delegate(object sender,DataReceivedEventArgs e){if(e.Data!=null&&log!=null)log(e.Data);};
+            process.BeginOutputReadLine();process.BeginErrorReadLine();
+            try {
+                while(!process.HasExited){token.ThrowIfCancellationRequested();await System.Threading.Tasks.Task.Delay(150,token).ConfigureAwait(false);}
+                process.WaitForExit();
+            } catch {
+                try{if(!process.HasExited)process.Kill();}catch{}
+                throw;
+            }
+            if(process.ExitCode!=0)throw new InvalidOperationException("Linux game runtime preparation failed (exit "+process.ExitCode+"). See the launcher log.");
+        }
+    }
     public static Process StartCamera(string helper, CameraSettings settings) {
         string script=Path.Combine(AppDomain.CurrentDomain.BaseDirectory,"aioncl-camera");
         if(!File.Exists(script))throw new FileNotFoundException("Linux camera bridge is missing.",script);

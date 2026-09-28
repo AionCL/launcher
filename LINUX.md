@@ -16,7 +16,7 @@ docker run --rm --user "$(id -u):$(id -g)" -e HOME=/tmp -v "$PWD:/src" aioncl-li
 Ou installer Mono (compilateur `mcs`), libgdiplus, Xvfb, xauth et DejaVu puis
 exécuter `./linux/build.sh`. Le script compile, exécute les régressions du cœur
 et les tests Linux, rend l'interface sous Xvfb puis produit
-`out/AionCL-Launcher-2.5.42-linux-preview.13.tar.gz` et son SHA-256 par défaut. Il produit
+`out/AionCL-Launcher-2.5.42-linux-preview.25.tar.gz` et son SHA-256 par défaut. Il produit
 aussi des paquets `.deb` et `.rpm`, avec contrôle de leur contenu et dépendances.
 Le rendu de contrôle reste dans `out/linux/linux-preview.png`.
 
@@ -26,8 +26,9 @@ Les paquets `.deb` installent automatiquement les prérequis Debian/Ubuntu :
 `mono-runtime`, `libmono-system-windows-forms4.0-cil`,
 `libmono-system-web-extensions4.0-cil`, `libmono-system-net-http4.0-cil`,
 `libmono-system-io-compression-filesystem4.0-cil`, `libgdiplus`, `fonts-dejavu-core`,
-`libssl3t64` (ou `libssl3`), `xdg-utils`, certificats et Wine. Le RPM déclare les
-équivalents Mono, OpenSSL, DejaVu et Wine dans ses dépendances. XWayland est requis
+`libssl3t64` (ou `libssl3`), `xdg-utils`, `curl`, `cabextract`, `procps`, `tar`,
+certificats et Wine. Le RPM déclare les équivalents Mono, OpenSSL, DejaVu, curl,
+cabextract, procps-ng, tar et Wine dans ses dépendances. XWayland est requis
 sous Wayland. Le fichier de bureau et son icône sont installés dans le menu système.
 Installation du `.deb` de préversion : `sudo apt install
 ./aioncl-launcher_..._amd64.deb`. Pour le RPM : `sudo dnf install
@@ -42,7 +43,13 @@ présents dans le conteneur Linux fourni.
 Extraire l'archive dans un dossier permanent puis exécuter `./aioncl-launcher`.
 Choisir un dossier de client Linux dédié dans l'interface ; le launcher installe
 et met à jour les mêmes packages publiés que sous Windows. Aucun nouveau package
-client n'est créé pour ce portage.
+client n'est créé pour ce portage. Au premier lancement du jeu, puis si un
+composant manque ou a changé, le launcher prépare automatiquement la couche Linux
+dans le client/préfixe sélectionné : DXVK 2.6.2, D3DCompiler47 Microsoft natif,
+options DXVK et profil Wine Windows 7 propre à Aion (correctif du gel au clic
+droit). Les téléchargements sont vérifiés par SHA-256 et les installateurs
+conservent les fichiers remplacés. Les lancements suivants vérifient les
+composants sans invalider à nouveau les caches de shaders.
 
 Variables facultatives avant lancement :
 

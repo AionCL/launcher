@@ -3,8 +3,8 @@ set -euo pipefail
 cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.."
 payload=${1:-out/linux}
 destination=${2:-out}
-release=${AIONCL_RPM_RELEASE:-0.preview13}
-preview=${AIONCL_PREVIEW_NUMBER:-13}
+release=${AIONCL_RPM_RELEASE:-0.preview25}
+preview=${AIONCL_PREVIEW_NUMBER:-25}
 [[ $release =~ ^[A-Za-z0-9._+-]+$ ]] || { echo 'Invalid RPM package release.' >&2; exit 1; }
 [[ $preview =~ ^[0-9]+$ ]] || { echo 'Invalid Linux preview number.' >&2; exit 1; }
 [[ -f $payload/AionCL.Launcher.Linux.exe && -x $payload/aioncl-launcher && -f $payload/assets/aioncl-icon.png ]]
@@ -25,6 +25,7 @@ BuildArch:      x86_64
 Requires:       mono-core, mono-winforms, mono-mvc
 Requires:       libgdiplus, dejavu-sans-fonts, xdg-utils, ca-certificates
 Requires:       openssl-libs, wine
+Requires:       cabextract, curl, procps-ng, tar
 Source0:        aioncl-payload.tar.gz
 Source1:        aioncl-launcher.desktop
 

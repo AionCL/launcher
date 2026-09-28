@@ -9,9 +9,11 @@ if (( EUID == 0 )); then
     echo 'Run as the owner of the Wine prefix and Aion client, not root.' >&2
     exit 1
 fi
-for command in curl sha256sum cabextract wine pgrep; do
+wine_runner=${AIONCL_WINE:-wine}
+for command in curl sha256sum cabextract pgrep; do
     command -v "$command" >/dev/null || { echo "Missing dependency: $command" >&2; exit 1; }
 done
+command -v "$wine_runner" >/dev/null || { echo "Missing Wine runner: $wine_runner" >&2; exit 1; }
 if pgrep -x aionclassic.bin >/dev/null; then
     echo 'Close Aion before installing its shader compiler.' >&2
     exit 1
@@ -37,12 +39,17 @@ trap 'rm -rf -- "$scratch"' EXIT
 cabextract -q -d "$scratch" -F fil3585cb2ea5db13cc0838f8d06b5c9679 "$archive"
 source="$scratch/fil3585cb2ea5db13cc0838f8d06b5c9679"
 [[ -s $source ]] || { echo 'Microsoft D3DCompiler extraction failed.' >&2; exit 1; }
+target="$WINEPREFIX/drive_c/windows/system32/d3dcompiler_47.dll"
+if cmp -s "$source" "$target"; then
+    "$wine_runner" reg add 'HKCU\Software\Wine\DllOverrides' /v d3dcompiler_47 /t REG_SZ /d native,builtin /f
+    printf 'D3DCOMPILER_ALREADY_READY version=47 prefix=%s\n' "$WINEPREFIX"
+    exit 0
+fi
 if pgrep -x aionclassic.bin >/dev/null; then
     echo 'Aion started during preparation; close it and run this command again.' >&2
     exit 1
 fi
 
-target="$WINEPREFIX/drive_c/windows/system32/d3dcompiler_47.dll"
 backup="$WINEPREFIX/aioncl-runtime-backup"
 mkdir -p "$backup"
 if [[ ! -e $backup/d3dcompiler_47.dll && ! -L $backup/d3dcompiler_47.dll ]]; then
@@ -50,7 +57,7 @@ if [[ ! -e $backup/d3dcompiler_47.dll && ! -L $backup/d3dcompiler_47.dll ]]; the
 fi
 install -m 644 "$source" "$target.aioncl-new"
 mv -f -- "$target.aioncl-new" "$target"
-wine reg add 'HKCU\Software\Wine\DllOverrides' /v d3dcompiler_47 /t REG_SZ /d native,builtin /f
+"$wine_runner" reg add 'HKCU\Software\Wine\DllOverrides' /v d3dcompiler_47 /t REG_SZ /d native,builtin /f
 
 # Previously compiled bytecode can retain the broken Wine compiler output.
 stamp=$(date +%Y%m%d-%H%M%S)

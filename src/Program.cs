@@ -588,6 +588,11 @@ namespace AionCL
                         throw new InvalidOperationException(L("Les fichiers de cette langue sont absents. Vérifiez / réparez le client.", "Files for this language are missing. Verify / repair the game.", "Die Sprachdateien fehlen. Bitte das Spiel prüfen / reparieren."));
                     command.Arguments = GameLanguage.Apply(command.Arguments, selectedLanguage);
 
+#if LINUX
+                    Log("Préparation / vérification des composants graphiques Linux (premier lancement ou réparation)…");
+                    await LinuxPlatform.PrepareRuntime(pathBox.Text,AppDomain.CurrentDomain.BaseDirectory,cts.Token,Log).ConfigureAwait(true);
+#endif
+
                     // Explicit direct mode follows the native Aion launcher contract.
                     // Linux persistence is explicit through its Save button; Windows
                     // storage remains opt-in through its existing checkbox.

@@ -582,6 +582,7 @@ public sealed class GameLauncher {
     }
     public Process StartGame(ProcessStartInfo command) {
 #if LINUX
+        LinuxPlatform.ConfigureGameWindowsVersion(command);
         return Process.Start(LinuxPlatform.WineCommand(command));
 #else
         return Process.Start(command);

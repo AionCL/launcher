@@ -20,7 +20,7 @@ class LinuxTests {
         Directory.CreateDirectory(root);
         try {
             var buildInfo=typeof(LinuxPlatform).Assembly.GetType("AionCL.LinuxBuildInfo");
-            string expectedPreview=Environment.GetEnvironmentVariable("AIONCL_PREVIEW_NUMBER")??"13";
+            string expectedPreview=Environment.GetEnvironmentVariable("AIONCL_PREVIEW_NUMBER")??"25";
             Check(buildInfo!=null && (string)buildInfo.GetField("PreviewNumber",BindingFlags.Static|BindingFlags.NonPublic).GetRawConstantValue()==expectedPreview, "Launcher title preview matches package build number");
             Environment.SetEnvironmentVariable("AIONCL_WINE", "/bin/echo");
             Environment.SetEnvironmentVariable("AIONCL_WINEPREFIX", Path.Combine(root, "prefix with spaces"));
@@ -34,6 +34,27 @@ class LinuxTests {
             Check(command.EnvironmentVariables["WINEDLLOVERRIDES"]=="d3d9=n;version=b;version=n,b;d3d9=n,b;d3dcompiler_47=n,b", "Load client proxies and native shader compiler while preserving other Wine overrides");
             Environment.SetEnvironmentVariable("WINEDLLOVERRIDES", null);
             Check(LinuxPlatform.WineCommand(command).EnvironmentVariables["WINEDLLOVERRIDES"]=="version=n,b;d3d9=n,b;d3dcompiler_47=n,b", "No-IP, DXVK and native shader compiler enabled without existing overrides");
+            string wineSetup=Path.Combine(root,"wine-setup");
+            string wineCapture=Path.Combine(root,"wine-setup-args");
+            File.WriteAllText(wineSetup,"#!/bin/sh\nprintf '%s\\n' \"$*\" > \"$AIONCL_TEST_CAPTURE\"\n");
+            Process.Start("chmod","+x \""+wineSetup+"\"").WaitForExit();
+            Environment.SetEnvironmentVariable("AIONCL_WINE",wineSetup);
+            Environment.SetEnvironmentVariable("AIONCL_TEST_CAPTURE",wineCapture);
+            LinuxPlatform.ConfigureGameWindowsVersion(new ProcessStartInfo { FileName="/tmp/client/aionclassic.bin", WorkingDirectory=root });
+            Check(File.ReadAllText(wineCapture).Trim()=="reg add HKCU\\Software\\Wine\\AppDefaults\\aionclassic.bin /v Version /t REG_SZ /d win7 /f", "Set per-game Wine compatibility to Windows 7");
+            Environment.SetEnvironmentVariable("AIONCL_TEST_CAPTURE",null);
+            Environment.SetEnvironmentVariable("AIONCL_WINE", "/bin/echo");
+            string runtimeBase=Path.Combine(root,"runtime helpers");Directory.CreateDirectory(runtimeBase);
+            string runtimeClient=Path.Combine(root,"client path");Directory.CreateDirectory(runtimeClient);
+            string runtimeScript=Path.Combine(runtimeBase,"prepare-linux-runtime.sh");
+            string runtimeCapture=Path.Combine(root,"runtime-args");
+            File.WriteAllText(runtimeScript,"printf '%s|%s|%s\\n' \"$WINEPREFIX\" \"$1\" \"$2\" > \"$AIONCL_TEST_CAPTURE\"\nprintf 'runtime-helper-pass\\n'\n");
+            Environment.SetEnvironmentVariable("AIONCL_TEST_CAPTURE",runtimeCapture);
+            var runtimeLogs=new System.Collections.Generic.List<string>();
+            LinuxPlatform.PrepareRuntime(runtimeClient,runtimeBase,System.Threading.CancellationToken.None,runtimeLogs.Add).GetAwaiter().GetResult();
+            Check(File.ReadAllText(runtimeCapture).Trim()==Path.Combine(root,"prefix with spaces")+"|"+Path.Combine(root,"prefix with spaces")+"|"+runtimeClient, "Runtime preparation receives Wine prefix and client paths safely");
+            Check(runtimeLogs.Contains("runtime-helper-pass"), "Runtime preparation output reaches launcher log");
+            Environment.SetEnvironmentVariable("AIONCL_TEST_CAPTURE",null);
             command.RedirectStandardOutput=true;
             using(var process=Process.Start(command)) {
                 string output=process.StandardOutput.ReadToEnd(); process.WaitForExit();
@@ -42,6 +63,8 @@ class LinuxTests {
             Environment.SetEnvironmentVariable("AIONCL_WINEPREFIX", "relative");
             bool rejected=false; try { LinuxPlatform.WineCommand(command); } catch(ArgumentException) { rejected=true; }
             Check(rejected, "Reject relative prefix");
+            rejected=false; try { LinuxPlatform.ConfigureGameWindowsVersion(command); } catch(ArgumentException) { rejected=true; }
+            Check(rejected, "Reject relative prefix for compatibility configuration");
             Environment.SetEnvironmentVariable("XDG_DATA_HOME", root);
             LinuxPlatform.CreateShortcut();
             Check(File.ReadAllText(Path.Combine(root,"applications","aioncl-launcher.desktop")).Contains("Terminal=false"), "Desktop entry");
