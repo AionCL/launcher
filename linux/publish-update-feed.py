@@ -26,9 +26,11 @@ def main():
         ('portable', f'AionCL-Launcher-2.5.42-linux-preview.{number}.zip'),
     ):
         path = directory / name
-        if name not in published or published[name]['size'] != path.stat().st_size:
+        # GitHub normalizes '~' to '.' in uploaded release asset names.
+        asset = published.get(name) or published.get(name.replace('~', '.'))
+        if asset is None or asset['size'] != path.stat().st_size:
             raise SystemExit(f'Missing or unexpected published package: {name}')
-        feed[kind] = {'url': published[name]['url'], 'sha256': hashlib.sha256(path.read_bytes()).hexdigest()}
+        feed[kind] = {'url': asset['url'], 'sha256': hashlib.sha256(path.read_bytes()).hexdigest()}
     branch = 'feat/linux-launcher'
     endpoint = 'repos/AionCL/launcher/contents/config/linux-updates.json'
     response = subprocess.run(['gh', 'api', endpoint + '?ref=' + branch], text=True, capture_output=True)

@@ -3,8 +3,8 @@ set -euo pipefail
 cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.."
 payload=${1:-out/linux}
 destination=${2:-out}
-release=${AIONCL_RPM_RELEASE:-0.preview27}
-preview=${AIONCL_PREVIEW_NUMBER:-27}
+release=${AIONCL_RPM_RELEASE:-0.preview28}
+preview=${AIONCL_PREVIEW_NUMBER:-28}
 [[ $release =~ ^[A-Za-z0-9._+-]+$ ]] || { echo 'Invalid RPM package release.' >&2; exit 1; }
 [[ $preview =~ ^[0-9]+$ ]] || { echo 'Invalid Linux preview number.' >&2; exit 1; }
 [[ -f $payload/AionCL.Launcher.Linux.exe && -x $payload/aioncl-launcher && -f $payload/assets/aioncl-icon.png ]]
