@@ -1,17 +1,17 @@
 {
   "schemaVersion": 1,
   "version": "2.5.42",
-  "preview": 29,
+  "preview": 30,
   "deb": {
-    "url": "https://github.com/AionCL/launcher/releases/download/aioncl-linux-preview-29/aioncl-launcher_2.5.42.preview29_amd64.deb",
-    "sha256": "d1a3eac7c616acd51ccf40dab2c527bec263216c7ac731faf6f47ffe38437fde"
+    "url": "https://github.com/AionCL/launcher/releases/download/aioncl-linux-preview-30/aioncl-launcher_2.5.42.preview30_amd64.deb",
+    "sha256": "35b8dcaad3c75860f2b58c315fad40eddf36a4509d16ebb8698a1478c85d4224"
   },
   "rpm": {
-    "url": "https://github.com/AionCL/launcher/releases/download/aioncl-linux-preview-29/aioncl-launcher-2.5.42-0.preview29.x86_64.rpm",
-    "sha256": "a61069cceabb37f743d2a071ab947f86186276544f04e3e398f30e6fa36c0f8f"
+    "url": "https://github.com/AionCL/launcher/releases/download/aioncl-linux-preview-30/aioncl-launcher-2.5.42-0.preview30.x86_64.rpm",
+    "sha256": "7a7ccbc926dcbd62997bda6c95f76771024e684a1304bc8808327f76e02c6564"
   },
   "portable": {
-    "url": "https://github.com/AionCL/launcher/releases/download/aioncl-linux-preview-29/AionCL-Launcher-2.5.42-linux-preview.29.zip",
-    "sha256": "21a781f6f6d9d174e46496e9570b01de644b6c7ae90c4e029bb9143864aaca27"
+    "url": "https://github.com/AionCL/launcher/releases/download/aioncl-linux-preview-30/AionCL-Launcher-2.5.42-linux-preview.30.zip",
+    "sha256": "3bc422881861c2d46fe4d87eb28ba815596b549f42795dd934f8cf7981e3aed4"
   }
 }
