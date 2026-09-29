@@ -51,7 +51,7 @@ class LinuxTests {
         Directory.CreateDirectory(root);
         try {
             var buildInfo=typeof(LinuxPlatform).Assembly.GetType("AionCL.LinuxBuildInfo");
-            string expectedPreview=Environment.GetEnvironmentVariable("AIONCL_PREVIEW_NUMBER")??"26";
+            string expectedPreview=Environment.GetEnvironmentVariable("AIONCL_PREVIEW_NUMBER")??"27";
             string settingsPath=LinuxGraphicsSettings.PreferencePath;
             string originalSettings=File.Exists(settingsPath)?File.ReadAllText(settingsPath):null;
             new LinuxGraphicsSettings().Save(settingsPath);

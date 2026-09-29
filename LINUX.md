@@ -16,7 +16,7 @@ docker run --rm --user "$(id -u):$(id -g)" -e HOME=/tmp -v "$PWD:/src" aioncl-li
 Ou installer Mono (compilateur `mcs`), libgdiplus, Xvfb, xauth et DejaVu puis
 exécuter `./linux/build.sh`. Le script compile, exécute les régressions du cœur
 et les tests Linux, rend l'interface sous Xvfb puis produit
-`out/AionCL-Launcher-2.5.42-linux-preview.26.tar.gz` et son SHA-256 par défaut. Il produit
+`out/AionCL-Launcher-2.5.42-linux-preview.27.tar.gz` et son SHA-256 par défaut. Il produit
 aussi des paquets `.deb` et `.rpm`, avec contrôle de leur contenu et dépendances.
 Le rendu de contrôle reste dans `out/linux/linux-preview.png`.
 
@@ -179,7 +179,7 @@ Le script installe le D3DCompiler 47 x64 officiel de Microsoft, vérifie son
 SHA-256, sauvegarde la DLL Wine et déplace les caches de shaders existants.
 Le launcher force ensuite son chargement natif uniquement pour le jeu.
 
-## Compatibilité graphique des personnages (preview26)
+## Compatibilité graphique des personnages (preview27)
 
 La préparation Linux installe aussi Microsoft D3DX9_38 x64, indépendamment de
 la marque du GPU. Dans **Paramètres → Compatibilité graphique Linux**, le mode
@@ -191,7 +191,7 @@ Les caches sont sauvegardés/recréés uniquement lors d'un changement de mode o
 de la réparation d'une DLL. Le jeu doit être fermé. Le correctif est confirmé
 sur le ZBook NVIDIA ; AMD/Intel et autres distributions restent à qualifier.
 
-## Mise à jour du launcher Linux (à partir de preview26)
+## Mise à jour du launcher Linux (à partir de preview27)
 
 Le bouton **Mettre à jour le launcher** apparaît lorsqu'une version Linux plus
 récente est publiée. Le flux Linux est distinct du flux Windows et les fichiers
@@ -212,6 +212,6 @@ automatiquement après réussite. En cas d'échec ou de refus d'autorisation, le
 launcher affiche l'erreur dans le journal et reste ouvert.
 
 Preview25 et les versions antérieures n'ont pas ce mécanisme : il faut installer
-preview26 manuellement une fois. Les mises à jour suivantes sont proposées dans
+preview27 manuellement une fois. Les mises à jour suivantes sont proposées dans
 le launcher ; la construction de chaque nouvelle version reste nécessaire côté
 développeur, mais le joueur n'a plus à télécharger/installer manuellement.

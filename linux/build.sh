@@ -3,7 +3,7 @@ set -euo pipefail
 cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.."
 out=out/linux
 mkdir -p "$out"
-preview=${AIONCL_PREVIEW_NUMBER:-26}
+preview=${AIONCL_PREVIEW_NUMBER:-27}
 [[ $preview =~ ^[0-9]+$ ]] || { echo 'Invalid Linux preview number.' >&2; exit 1; }
 cat >"$out/LinuxBuildInfo.cs" <<EOF
 namespace AionCL

@@ -3,8 +3,8 @@ set -euo pipefail
 cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.."
 payload=${1:-out/linux}
 destination=${2:-out}
-version=${AIONCL_DEB_VERSION:-2.5.42~preview26}
-preview=${AIONCL_PREVIEW_NUMBER:-26}
+version=${AIONCL_DEB_VERSION:-2.5.42~preview27}
+preview=${AIONCL_PREVIEW_NUMBER:-27}
 [[ $version =~ ^[0-9][A-Za-z0-9.+:~-]*$ ]] || { echo 'Invalid Debian package version.' >&2; exit 1; }
 [[ $preview =~ ^[0-9]+$ ]] || { echo 'Invalid Linux preview number.' >&2; exit 1; }
 [[ -f $payload/AionCL.Launcher.Linux.exe && -x $payload/aioncl-launcher && -f $payload/assets/aioncl-icon.png ]]
