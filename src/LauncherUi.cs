@@ -119,6 +119,9 @@ public sealed partial class MainForm {
         versionLabel.TextChanged += delegate { if(!changingLanguage) UpdateVersionText(); };
         Resize += delegate { LayoutLauncher(); };
         FormClosed += delegate { if(journal!=null) journal.Dispose(); if(portal!=null) portal.Dispose(); };
+#if LINUX
+        BuildLinuxGraphicsUi();
+#endif
         BuildShell();
         BuildUpdateUi(); LayoutLauncher(); ApplyLanguage();
 #if LINUX
@@ -241,6 +244,11 @@ public sealed partial class MainForm {
         languageLabel.SetBounds(22,174,column,20); languageBox.SetBounds(22,200,column,32);
         koreanVoices.SetBounds(22,248,column,34); japaneseVoices.SetBounds(22,292,column,34);
         hitFontButton.SetBounds(22,336,column,34);
+#if LINUX
+        linuxGraphicsButton.SetBounds(22,378,column,34);
+        linuxGraphicsButton.Text=L("Compatibilité graphique Linux…","Linux graphics compatibility…","Linux-Grafikkompatibilität…");
+        linuxGraphicsButton.Enabled=!busy;
+#endif
         cameraButton.SetBounds(right,200,column,34); installButton.SetBounds(right,248,column,34);
         verifyButton.SetBounds(right,292,column,34); shortcutsButton.SetBounds(right,336,column,34);
     }

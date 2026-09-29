@@ -22,6 +22,7 @@ jobs:
           name: aioncl-launcher-linux-${{ github.sha }}
           path: |
             out/AionCL-Launcher-*-linux-*.tar.gz*
+            out/AionCL-Launcher-*-linux-*.zip*
             out/aioncl-launcher_*.deb
             out/aioncl-launcher-*.rpm
             out/linux/linux-preview.png
@@ -33,6 +34,7 @@ jobs:
     permissions:
       contents: write
     steps:
+      - uses: actions/checkout@v4
       - uses: actions/download-artifact@v4
         with:
           name: aioncl-launcher-linux-${{ github.sha }}
@@ -43,11 +45,16 @@ jobs:
         run: |
           set -euo pipefail
           shopt -s nullglob
-          assets=(packages/*.deb packages/*.rpm packages/*.tar.gz packages/*.sha256)
+          assets=(packages/*.deb packages/*.rpm packages/*.tar.gz packages/*.zip packages/*.sha256)
           test "${#assets[@]}" -ge 4
           tag="aioncl-linux-preview-${GITHUB_RUN_NUMBER}"
           gh release create "$tag" "${assets[@]}" \
             --repo AionCL/launcher \
+            --target "$GITHUB_SHA" \
             --title "AionCL Linux 2.5.42 Preview ${GITHUB_RUN_NUMBER}" \
             --prerelease \
-            --notes "Linux launcher preview packages built and tested from ${GITHUB_SHA}. Install the .deb or .rpm manually; the launcher continues to manage game-client updates."
+            --notes "Linux launcher preview packages built and tested from ${GITHUB_SHA}. Upgrade once from preview 25 manually. Native D3DX9 is enabled by default with an advanced Wine fallback option. This version supports future launcher updates from inside the launcher (APT/DNF or portable backup), using verified Linux packages."
+      - name: Publish verified Linux launcher update feed
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python3 linux/publish-update-feed.py packages "$GITHUB_RUN_NUMBER" "$GITHUB_SHA"

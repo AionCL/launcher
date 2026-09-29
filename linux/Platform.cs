@@ -116,7 +116,7 @@ public static class LinuxPlatform {
         string overrides = result.EnvironmentVariables["WINEDLLOVERRIDES"];
         result.EnvironmentVariables["WINEDLLOVERRIDES"] =
             (String.IsNullOrWhiteSpace(overrides) ? "" : overrides.TrimEnd(';') + ";") +
-            "version=n,b;d3d9=n,b;d3dcompiler_47=n,b";
+            "version=n,b;d3d9=n,b;d3dcompiler_47=n,b;d3dx9_38=" + (LinuxGraphicsSettings.Load().nativeD3dx ? "n,b" : "b");
         return result;
     }
     public static void ConfigureGameWindowsVersion(ProcessStartInfo game) {
@@ -148,7 +148,7 @@ public static class LinuxPlatform {
         string script=Path.Combine(baseDirectory,"prepare-linux-runtime.sh");
         if(!File.Exists(script))throw new FileNotFoundException("Linux runtime preparation script is missing.",script);
         var start=new ProcessStartInfo {
-            FileName="bash",Arguments=Quote(script)+" "+Quote(Path.GetFullPath(prefix))+" "+Quote(Path.GetFullPath(client)),
+            FileName="bash",Arguments=Quote(script)+" "+Quote(Path.GetFullPath(prefix))+" "+Quote(Path.GetFullPath(client))+" "+Quote(LinuxGraphicsSettings.Load().nativeD3dx ? "native" : "wine"),
             WorkingDirectory=Path.GetFullPath(client),UseShellExecute=false,RedirectStandardOutput=true,RedirectStandardError=true
         };
         string runner=Environment.GetEnvironmentVariable("AIONCL_WINE");

@@ -16,7 +16,7 @@ docker run --rm --user "$(id -u):$(id -g)" -e HOME=/tmp -v "$PWD:/src" aioncl-li
 Ou installer Mono (compilateur `mcs`), libgdiplus, Xvfb, xauth et DejaVu puis
 exécuter `./linux/build.sh`. Le script compile, exécute les régressions du cœur
 et les tests Linux, rend l'interface sous Xvfb puis produit
-`out/AionCL-Launcher-2.5.42-linux-preview.25.tar.gz` et son SHA-256 par défaut. Il produit
+`out/AionCL-Launcher-2.5.42-linux-preview.26.tar.gz` et son SHA-256 par défaut. Il produit
 aussi des paquets `.deb` et `.rpm`, avec contrôle de leur contenu et dépendances.
 Le rendu de contrôle reste dans `out/linux/linux-preview.png`.
 
@@ -178,3 +178,40 @@ de `D3DCompile2 ... E5017` dans le terminal. Jeu fermé, exécuter :
 Le script installe le D3DCompiler 47 x64 officiel de Microsoft, vérifie son
 SHA-256, sauvegarde la DLL Wine et déplace les caches de shaders existants.
 Le launcher force ensuite son chargement natif uniquement pour le jeu.
+
+## Compatibilité graphique des personnages (preview26)
+
+La préparation Linux installe aussi Microsoft D3DX9_38 x64, indépendamment de
+la marque du GPU. Dans **Paramètres → Compatibilité graphique Linux**, le mode
+**DLL Microsoft — recommandé** est activé par défaut. **DLL Wine — dépannage**
+force l'implémentation builtin sans désactiver DXVK ou D3DCompiler47. Le choix
+est conservé dans `AionCL/linux-graphics.json` sous LocalApplicationData, puis
+appliqué au préfixe sélectionné au prochain clic Jouer. Aucun rebuild nécessaire.
+Les caches sont sauvegardés/recréés uniquement lors d'un changement de mode ou
+de la réparation d'une DLL. Le jeu doit être fermé. Le correctif est confirmé
+sur le ZBook NVIDIA ; AMD/Intel et autres distributions restent à qualifier.
+
+## Mise à jour du launcher Linux (à partir de preview26)
+
+Le bouton **Mettre à jour le launcher** apparaît lorsqu'une version Linux plus
+récente est publiée. Le flux Linux est distinct du flux Windows et les fichiers
+sont vérifiés par SHA-256 avant installation. Le flux Linux est publié après la
+release, avec les empreintes des paquets construits par la CI.
+
+- `.deb` installé dans `/opt/aioncl/launcher` : APT via `pkexec`.
+- `.rpm` installé dans le même dossier : DNF via `pkexec` (DNF requis).
+- Installation portable dans un dossier accessible en écriture : ZIP vérifié,
+  extraction strictement contrôlée, remplacement avec sauvegarde du dossier
+  précédent ; `launcher.json` local est conservé.
+
+Le launcher et le jeu continuent de tourner sous l'utilisateur normal. Seule
+l'installation du paquet système demande l'autorisation administrateur via
+Polkit. Une fois l'installation commencée, l'annulation/la fermeture sont
+bloquées pour laisser le gestionnaire de paquets terminer. Le launcher redémarre
+automatiquement après réussite. En cas d'échec ou de refus d'autorisation, le
+launcher affiche l'erreur dans le journal et reste ouvert.
+
+Preview25 et les versions antérieures n'ont pas ce mécanisme : il faut installer
+preview26 manuellement une fois. Les mises à jour suivantes sont proposées dans
+le launcher ; la construction de chaque nouvelle version reste nécessaire côté
+développeur, mais le joueur n'a plus à télécharger/installer manuellement.

@@ -14,13 +14,51 @@ class LinuxTests {
             using(var stream=zip.CreateEntry(path).Open())stream.Write(bytes,0,bytes.Length);
         return new Package {name=name,size=new FileInfo(archive).Length,sha256=Safety.ShaAsync(archive,System.Threading.CancellationToken.None).GetAwaiter().GetResult(),files=new[]{new ClientFile {path=path,size=bytes.Length,sha256=Safety.Sha(bytes)}}};
     }
+    static void TestLauncherUpdater(string root) {
+        string prefix="https://github.com/AionCL/launcher/releases/download/test/";
+        var feed=new LinuxLauncherRelease {schemaVersion=1,version="2.5.42",preview=100,
+            deb=new LinuxUpdateAsset {url=prefix+"launcher.deb",sha256=new string('a',64)},
+            rpm=new LinuxUpdateAsset {url=prefix+"launcher.rpm",sha256=new string('b',64)},
+            portable=new LinuxUpdateAsset {url=prefix+"launcher.zip",sha256=new string('c',64)}};
+        feed.Validate();Check(feed.IsNewer("2.5.42",99)&&!feed.IsNewer("2.5.42",100),"Linux preview comparison");
+        feed.deb.url="https://example.com/launcher.deb";bool rejected=false;try{feed.Validate();}catch(System.IO.InvalidDataException){rejected=true;}
+        Check(rejected,"Reject foreign launcher asset URL");
+        string package=Path.Combine(root,"package with spaces.deb");
+        var installer=LinuxLauncherUpdater.InstallCommand("deb",package);
+        Check(installer.FileName=="pkexec"&&installer.Arguments.Contains("/usr/bin/apt-get install --yes"),"System package update uses authorization and APT");
+        var fake=new ProcessStartInfo {FileName="/bin/sh",Arguments="-c "+LinuxPlatform.Quote("exit 7"),UseShellExecute=false,RedirectStandardOutput=true,RedirectStandardError=true};
+        rejected=false;try{LinuxLauncherUpdater.RunInstaller(fake,delegate{}).GetAwaiter().GetResult();}catch(IOException){rejected=true;}
+        Check(rejected,"Installer failures preserve running launcher");
+        string zip=Path.Combine(root,"bad-launcher.zip");
+        using(var archive=System.IO.Compression.ZipFile.Open(zip,System.IO.Compression.ZipArchiveMode.Create)) {
+            using(var stream=new StreamWriter(archive.CreateEntry("../escape").Open()))stream.Write("bad");
+        }
+        rejected=false;try{LinuxLauncherUpdater.ExtractPortable(zip,Path.Combine(root,"rejected"));}catch(InvalidDataException){rejected=true;}
+        Check(rejected&&!File.Exists(Path.Combine(root,"escape")),"Reject traversal before extracting launcher");
+        string portableRoot=Path.Combine(root,"portable launcher");Directory.CreateDirectory(portableRoot);
+        File.WriteAllText(Path.Combine(portableRoot,"launcher.json"),"local-config");File.WriteAllText(Path.Combine(portableRoot,"old"),"preserve-in-backup");
+        zip=Path.Combine(root,"valid-launcher.zip");
+        using(var archive=System.IO.Compression.ZipFile.Open(zip,System.IO.Compression.ZipArchiveMode.Create)) {
+            foreach(string name in new[]{"AionCL.Launcher.Linux.exe","launcher.json","assets/aioncl-icon.png","aioncl-launcher","aioncl-camera","install-d3dx9.sh","install-dxvk.sh","install-d3dcompiler.sh","prepare-linux-runtime.sh","LINUX.md"})
+                using(var stream=new StreamWriter(archive.CreateEntry(name).Open()))stream.Write("fixture");
+        }
+        string backup=LinuxLauncherUpdater.ApplyPortable(zip,portableRoot);
+        Check(File.ReadAllText(Path.Combine(portableRoot,"launcher.json"))=="local-config"&&File.Exists(Path.Combine(backup,"old")),"Portable update preserves configuration and backup");
+    }
     [STAThread]
     static void Main() {
         string root = Path.Combine(Path.GetTempPath(), "aioncl-linux-" + Guid.NewGuid().ToString("N"));
         Directory.CreateDirectory(root);
         try {
             var buildInfo=typeof(LinuxPlatform).Assembly.GetType("AionCL.LinuxBuildInfo");
-            string expectedPreview=Environment.GetEnvironmentVariable("AIONCL_PREVIEW_NUMBER")??"25";
+            string expectedPreview=Environment.GetEnvironmentVariable("AIONCL_PREVIEW_NUMBER")??"26";
+            string settingsPath=LinuxGraphicsSettings.PreferencePath;
+            string originalSettings=File.Exists(settingsPath)?File.ReadAllText(settingsPath):null;
+            new LinuxGraphicsSettings().Save(settingsPath);
+            Check(LinuxGraphicsSettings.Load(Path.Combine(root,"absent.json")).nativeD3dx,"Native D3DX enabled by default");
+            string settingsFixture=Path.Combine(root,"settings.json");
+            new LinuxGraphicsSettings {nativeD3dx=false}.Save(settingsFixture);
+            Check(!LinuxGraphicsSettings.Load(settingsFixture).nativeD3dx,"Wine fallback preference persists");
             Check(buildInfo!=null && (string)buildInfo.GetField("PreviewNumber",BindingFlags.Static|BindingFlags.NonPublic).GetRawConstantValue()==expectedPreview, "Launcher title preview matches package build number");
             Environment.SetEnvironmentVariable("AIONCL_WINE", "/bin/echo");
             Environment.SetEnvironmentVariable("AIONCL_WINEPREFIX", Path.Combine(root, "prefix with spaces"));
@@ -31,9 +69,12 @@ class LinuxTests {
             });
             Check(command.FileName=="/bin/echo" && !command.UseShellExecute, "Runner and shell policy");
             Check(command.EnvironmentVariables["WINEPREFIX"]==Path.Combine(root,"prefix with spaces"), "Dedicated prefix");
-            Check(command.EnvironmentVariables["WINEDLLOVERRIDES"]=="d3d9=n;version=b;version=n,b;d3d9=n,b;d3dcompiler_47=n,b", "Load client proxies and native shader compiler while preserving other Wine overrides");
+            Check(command.EnvironmentVariables["WINEDLLOVERRIDES"]=="d3d9=n;version=b;version=n,b;d3d9=n,b;d3dcompiler_47=n,b;d3dx9_38=n,b", "Load client proxies and native shader compiler while preserving other Wine overrides");
             Environment.SetEnvironmentVariable("WINEDLLOVERRIDES", null);
-            Check(LinuxPlatform.WineCommand(command).EnvironmentVariables["WINEDLLOVERRIDES"]=="version=n,b;d3d9=n,b;d3dcompiler_47=n,b", "No-IP, DXVK and native shader compiler enabled without existing overrides");
+            new LinuxGraphicsSettings {nativeD3dx=false}.Save(settingsPath);
+            Check(LinuxPlatform.WineCommand(command).EnvironmentVariables["WINEDLLOVERRIDES"].EndsWith(";d3dx9_38=b"),"Wine mode overrides existing native registry settings");
+            new LinuxGraphicsSettings().Save(settingsPath);
+            Check(LinuxPlatform.WineCommand(command).EnvironmentVariables["WINEDLLOVERRIDES"]=="version=n,b;d3d9=n,b;d3dcompiler_47=n,b;d3dx9_38=n,b", "No-IP, DXVK and native shader compiler enabled without existing overrides");
             string wineSetup=Path.Combine(root,"wine-setup");
             string wineCapture=Path.Combine(root,"wine-setup-args");
             File.WriteAllText(wineSetup,"#!/bin/sh\nprintf '%s\\n' \"$*\" > \"$AIONCL_TEST_CAPTURE\"\n");
@@ -48,11 +89,15 @@ class LinuxTests {
             string runtimeClient=Path.Combine(root,"client path");Directory.CreateDirectory(runtimeClient);
             string runtimeScript=Path.Combine(runtimeBase,"prepare-linux-runtime.sh");
             string runtimeCapture=Path.Combine(root,"runtime-args");
-            File.WriteAllText(runtimeScript,"printf '%s|%s|%s\\n' \"$WINEPREFIX\" \"$1\" \"$2\" > \"$AIONCL_TEST_CAPTURE\"\nprintf 'runtime-helper-pass\\n'\n");
+            File.WriteAllText(runtimeScript,"printf '%s|%s|%s|%s\\n' \"$WINEPREFIX\" \"$1\" \"$2\" \"$3\" > \"$AIONCL_TEST_CAPTURE\"\nprintf 'runtime-helper-pass\\n'\n");
             Environment.SetEnvironmentVariable("AIONCL_TEST_CAPTURE",runtimeCapture);
             var runtimeLogs=new System.Collections.Generic.List<string>();
             LinuxPlatform.PrepareRuntime(runtimeClient,runtimeBase,System.Threading.CancellationToken.None,runtimeLogs.Add).GetAwaiter().GetResult();
-            Check(File.ReadAllText(runtimeCapture).Trim()==Path.Combine(root,"prefix with spaces")+"|"+Path.Combine(root,"prefix with spaces")+"|"+runtimeClient, "Runtime preparation receives Wine prefix and client paths safely");
+            Check(File.ReadAllText(runtimeCapture).Trim()==Path.Combine(root,"prefix with spaces")+"|"+Path.Combine(root,"prefix with spaces")+"|"+runtimeClient+"|native", "Runtime preparation receives Wine prefix and client paths safely");
+            new LinuxGraphicsSettings {nativeD3dx=false}.Save(settingsPath);
+            LinuxPlatform.PrepareRuntime(runtimeClient,runtimeBase,System.Threading.CancellationToken.None,runtimeLogs.Add).GetAwaiter().GetResult();
+            Check(File.ReadAllText(runtimeCapture).Trim().EndsWith("|wine"),"Runtime receives selected Wine fallback mode");
+            new LinuxGraphicsSettings().Save(settingsPath);
             Check(runtimeLogs.Contains("runtime-helper-pass"), "Runtime preparation output reaches launcher log");
             Environment.SetEnvironmentVariable("AIONCL_TEST_CAPTURE",null);
             command.RedirectStandardOutput=true;
@@ -109,6 +154,8 @@ class LinuxTests {
             File.AppendAllText(Path.Combine(cache,"first.zip"),"corrupt");
             bool corrupt=false;try { LinuxPlatform.ExtractPackages(new InstallPlan {Packages=new[]{first,other}},cache,stage,System.Threading.CancellationToken.None,null,delegate{}).GetAwaiter().GetResult(); }catch(InvalidDataException){corrupt=true;}
             Check(corrupt,"Concurrent extraction rejects corrupt archives");
+            TestLauncherUpdater(root);
+            if(originalSettings==null)File.Delete(settingsPath);else File.WriteAllText(settingsPath,originalSettings);
             Application.EnableVisualStyles();
             using(var form=new MainForm(true)) {
                 form.Show(); Application.DoEvents();
@@ -129,12 +176,27 @@ class LinuxTests {
                 typeof(MainForm).GetMethod("RefreshUpdateUi",BindingFlags.NonPublic|BindingFlags.Instance).Invoke(form,null);
                 var update=(Button)typeof(MainForm).GetField("launcherUpdateButton",BindingFlags.NonPublic|BindingFlags.Instance).GetValue(form);
                 Check(!update.Visible, "Never offer a Windows launcher update on Linux");
+                var linuxFeed=new LinuxLauncherRelease {schemaVersion=1,version=Updates.LauncherVersion,preview=Int32.Parse(expectedPreview)+1};
+                typeof(MainForm).GetField("linuxRelease",BindingFlags.NonPublic|BindingFlags.Instance).SetValue(form,linuxFeed);
+                typeof(MainForm).GetMethod("RefreshUpdateUi",BindingFlags.NonPublic|BindingFlags.Instance).Invoke(form,null);
+                Check(update.Visible,"Offer a newer Linux launcher preview");
+                linuxFeed.preview=Int32.Parse(expectedPreview);
+                typeof(MainForm).GetMethod("RefreshUpdateUi",BindingFlags.NonPublic|BindingFlags.Instance).Invoke(form,null);
+                Check(!update.Visible,"Do not offer same Linux preview");
                 var camera=(Button)typeof(MainForm).GetField("cameraButton",BindingFlags.NonPublic|BindingFlags.Instance).GetValue(form);
                 var remember=(CheckBox)typeof(MainForm).GetField("authRemember",BindingFlags.NonPublic|BindingFlags.Instance).GetValue(form);
                 Check(camera.Enabled && !remember.Visible, "Linux credential action and camera enabled");
                 using(var bitmap=new Bitmap(form.Width,form.Height)) {
                     using(var graphics=Graphics.FromImage(bitmap)) graphics.CopyFromScreen(form.Location,Point.Empty,bitmap.Size);
                     bitmap.Save(Path.Combine(AppDomain.CurrentDomain.BaseDirectory,"linux-preview.png"));
+                }
+                var settingsButton=(Button)typeof(MainForm).GetField("helpButton",BindingFlags.NonPublic|BindingFlags.Instance).GetValue(form);
+                settingsButton.PerformClick();Application.DoEvents();
+                var graphicsButton=(Button)typeof(MainForm).GetField("linuxGraphicsButton",BindingFlags.NonPublic|BindingFlags.Instance).GetValue(form);
+                Check(graphicsButton.Visible&&graphicsButton.Bottom<=graphicsButton.Parent.Height,"Linux graphics settings visible inside settings panel");
+                using(var bitmap=new Bitmap(form.Width,form.Height)) {
+                    using(var graphics=Graphics.FromImage(bitmap))graphics.CopyFromScreen(form.Location,Point.Empty,bitmap.Size);
+                    bitmap.Save(Path.Combine(AppDomain.CurrentDomain.BaseDirectory,"linux-settings.png"));
                 }
                 form.Close();
             }

@@ -22,7 +22,14 @@ public sealed partial class MainForm {
     bool checkingUpdates;
     UpdateFeed releases;
     string updateError;
+#if LINUX
+    LinuxLauncherRelease linuxRelease;
+    bool installingLinuxLauncher;
+#endif
     private void BuildUpdateUi() {
+#if LINUX
+        FormClosing+=delegate(object sender,FormClosingEventArgs args) {if(installingLinuxLauncher)args.Cancel=true;};
+#endif
         updatePanel=new Panel { BackColor=Color.FromArgb(178,23,39,51) };(workspace ?? (Control)this).Controls.Add(updatePanel);
         updateNotice=new Label { Bounds=new Rectangle(16,12,610,42),ForeColor=Color.FromArgb(176,218,233),Text="AionCL · Updates",Font=new Font("Segoe UI",9) };updatePanel.Controls.Add(updateNotice);
         checkUpdatesButton=ButtonAt(updatePanel,"",650,12,165,34,false);checkUpdatesButton.Click += async delegate { await CheckUpdates(false); };
@@ -39,7 +46,7 @@ public sealed partial class MainForm {
     }
     private bool LauncherUpdateAvailable() {
 #if LINUX
-        return false; // The public launcher feed distributes Windows binaries.
+        return linuxRelease!=null&&linuxRelease.IsNewer(Updates.LauncherVersion,Int32.Parse(LinuxBuildInfo.PreviewNumber));
 #else
         return releases!=null&&Updates.Newer(releases.launcher.version,Updates.LauncherVersion);
 #endif
@@ -56,6 +63,9 @@ public sealed partial class MainForm {
         checkUpdatesButton.Enabled=!busy&&!checkingUpdates&&config!=null;
         bool launcherAvailable=LauncherUpdateAvailable();
         bool directLauncherUpdate=launcherAvailable&&releases.launcher!=null&&!String.IsNullOrWhiteSpace(releases.launcher.assetUrl)&&!String.IsNullOrWhiteSpace(releases.launcher.sha256);
+#if LINUX
+        directLauncherUpdate=launcherAvailable;
+#endif
         launcherUpdateButton.Visible=directLauncherUpdate&&!busy&&!checkingUpdates;
         string available=launcherAvailable?L(directLauncherUpdate?"Nouveau launcher disponible. ":"Nouveau launcher disponible dans le journal. ",directLauncherUpdate?"New launcher available. ":"A new launcher is available in the log. ",directLauncherUpdate?"Neuer Launcher verfügbar. ":"Ein neuer Launcher ist im Journal verfügbar. "):"";
         if(ClientUpdateAvailable()) { playButton.Text=L("↻   METTRE À JOUR LE JEU","↻   UPDATE GAME","↻   SPIEL AKTUALISIEREN"); ApplyActionStyle(playButton,Color.FromArgb(205,125,32),Color.FromArgb(230,151,48),15F); }
@@ -69,8 +79,39 @@ public sealed partial class MainForm {
     }
     private async Task UpdateLauncherAsync() {
 #if LINUX
-        await Task.Yield();
-        throw new PlatformNotSupportedException("Linux launcher updates require a Linux package.");
+        if(!LauncherUpdateAvailable()||busy||checkingUpdates)return;
+        string root=AppDomain.CurrentDomain.BaseDirectory.TrimEnd('/');
+        string staging=null;
+        try {
+            VoiceMode.RequireGameClosed();
+            linuxRelease.Validate();
+            string kind=LinuxLauncherUpdater.PackageKind(root);
+            var asset=kind=="deb"?linuxRelease.deb:kind=="rpm"?linuxRelease.rpm:linuxRelease.portable;
+            staging=Path.Combine(Path.GetTempPath(),"AionCL-launcher-update-"+Guid.NewGuid().ToString("N"));Directory.CreateDirectory(staging);
+            string package=Path.Combine(staging,"launcher."+(kind=="portable"?"zip":kind));
+            SetBusy(true);cts=new CancellationTokenSource();progressBar.Style=ProgressBarStyle.Marquee;
+            statusLabel.Text=L("Téléchargement du nouveau launcher…","Downloading the new launcher…","Neuen Launcher wird heruntergeladen…");
+            using(var network=new Network(config.requestTimeoutSeconds))await network.Download(asset.url,package,null,cts.Token);
+            if(!String.Equals(await Safety.ShaAsync(package,cts.Token),asset.sha256,StringComparison.OrdinalIgnoreCase))throw new InvalidDataException("Invalid Linux launcher SHA-256.");
+            cts.Token.ThrowIfCancellationRequested();VoiceMode.RequireGameClosed();
+            installingLinuxLauncher=true;cancelButton.Enabled=false;
+            statusLabel.Text=L("Installation du launcher… Autorisez la mise à jour si Linux le demande.","Installing launcher… Authorize the update if Linux requests it.","Launcher wird installiert… Die Aktualisierung bei Aufforderung durch Linux autorisieren.");
+            if(kind=="portable")Log("Launcher backup: "+await Task.Run(()=>LinuxLauncherUpdater.ApplyPortable(package,root)));
+            else {
+                // apt's sandbox must be able to read the verified local package.
+                using(var permission=Process.Start("chmod","0755 "+LinuxPlatform.Quote(staging))) {permission.WaitForExit();if(permission.ExitCode!=0)throw new IOException("Cannot prepare launcher package permissions.");}
+                using(var permission=Process.Start("chmod","0644 "+LinuxPlatform.Quote(package))) {permission.WaitForExit();if(permission.ExitCode!=0)throw new IOException("Cannot prepare launcher package permissions.");}
+                await LinuxLauncherUpdater.RunInstaller(LinuxLauncherUpdater.InstallCommand(kind,package),Log);
+            }
+            LinuxLauncherUpdater.RestartAfterExit(root);
+            installingLinuxLauncher=false;Application.Exit();
+        } catch(OperationCanceledException) {statusLabel.Text=L("Mise à jour interrompue.","Update interrupted.","Update unterbrochen.");}
+        catch(Exception ex) {Log(ex.Message);statusLabel.Text=L("Échec de la mise à jour du launcher.","Launcher update failed.","Launcher-Update fehlgeschlagen.");MessageBox.Show(this,ex.Message,"AionCL",MessageBoxButtons.OK,MessageBoxIcon.Error);}
+        finally {
+            installingLinuxLauncher=false;
+            if(staging!=null&&Directory.Exists(staging)) {try {Directory.Delete(staging,true);}catch(IOException) {}catch(UnauthorizedAccessException) {}}
+            if(!IsDisposed){progressBar.Style=ProgressBarStyle.Continuous;SetBusy(false);}
+        }
 #else
         if(releases==null||releases.launcher==null||String.IsNullOrWhiteSpace(releases.launcher.assetUrl)||String.IsNullOrWhiteSpace(releases.launcher.sha256)) { if(releases!=null) Process.Start(new ProcessStartInfo { FileName=Safety.Https(releases.launcher.downloadPage).AbsoluteUri,UseShellExecute=true }); return; }
         string root=AppDomain.CurrentDomain.BaseDirectory.TrimEnd(Path.DirectorySeparatorChar,Path.AltDirectorySeparatorChar);
@@ -113,6 +154,11 @@ public sealed partial class MainForm {
                 ManifestResult next=manifest;
                 if(manifest==null||manifest.Manifest.clientVersion!=feed.client.version||config.manifestUrl!=feed.client.manifestUrl)next=await network.ManifestAsync(target,cts.Token);
                 config=target;manifest=next;releases=feed;
+#if LINUX
+                try {linuxRelease=await LinuxLauncherUpdater.Fetch(network,cts.Token);}
+                catch(OperationCanceledException) {throw;}
+                catch(Exception ex) {linuxRelease=null;updateError=L("Mise à jour du launcher Linux indisponible. Réessayez.","Linux launcher update unavailable. Retry.","Linux-Launcher-Update nicht verfügbar. Erneut versuchen.");Log("Linux launcher update: "+ex.Message);}
+#endif
             }
             Log(L("Recherche des mises à jour terminée.","Update check complete.","Updatesuche abgeschlossen."));
         }catch(OperationCanceledException){updateError=L("Recherche interrompue. Réessayez.","Update check interrupted. Retry.","Updatesuche unterbrochen. Erneut versuchen.");}

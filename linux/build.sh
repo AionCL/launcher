@@ -3,7 +3,7 @@ set -euo pipefail
 cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.."
 out=out/linux
 mkdir -p "$out"
-preview=${AIONCL_PREVIEW_NUMBER:-25}
+preview=${AIONCL_PREVIEW_NUMBER:-26}
 [[ $preview =~ ^[0-9]+$ ]] || { echo 'Invalid Linux preview number.' >&2; exit 1; }
 cat >"$out/LinuxBuildInfo.cs" <<EOF
 namespace AionCL
@@ -15,9 +15,9 @@ namespace AionCL
 }
 EOF
 refs=(-r:System.Net.Http -r:System.IO.Compression -r:System.IO.Compression.FileSystem -r:System.Web.Extensions -r:System.Windows.Forms -r:System.Drawing -r:System.Security)
-core=(src/Core.cs src/CameraSettings.cs src/Updates.cs src/KoreanPack.cs src/HitFont.cs linux/Platform.cs linux/OpenSslSha256.cs)
+core=(src/Core.cs src/CameraSettings.cs src/Updates.cs src/KoreanPack.cs src/HitFont.cs linux/Platform.cs linux/OpenSslSha256.cs linux/GraphicsSettings.cs)
 resources=(-resource:assets/portal.png,AionCL.portal.png -resource:assets/classic-wings.jpg,AionCL.classic-wings.jpg -resource:config/korean-pack.json,AionCL.korean-pack.json -resource:config/japanese-pack.json,AionCL.japanese-pack.json -resource:assets/japanese-hit-font.pak,AionCL.hit-font.pak)
-mcs -define:LINUX,CAMERA_UI -target:exe -out:"$out/AionCL.Launcher.Linux.exe" "${refs[@]}" "${resources[@]}" "${core[@]}" "$out/LinuxBuildInfo.cs" src/Program.cs src/LauncherUi.cs src/Localization.cs src/UpdateUi.cs src/JapanesePack.cs linux/LauncherAuth.cs
+mcs -define:LINUX,CAMERA_UI -target:exe -out:"$out/AionCL.Launcher.Linux.exe" "${refs[@]}" "${resources[@]}" "${core[@]}" "$out/LinuxBuildInfo.cs" src/Program.cs src/LauncherUi.cs src/Localization.cs src/UpdateUi.cs src/JapanesePack.cs linux/LauncherAuth.cs linux/GraphicsUi.cs linux/LauncherUpdater.cs
 mcs -define:LINUX -out:"$out/AionCL.Tests.exe" "${refs[@]}" "${core[@]}" tests/tests.cs tests/RegressionTests.cs
 mono "$out/AionCL.Tests.exe"
 mcs -out:"$out/AionCL.LinuxTests.exe" "${refs[@]}" -r:"$out/AionCL.Launcher.Linux.exe" linux/Tests.cs
@@ -39,8 +39,17 @@ cp "$out/prepare-linux-runtime.sh" "$package/"
 cp "$out/assets/aioncl-icon.png" "$package/assets/"
 chmod +x "$package/aioncl-launcher" "$package/aioncl-camera" "$package/install-d3dx9.sh" "$package/install-dxvk.sh" "$package/install-d3dcompiler.sh" "$package/prepare-linux-runtime.sh"
 linux/camera-bridge-smoke.sh
+linux/runtime-smoke.sh
 # Test binaries and screenshots stay in out/linux, outside the distributable.
 tar -czf "out/AionCL-Launcher-2.5.42-linux-preview.${preview}.tar.gz" -C "$out" AionCL.Launcher.Linux.exe launcher.json assets/aioncl-icon.png aioncl-launcher aioncl-camera install-d3dx9.sh install-dxvk.sh install-d3dcompiler.sh prepare-linux-runtime.sh LINUX.md
+python3 - "$out" "out/AionCL-Launcher-2.5.42-linux-preview.${preview}.zip" <<'ZIP'
+import pathlib,sys,zipfile
+root=pathlib.Path(sys.argv[1])
+files=['AionCL.Launcher.Linux.exe','launcher.json','assets/aioncl-icon.png','aioncl-launcher','aioncl-camera','install-d3dx9.sh','install-dxvk.sh','install-d3dcompiler.sh','prepare-linux-runtime.sh','LINUX.md']
+with zipfile.ZipFile(sys.argv[2],'w',zipfile.ZIP_DEFLATED) as z:
+    for name in files:z.write(root/name,name)
+ZIP
+(cd out && sha256sum "AionCL-Launcher-2.5.42-linux-preview.${preview}.zip" > "AionCL-Launcher-2.5.42-linux-preview.${preview}.zip.sha256")
 (cd out && sha256sum "AionCL-Launcher-2.5.42-linux-preview.${preview}.tar.gz" > "AionCL-Launcher-2.5.42-linux-preview.${preview}.tar.gz.sha256")
 cat "out/AionCL-Launcher-2.5.42-linux-preview.${preview}.tar.gz.sha256"
 linux/package-deb.sh "$package" out
