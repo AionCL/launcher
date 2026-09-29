@@ -3,7 +3,7 @@ set -euo pipefail
 cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.."
 out=out/linux
 mkdir -p "$out"
-preview=${AIONCL_PREVIEW_NUMBER:-28}
+preview=${AIONCL_PREVIEW_NUMBER:-29}
 [[ $preview =~ ^[0-9]+$ ]] || { echo 'Invalid Linux preview number.' >&2; exit 1; }
 cat >"$out/LinuxBuildInfo.cs" <<EOF
 namespace AionCL
@@ -15,9 +15,9 @@ namespace AionCL
 }
 EOF
 refs=(-r:System.Net.Http -r:System.IO.Compression -r:System.IO.Compression.FileSystem -r:System.Web.Extensions -r:System.Windows.Forms -r:System.Drawing -r:System.Security)
-core=(src/Core.cs src/CameraSettings.cs src/Updates.cs src/KoreanPack.cs src/HitFont.cs linux/Platform.cs linux/OpenSslSha256.cs linux/GraphicsSettings.cs)
+core=(src/Core.cs src/CameraSettings.cs src/Updates.cs src/KoreanPack.cs src/JapanesePack.cs src/VoicePackSources.cs src/HitFont.cs linux/Platform.cs linux/OpenSslSha256.cs linux/GraphicsSettings.cs)
 resources=(-resource:assets/portal.png,AionCL.portal.png -resource:assets/classic-wings.jpg,AionCL.classic-wings.jpg -resource:config/korean-pack.json,AionCL.korean-pack.json -resource:config/japanese-pack.json,AionCL.japanese-pack.json -resource:assets/japanese-hit-font.pak,AionCL.hit-font.pak)
-mcs -define:LINUX,CAMERA_UI -target:exe -out:"$out/AionCL.Launcher.Linux.exe" "${refs[@]}" "${resources[@]}" "${core[@]}" "$out/LinuxBuildInfo.cs" src/Program.cs src/LauncherUi.cs src/Localization.cs src/UpdateUi.cs src/JapanesePack.cs linux/LauncherAuth.cs linux/GraphicsUi.cs linux/LauncherUpdater.cs
+mcs -define:LINUX,CAMERA_UI -target:exe -out:"$out/AionCL.Launcher.Linux.exe" "${refs[@]}" "${resources[@]}" "${core[@]}" "$out/LinuxBuildInfo.cs" src/Program.cs src/LauncherUi.cs src/Localization.cs src/UpdateUi.cs linux/LauncherAuth.cs linux/GraphicsUi.cs linux/LauncherUpdater.cs
 mcs -define:LINUX -out:"$out/AionCL.Tests.exe" "${refs[@]}" "${core[@]}" tests/tests.cs tests/RegressionTests.cs
 mono "$out/AionCL.Tests.exe"
 mcs -out:"$out/AionCL.LinuxTests.exe" "${refs[@]}" -r:"$out/AionCL.Launcher.Linux.exe" linux/Tests.cs

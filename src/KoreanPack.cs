@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.IO;
 using System.Linq;
 using System.Threading;
@@ -16,14 +16,9 @@ public sealed class KoreanPack {
     public static KoreanPack Load() { using(var s=typeof(KoreanPack).Assembly.GetManifestResourceStream("AionCL.korean-pack.json")) using(var r=new StreamReader(s)) return new KoreanPack(Json.Parse<ClientFile[]>(r.ReadToEnd())); }
     static string Prefix(string language) { if(language!="FRA"&&language!="ENG"&&language!="DEU"&&language!="RUS")throw new InvalidDataException("Unsupported language.");return "L10N/"+GameLanguage.Runtime(language)+"/sounds/"; }
     string Active(string root,string language,ClientFile f){return Safety.Under(root,Prefix(language)+f.path);}
-    static string SourceFile(string root,string relative) {
-        var direct=Safety.Under(root,relative);
-        if(File.Exists(direct)) return direct;
-        if(!Directory.Exists(root)) return direct;
-        var suffix=relative.Replace('/',Path.DirectorySeparatorChar);
-        foreach(var candidate in Directory.GetFiles(root,Path.GetFileName(relative),SearchOption.AllDirectories))
-            if(candidate.EndsWith(suffix,StringComparison.OrdinalIgnoreCase)) return candidate;
-        return direct;
+    public Task<string> FindSource(string root,string language,string preference,CancellationToken token) {
+        Prefix(language);
+        return VoicePackSources.FindAutomatic(root,language,"korean",preference,files,token);
     }
     string Cached(string root,ClientFile f){return Safety.Under(root,".aioncl/korean-pack-cache/"+f.path);}
     string Marker(string root,string language){Prefix(language);return Safety.Under(root,".aioncl/korean-pack-"+language+".json");}
@@ -47,6 +42,7 @@ public sealed class KoreanPack {
     }
     internal async Task ChangeFiles(string root,string language,bool install,string source,IProgress<VerificationProgress> progress,CancellationToken token) {
         Prefix(language);
+        var sources=install ? await VoicePackSources.Resolve(source,files,token).ConfigureAwait(false) : new System.Collections.Generic.Dictionary<string,string>();
         // Preflight the entire set before changing any active file.
         foreach(var f in files) {
             token.ThrowIfCancellationRequested();var active=Active(root,language,f);
@@ -54,7 +50,7 @@ public sealed class KoreanPack {
             if(install && !File.Exists(active)) {
                 var candidate=Cached(root,f);
                 if(!await Safety.Matches(candidate,f.size,f.sha256,token).ConfigureAwait(false)) {
-                    if(String.IsNullOrEmpty(source)||!await Safety.Matches(SourceFile(source,f.path),f.size,f.sha256,token).ConfigureAwait(false)) throw new IOException("Korean source missing or invalid: "+f.path+" (select the extracted pack folder or its parent)");
+                    if(!sources.ContainsKey(f.path)) throw new IOException("Korean source missing or invalid: "+f.path+" (select the extracted pack folder or its parent)");
                 }
             }
             if(!install && File.Exists(active) && File.Exists(Cached(root,f)) && !await Safety.Matches(Cached(root,f),f.size,f.sha256,token).ConfigureAwait(false)) throw new IOException("Modified Korean cache preserved: "+f.path);
@@ -66,7 +62,7 @@ public sealed class KoreanPack {
         foreach(var f in files) {
             token.ThrowIfCancellationRequested();var active=Active(root,language,f);var cache=Cached(root,f);
             if(install && !File.Exists(active)) {
-                string candidate=await Safety.Matches(cache,f.size,f.sha256,token).ConfigureAwait(false)?cache:SourceFile(source,f.path);
+                string candidate=await Safety.Matches(cache,f.size,f.sha256,token).ConfigureAwait(false)?cache:sources[f.path];
                 Directory.CreateDirectory(Path.GetDirectoryName(active));
                 var temp=Safety.Under(root,".aioncl/voice-copy-"+Guid.NewGuid().ToString("N")+".tmp");
                 try {

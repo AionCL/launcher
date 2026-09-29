@@ -399,14 +399,17 @@ public sealed partial class MainForm {
             VoiceMode.RequireGameClosed();
             bool install=!koreanPack.HasPack(root,language);
             if(install && japanesePack.HasPack(root,language)) throw new InvalidOperationException(L("Retirez d’abord le pack japonais avant d’activer les voix coréennes.","Remove the Japanese pack before enabling Korean voices.","Entfernen Sie zuerst das japanische Paket, bevor Sie koreanische Stimmen aktivieren."));
+            SetBusy(true);cts=new System.Threading.CancellationTokenSource();
+            statusLabel.Text=L("Recherche des voix coréennes disponibles…","Looking for available Korean voices…","Verfügbare koreanische Stimmen werden gesucht…");
             string source=null;
-            if(install && !koreanPack.HasCache(root)) {
-                source=koreanPack.PreviousSource(root,language);
-                if(source==null)using(var dialog=new FolderBrowserDialog { Description=L("Choisir le dossier extrait du pack coréen (pas le dossier du jeu). Le dossier doit contenir gossip, npc et system.","Select the extracted Korean pack folder (not the game folder). It must contain gossip, npc and system.","Den entpackten koreanischen Stimmenordner wählen (nicht den Spielordner). Er muss gossip, npc und system enthalten.") }) {
+            if(install) {
+                source=await koreanPack.FindSource(root,language,preferences,cts.Token);
+                if(source==null)source=koreanPack.PreviousSource(root,language);
+                if(source==null)using(var dialog=new FolderBrowserDialog { Description=L("Pack coréen introuvable automatiquement. Choisir le pack extrait ou la racine d’un ancien client contenant ce pack.","Select the extracted Korean pack folder (not the game folder). An old game folder containing this pack is also accepted.","Den entpackten koreanischen Stimmenordner wählen (nicht den Spielordner). Ein alter Spielordner mit diesem Paket wird ebenfalls akzeptiert.") }) {
                     if(dialog.ShowDialog(this)!=DialogResult.OK)return;source=dialog.SelectedPath;
                 }
             }
-            SetBusy(true);cts=new System.Threading.CancellationTokenSource();
+            if(source!=null)Log(L("Source des voix retrouvée : ","Voice source found: ","Stimmenquelle gefunden: ")+source);
             progressBar.Value=0;progressBar.Style=ProgressBarStyle.Marquee;
             statusLabel.Text=L("Contrôle du pack coréen…","Checking Korean voice pack…","Koreanisches Stimmenpaket wird geprüft…");
             var progress=CreateUiProgress<VerificationProgress>(delegate(VerificationProgress p) {
@@ -415,6 +418,7 @@ public sealed partial class MainForm {
                 statusLabel.Text=(install?L("Installation des voix","Installing voices","Stimmen installieren"):L("Retrait des voix","Removing voices","Stimmen entfernen"))+" : "+p.Completed+" / "+p.Total;
             });
             await koreanPack.Change(root,language,install,source,progress,cts.Token);
+            if(install&&source!=null)SavePreference(Path.Combine(Path.GetDirectoryName(preferences),"korean-pack-source.txt"),source);
             progressBar.Value=100;
             outcome=install?L("Voix coréennes installées. Textes conservés.","Korean voices installed. Text unchanged.","Koreanische Stimmen installiert. Texte unverändert."):L("Pack coréen retiré. Voix d’origine restaurées.","Korean pack removed. Original voices restored.","Koreanisches Paket entfernt. Originalstimmen wiederhergestellt.");
         } catch(OperationCanceledException) { outcome=L("Opération interrompue. Le bouton permet de retirer les fichiers ajoutés.","Operation interrupted. Use the button to remove added files.","Vorgang unterbrochen. Hinzugefügte Dateien über die Schaltfläche entfernen."); }
@@ -427,12 +431,17 @@ public sealed partial class MainForm {
         try {
             VoiceMode.RequireGameClosed(); bool install=!japanesePack.HasPack(root,language);
             if(install && koreanPack.HasPack(root,language)) throw new InvalidOperationException(L("Retirez d’abord le pack coréen avant d’activer les voix japonaises.","Remove the Korean pack before enabling Japanese voices.","Entfernen Sie zuerst das koreanische Paket, bevor Sie japanische Stimmen aktivieren."));
-            string source=null;
-            if(install && !japanesePack.HasCache(root)) using(var dialog=new FolderBrowserDialog { Description=L("Choisir le dossier extrait du pack japonais (pas le dossier du jeu). Le dossier doit contenir gossip, npc et system.","Select the extracted Japanese pack folder (not the game folder). It must contain gossip, npc and system.","Den entpackten japanischen Stimmenordner wählen (nicht den Spielordner). Er muss gossip, npc und system enthalten.") }) { if(dialog.ShowDialog(this)!=DialogResult.OK)return; source=dialog.SelectedPath; }
-            SetBusy(true); cts=new System.Threading.CancellationTokenSource(); progressBar.Value=0; progressBar.Style=ProgressBarStyle.Marquee;
+            SetBusy(true);cts=new System.Threading.CancellationTokenSource();
+            statusLabel.Text=L("Recherche des voix japonaises disponibles…","Looking for available Japanese voices…","Verfügbare japanische Stimmen werden gesucht…");
+            string source=install?await japanesePack.FindSource(root,language,preferences,cts.Token):null;
+            if(install && source==null) using(var dialog=new FolderBrowserDialog { Description=L("Pack japonais introuvable automatiquement. Choisir le pack extrait ou la racine d’un ancien client contenant ce pack.","Select the extracted Japanese pack folder (not the game folder). An old game folder containing this pack is also accepted.","Den entpackten japanischen Stimmenordner wählen (nicht den Spielordner). Ein alter Spielordner mit diesem Paket wird ebenfalls akzeptiert.") }) { if(dialog.ShowDialog(this)!=DialogResult.OK)return; source=dialog.SelectedPath; }
+            if(source!=null)Log(L("Source des voix retrouvée : ","Voice source found: ","Stimmenquelle gefunden: ")+source);
+            progressBar.Value=0; progressBar.Style=ProgressBarStyle.Marquee;
             statusLabel.Text=L("Contrôle du pack japonais…","Checking Japanese voice pack…","Japanisches Stimmenpaket wird geprüft…");
             var progress=CreateUiProgress<VerificationProgress>(delegate(VerificationProgress p) { if(!reporting||IsDisposed)return; progressBar.Style=ProgressBarStyle.Continuous; progressBar.Value=(int)(100L*p.Completed/p.Total); statusLabel.Text=(install?L("Installation des voix","Installing voices","Stimmen installieren"):L("Retrait des voix","Removing voices","Stimmen entfernen"))+" : "+p.Completed+" / "+p.Total; });
-            await japanesePack.Change(root,language,install,source,progress,cts.Token); progressBar.Value=100;
+            await japanesePack.Change(root,language,install,source,progress,cts.Token);
+            if(install&&source!=null)SavePreference(Path.Combine(Path.GetDirectoryName(preferences),"japanese-pack-source.txt"),source);
+            progressBar.Value=100;
             outcome=install?L("Voix japonaises installées. Textes conservés.","Japanese voices installed. Text unchanged.","Japanische Stimmen installiert. Texte unverändert."):L("Pack japonais retiré. Voix d’origine restaurées.","Japanese pack removed. Original voices restored.","Japanisches Paket entfernt. Originalstimmen wiederhergestellt.");
         } catch(OperationCanceledException) { outcome=L("Opération interrompue. Les fichiers ajoutés restent contrôlés.","Operation interrupted. Added files remain protected.","Vorgang unterbrochen. Hinzugefügte Dateien bleiben geschützt."); }
         catch(Exception ex) { outcome=TranslateMessage(ex.Message); MessageBox.Show(this,outcome,"AionCL",MessageBoxButtons.OK,MessageBoxIcon.Error); }

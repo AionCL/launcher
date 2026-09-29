@@ -61,6 +61,7 @@ Write-Host "Program : $programFile"
     (Join-Path $root 'src\Updates.cs') `
     (Join-Path $root 'src\UpdateUi.cs') `
     (Join-Path $root 'src\KoreanPack.cs') `
+    (Join-Path $root 'src\VoicePackSources.cs') `
     (Join-Path $root 'src\JapanesePack.cs') `
     (Join-Path $root 'src\HitFont.cs') `
     (Join-Path $root 'src\LauncherAuth.cs') `
@@ -112,6 +113,8 @@ if ($Tests) {
         $coreFile `
         (Join-Path $root 'src\Updates.cs') `
         (Join-Path $root 'src\KoreanPack.cs') `
+        (Join-Path $root 'src\JapanesePack.cs') `
+        (Join-Path $root 'src\VoicePackSources.cs') `
         (Join-Path $root 'src\HitFont.cs') `
         $testsFile `
         (Join-Path $root 'src\CameraSettings.cs') `

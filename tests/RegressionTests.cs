@@ -56,6 +56,39 @@ public static class RegressionTests {
             Check(!await pack.Valid(root,"FRA",CancellationToken.None),"Corrupt pack accepted");
             try{await pack.ChangeFiles(root,"FRA",false,null,null,CancellationToken.None);throw new Exception("Modified file erased");}catch(IOException){}
             Check(File.ReadAllText(Path.Combine(localized,"zattack.pak"))=="modified","Conflict not preserved");
+
+            // A former client can contain both languages. Never pick a wrong
+            // variant just because its filename was enumerated first.
+            string oldClient=Path.Combine(source,"old-client"),newClient=Path.Combine(root,"new-client"),data=Path.Combine(root,"preferences");
+            Directory.CreateDirectory(data);Directory.CreateDirectory(newClient);
+            string preference=Path.Combine(data,"launcher-path.txt");File.WriteAllText(preference,newClient);File.WriteAllText(preference+".bak-fixture",oldClient);
+            byte[] kor=Encoding.UTF8.GetBytes("kor"),jap=Encoding.UTF8.GetBytes("jap");
+            var korFile=new ClientFile {path="cutscene/dc1/voice/zvoice.pak",size=kor.Length,sha256=Safety.Sha(kor)};
+            var japFile=new ClientFile {path=korFile.path,size=jap.Length,sha256=Safety.Sha(jap)};
+            string korFolder=Path.Combine(oldClient,"client",".aioncl","korean-pack-cache"),japFolder=Path.Combine(oldClient,"client",".aioncl","japanese-pack-cache");
+            foreach(var folder in new[]{korFolder,japFolder})Directory.CreateDirectory(Path.Combine(folder,"cutscene","dc1","voice"));
+            File.WriteAllBytes(Path.Combine(korFolder,"cutscene","dc1","voice","zvoice.pak"),kor);
+            File.WriteAllBytes(Path.Combine(japFolder,"cutscene","dc1","voice","zvoice.pak"),jap);
+            var korean=new KoreanPack(new[]{korFile});var japanese=new JapanesePack(new[]{japFile});
+            string found=await korean.FindSource(newClient,"FRA",preference,CancellationToken.None);
+            Check(found==korFolder,"Discover Korean cache in previous installation without asking for folder");
+            await korean.ChangeFiles(newClient,"FRA",true,found,null,CancellationToken.None);
+            Check(await korean.Valid(newClient,"FRA",CancellationToken.None),"Auto-discovered Korean source installs in new client");
+            await korean.ChangeFiles(newClient,"FRA",false,null,null,CancellationToken.None);
+            found=await japanese.FindSource(newClient,"FRA",preference,CancellationToken.None);
+            Check(found==japFolder,"Discover Japanese cache in previous installation");
+            await japanese.ChangeFiles(newClient,"FRA",true,oldClient,null,CancellationToken.None);
+            Check(await japanese.Valid(newClient,"FRA",CancellationToken.None),"Selecting game root resolves correct Japanese hash among variants");
+            await japanese.ChangeFiles(newClient,"FRA",false,null,null,CancellationToken.None);
+            await korean.ChangeFiles(newClient,"FRA",true,oldClient,null,CancellationToken.None);
+            Check(await korean.Valid(newClient,"FRA",CancellationToken.None),"Selecting game root resolves correct Korean hash among variants");
+            Check(File.ReadAllBytes(Path.Combine(japFolder,"cutscene","dc1","voice","zvoice.pak")).SequenceEqual(jap),"Previous source stays unchanged");
+            string uppercase=Path.Combine(source,"uppercase","CUTSCENE","DC1","VOICE");Directory.CreateDirectory(uppercase);File.WriteAllBytes(Path.Combine(uppercase,"ZVOICE.PAK"),jap);
+            var matches=await VoicePackSources.Resolve(Path.Combine(source,"uppercase"),new[]{japFile},CancellationToken.None);
+            Check(matches.Count==1,"Nested source discovery handles Linux filename casing");
+            var cancelled=new CancellationTokenSource();cancelled.Cancel();
+            try {await VoicePackSources.Resolve(oldClient,new[]{korFile},cancelled.Token);throw new Exception("Source search ignored cancellation");}catch(OperationCanceledException) {}
+            Check((await VoicePackSources.Resolve(Path.Combine(root,"missing-pack"),new[]{korFile},CancellationToken.None)).Count==0,"Missing sources are not fabricated");
         }finally{Cleanup(root);Cleanup(source);}
     }
     sealed class CheckProgress : IProgress<VerificationProgress> {

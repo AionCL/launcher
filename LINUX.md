@@ -16,7 +16,7 @@ docker run --rm --user "$(id -u):$(id -g)" -e HOME=/tmp -v "$PWD:/src" aioncl-li
 Ou installer Mono (compilateur `mcs`), libgdiplus, Xvfb, xauth et DejaVu puis
 exécuter `./linux/build.sh`. Le script compile, exécute les régressions du cœur
 et les tests Linux, rend l'interface sous Xvfb puis produit
-`out/AionCL-Launcher-2.5.42-linux-preview.28.tar.gz` et son SHA-256 par défaut. Il produit
+`out/AionCL-Launcher-2.5.42-linux-preview.29.tar.gz` et son SHA-256 par défaut. Il produit
 aussi des paquets `.deb` et `.rpm`, avec contrôle de leur contenu et dépendances.
 Le rendu de contrôle reste dans `out/linux/linux-preview.png`.
 
@@ -179,7 +179,7 @@ Le script installe le D3DCompiler 47 x64 officiel de Microsoft, vérifie son
 SHA-256, sauvegarde la DLL Wine et déplace les caches de shaders existants.
 Le launcher force ensuite son chargement natif uniquement pour le jeu.
 
-## Compatibilité graphique des personnages (preview28)
+## Compatibilité graphique des personnages (preview29)
 
 La préparation Linux installe aussi Microsoft D3DX9_38 x64, indépendamment de
 la marque du GPU. Dans **Paramètres → Compatibilité graphique Linux**, le mode
@@ -191,7 +191,7 @@ Les caches sont sauvegardés/recréés uniquement lors d'un changement de mode o
 de la réparation d'une DLL. Le jeu doit être fermé. Le correctif est confirmé
 sur le ZBook NVIDIA ; AMD/Intel et autres distributions restent à qualifier.
 
-## Mise à jour du launcher Linux (à partir de preview28)
+## Mise à jour du launcher Linux (à partir de preview29)
 
 Le bouton **Mettre à jour le launcher** apparaît lorsqu'une version Linux plus
 récente est publiée. Le flux Linux est distinct du flux Windows et les fichiers
@@ -212,6 +212,20 @@ automatiquement après réussite. En cas d'échec ou de refus d'autorisation, le
 launcher affiche l'erreur dans le journal et reste ouvert.
 
 Preview25 et les versions antérieures n'ont pas ce mécanisme : il faut installer
-preview28 manuellement une fois. Les mises à jour suivantes sont proposées dans
+preview29 manuellement une fois. Les mises à jour suivantes sont proposées dans
 le launcher ; la construction de chaque nouvelle version reste nécessaire côté
 développeur, mais le joueur n'a plus à télécharger/installer manuellement.
+
+## Packs de voix après réinstallation (preview29)
+
+Le clic **Installer les voix coréennes/japonaises** recherche les fichiers locaux
+valides dans le client sélectionné, la dernière source du pack mémorisée et les
+anciens clients connus du launcher. Les caches internes et le sous-dossier
+`client` des anciennes recettes sont reconnus. La racine d'un ancien client ou
+un dossier parent des packs peut être sélectionné : plusieurs versions/langues
+peuvent coexister, le SHA-256 attendu sélectionne les bons fichiers.
+
+Les sources ne sont pas modifiées ; les fichiers sont copiés et vérifiés dans le
+client courant. La recherche est annulable et ne bloque pas l'interface. Si le
+pack n'existe dans aucune source locale connue, le launcher demande un dossier
+extrait. Cette version ne télécharge pas automatiquement les packs de voix.

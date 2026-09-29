@@ -2,9 +2,9 @@
 set -euo pipefail
 cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.."
 destination=${1:-out}
-version=${AIONCL_DEB_VERSION:-2.5.42~preview28}
-rpm_release=${AIONCL_RPM_RELEASE:-0.preview28}
-preview=${AIONCL_PREVIEW_NUMBER:-28}
+version=${AIONCL_DEB_VERSION:-2.5.42~preview29}
+rpm_release=${AIONCL_RPM_RELEASE:-0.preview29}
+preview=${AIONCL_PREVIEW_NUMBER:-29}
 deb="$destination/aioncl-launcher_${version}_amd64.deb"
 rpm="$destination/aioncl-launcher-2.5.42-${rpm_release}.x86_64.rpm"
 [[ -f $deb && -f $rpm ]]
