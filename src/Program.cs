@@ -190,14 +190,14 @@ namespace AionCL
             }
             var validation = ValidateNativeCredentials(authUser.Text.Trim(), authPassword.Text);
             if (validation != null) { authStatus.Text = TranslateMessage(validation); return; }
-            launcherAuth.SaveCredentials(authUser.Text.Trim(), authPassword.Text,
-#if LINUX
-                true
-#else
-                authRemember.Checked
-#endif
-            );
-            RefreshAccountBox(authUser.Text.Trim());
+            try {
+                launcherAuth.SaveCredentials(authUser.Text.Trim(), authPassword.Text, true);
+                launcherAuth.SelectAccount(authUser.Text.Trim());
+                RefreshAccountBox(authUser.Text.Trim());
+            } catch (Exception) {
+                authStatus.Text = L("Impossible de sauvegarder les identifiants. Vérifiez les permissions du dossier utilisateur.", "Cannot save credentials. Check your user folder permissions.", "Zugangsdaten konnten nicht gespeichert werden. Prüfe die Ordnerberechtigungen.");
+                return;
+            }
             authStatus.Text = TranslateMessage("Identifiants enregistrés pour le client.");
             await Task.Yield();
         }
@@ -523,10 +523,7 @@ namespace AionCL
             }
             var credentialError = ValidateNativeCredentials(directAuthUser, directAuthPassword);
             if (credentialError != null) { authStatus.Text = TranslateMessage(credentialError); return; }
-#if !LINUX
-            launcherAuth.SaveCredentials(directAuthUser, directAuthPassword, authRemember.Checked);
-            RefreshAccountBox(directAuthUser);
-#endif
+
             authStatus.Text = TranslateMessage("Connexion directe en préparation…");
 
             SetBusy(true);
@@ -710,6 +707,11 @@ namespace AionCL
             if (!busy) { foreach(var progress in linuxProgress) progress.Dispose(); linuxProgress.Clear(); }
 #endif
             this.busy = busy;
+            accountBox.Enabled = !busy;
+            authUser.Enabled = !busy;
+            authPassword.Enabled = !busy;
+            authManualButton.Enabled = !busy;
+            forgetCredentialsButton.Enabled = !busy;
             languageBox.Enabled = !busy;
             koreanVoices.Enabled = !busy;
             japaneseVoices.Enabled = !busy;

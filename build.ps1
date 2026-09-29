@@ -124,6 +124,10 @@ if ($Tests) {
         throw 'Test compilation failed.'
     }
 
+    & $compiler /nologo /target:exe "/out:$(Join-Path $out 'AionCL.AccountTests.exe')" @references "/r:$launcherExe" (Join-Path $root 'tests\AccountTests.cs')
+    if ($LASTEXITCODE -ne 0) { throw 'Account test compilation failed.' }
+    & (Join-Path $out 'AionCL.AccountTests.exe')
+    if ($LASTEXITCODE -ne 0) { throw 'Account tests failed.' }
     Copy-Item $appConfig "$testsExe.config" -Force
 }
 

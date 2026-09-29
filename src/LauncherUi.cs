@@ -88,7 +88,7 @@ public sealed partial class MainForm {
         footer=new Panel { BackColor=Color.FromArgb(215,12,15,21) }; Controls.Add(footer);
         authSectionLabel=LabelAt(footer,"Connexion au jeu",28,3,130,18,9,accent);
         accountBox.DropDownStyle=ComboBoxStyle.DropDownList; accountBox.FlatStyle=FlatStyle.Flat; accountBox.BackColor=Color.FromArgb(35,43,56); accountBox.ForeColor=ForeColor; accountBox.AccessibleName="Compte enregistré"; accountBox.IntegralHeight=true; accountBox.MaxDropDownItems=8; accountBox.DropDownWidth=180; footer.Controls.Add(accountBox);
-        accountBox.SelectedIndexChanged += delegate { if(loadingAccounts||accountBox.SelectedItem==null)return; var saved=launcherAuth.Find(accountBox.SelectedItem.ToString()); if(saved!=null){authUser.Text=saved.username;authPassword.Text=saved.password;authRemember.Checked=true;authStatus.Text=L("Compte enregistré sélectionné.","Saved account selected.","Gespeichertes Konto ausgewählt.");} };
+        accountBox.SelectedIndexChanged += delegate { if(loadingAccounts||accountBox.SelectedItem==null)return; var saved=launcherAuth.Find(accountBox.SelectedItem.ToString()); if(saved!=null){authUser.Text=saved.username;authPassword.Text=saved.password;authRemember.Checked=true;authStatus.Text=L("Compte enregistré sélectionné.","Saved account selected.","Gespeichertes Konto ausgewählt.");RememberSelectedAccount(saved.username);} };
         authUserLabel=LabelAt(footer,"Identifiant",28,20,150,16,8,muted);
         authPasswordLabel=LabelAt(footer,"Mot de passe",206,20,150,16,8,muted);
         authUser.SetBounds(28,36,170,30); authUser.BackColor=BackColor; authUser.ForeColor=ForeColor; authUser.BorderStyle=BorderStyle.FixedSingle; footer.Controls.Add(authUser);
@@ -110,7 +110,15 @@ public sealed partial class MainForm {
         logBox.Multiline=true; logBox.ReadOnly=true; logBox.ScrollBars=ScrollBars.Vertical; logBox.BackColor=BackColor; logBox.ForeColor=ForeColor; logBox.BorderStyle=BorderStyle.None;
         journalPanel = new SurfacePanel { BackColor=Color.FromArgb(14,21,30), Visible=false, Padding=new Padding(18) };
         StyleButton(diagnosticsButton,"",journalPanel,18,10,200,32,false); diagnosticsButton.Click += async delegate { await RunDiagnosticsAsync(); };
-        StyleButton(forgetCredentialsButton,"",journalPanel,228,10,250,32,false); forgetCredentialsButton.Click += delegate { if(accountBox.SelectedItem!=null) launcherAuth.ForgetCredential(accountBox.SelectedItem.ToString()); else launcherAuth.ForgetCredentials(); RefreshAccountBox(null); authUser.Clear(); authPassword.Clear(); authRemember.Checked=false; authStatus.Text=L("Compte mémorisé effacé.","Saved account removed.","Gespeichertes Konto gelöscht."); };
+        StyleButton(forgetCredentialsButton,"",journalPanel,228,10,250,32,false); forgetCredentialsButton.Click += delegate {
+            try {
+                if(accountBox.SelectedItem!=null)launcherAuth.ForgetCredential(accountBox.SelectedItem.ToString());else launcherAuth.ForgetCredentials();
+                RefreshAccountBox(null);
+                authStatus.Text=L("Compte mémorisé effacé.","Saved account removed.","Gespeichertes Konto gelöscht.");
+            } catch(Exception) {
+                authStatus.Text=L("Impossible de supprimer le compte mémorisé. Vérifiez les permissions du dossier utilisateur.","Cannot remove saved account. Check your user folder permissions.","Gespeichertes Konto konnte nicht gelöscht werden. Prüfe die Ordnerberechtigungen.");
+            }
+        };
         diagnosticsStatus.SetBounds(494,10,Math.Max(160,contentArea==null?280:contentArea.Width-520),34); diagnosticsStatus.ForeColor=muted; diagnosticsStatus.Font=new Font("Segoe UI",8); journalPanel.Controls.Add(diagnosticsStatus);
         journalPanel.Controls.Add(logBox);
         try { if(File.Exists(preferences)) pathBox.Text=File.ReadAllText(preferences); } catch(IOException) {} catch(UnauthorizedAccessException) {}
@@ -124,8 +132,8 @@ public sealed partial class MainForm {
 #endif
         BuildShell();
         BuildUpdateUi(); LayoutLauncher(); ApplyLanguage();
-#if LINUX
         authRemember.Checked=false; authRemember.Enabled=false; authRemember.Visible=false;
+#if LINUX
         cameraButton.Enabled=true;
         cameraButton.Text="Camera / FOV";
 #endif
@@ -281,9 +289,7 @@ public sealed partial class MainForm {
         authUserLabel.SetBounds(x,36,userWidth,16); authUser.SetBounds(x,52,userWidth,30); x+=userWidth+gap;
         authPasswordLabel.SetBounds(x,36,userWidth,16); authPassword.SetBounds(x,52,userWidth,30); x+=userWidth+gap;
         if(authRemember.Visible) { authRemember.SetBounds(x,55,rememberWidth,24); x+=rememberWidth+gap; }
-#if LINUX
         manualWidth=Math.Max(manualWidth,210);
-#endif
         authManualButton.SetBounds(x,50,manualWidth,34);
         authStatus.SetBounds(left,88,Math.Max(300,available),20);
     }
@@ -291,8 +297,14 @@ public sealed partial class MainForm {
         var l=new Label { Text=t,Bounds=new Rectangle(x,y,w,h),ForeColor=c,BackColor=Color.Transparent,Font=new Font("Segoe UI",size) }; p.Controls.Add(l); return l;
     }
     private void OpenCommunity(string url) { if(String.IsNullOrWhiteSpace(url)) return; try { Process.Start(new ProcessStartInfo { FileName=Safety.Https(url).AbsoluteUri, UseShellExecute=true }); } catch(Exception ex) { Log(ex.Message); } }
+    private void RememberSelectedAccount(string username) {
+        try { launcherAuth.SelectAccount(username); }
+        catch(Exception) { authStatus.Text=L("Compte choisi pour cette session ; sélection non sauvegardée.","Account selected for this session; selection could not be saved.","Konto für diese Sitzung ausgewählt; Auswahl konnte nicht gespeichert werden."); }
+    }
     private void RefreshAccountBox(string selected) {
         if(accountBox==null)return;
+        if(String.IsNullOrWhiteSpace(selected))selected=launcherAuth.SelectedAccount;
+        authUser.Clear(); authPassword.Clear(); authRemember.Checked=false;
         loadingAccounts=true; accountBox.Items.Clear(); int index=-1, i=0;
         foreach(var account in launcherAuth.Accounts) { if(String.IsNullOrWhiteSpace(account.username))continue; accountBox.Items.Add(account.username); if(String.Equals(account.username,selected,StringComparison.OrdinalIgnoreCase))index=i; i++; }
         if(index<0&&accountBox.Items.Count>0)index=0; if(index>=0)accountBox.SelectedIndex=index; loadingAccounts=false;
@@ -343,12 +355,11 @@ public sealed partial class MainForm {
         homeButton.Text=L("Accueil","Home","Start"); helpButton.Text=L("Paramètres","Settings","Einstellungen"); journalButton.Text=L("Journal","Log","Protokoll");
         discordButton.Text=""; youtubeButton.Text="";
         authSectionLabel.Text=L("Connexion au jeu","Game login","Spielanmeldung"); authUserLabel.Text=L("Identifiant","Username","Benutzername"); authPasswordLabel.Text=L("Mot de passe","Password","Passwort"); authRemember.Text=L("Mémoriser dans Windows","Remember in Windows","In Windows speichern");
-        authManualButton.Text=L("Utiliser ces identifiants","Use these credentials","Diese Zugangsdaten verwenden");
+        authManualButton.Text=L("Sauvegarder ces identifiants","Save these credentials","Zugangsdaten speichern");
         homeButton.BackColor=storyPage=="home"?Color.FromArgb(44,61,75):BackColor; helpButton.BackColor=storyPage=="settings"?Color.FromArgb(44,61,75):BackColor; journalButton.BackColor=storyPage=="journal"?Color.FromArgb(44,61,75):BackColor;
         clientTitle.Text=L("Votre jeu","Your game","Dein Spiel");pathLabel.Text=L("DOSSIER DU CLIENT","GAME FOLDER","SPIELORDNER");languageLabel.Text=L("LANGUE DU JEU ET DU LAUNCHER","GAME & LAUNCHER LANGUAGE","SPIEL- UND LAUNCHERSPRACHE");
-        installButton.Text=L("Installer / reprendre","Install / resume","Installieren / fortsetzen");verifyButton.Text=L("Vérifier / réparer","Verify / repair","Prüfen / reparieren"); shortcutsButton.Text=L("Créer les raccourcis Windows","Create Windows shortcuts","Windows-Verknüpfungen erstellen"); diagnosticsButton.Text=L("Tester la connexion","Run connection test","Verbindung testen"); forgetCredentialsButton.Text=L("Effacer les identifiants mémorisés","Clear saved credentials","Gespeicherte Zugangsdaten löschen"); cancelButton.Text=L("Interrompre","Interrupt","Unterbrechen"); playButton.Text=L("▶   JOUER","▶   PLAY","▶   SPIELEN");
+        installButton.Text=L("Installer / reprendre","Install / resume","Installieren / fortsetzen");verifyButton.Text=L("Vérifier / réparer","Verify / repair","Prüfen / reparieren"); shortcutsButton.Text=L("Créer les raccourcis Windows","Create Windows shortcuts","Windows-Verknüpfungen erstellen"); diagnosticsButton.Text=L("Tester la connexion","Run connection test","Verbindung testen"); forgetCredentialsButton.Text=L("Supprimer le compte sélectionné","Remove selected account","Ausgewähltes Konto löschen"); cancelButton.Text=L("Interrompre","Interrupt","Unterbrechen"); playButton.Text=L("▶   JOUER","▶   PLAY","▶   SPIELEN");
 #if LINUX
-        authManualButton.Text=L("Sauvegarder ces identifiants","Save these credentials","Zugangsdaten speichern");
         shortcutsButton.Text=L("Créer le raccourci Linux","Create Linux shortcut","Linux-Verknüpfung erstellen");
 #endif
         browseButton.AccessibleName=L("Choisir le dossier client","Choose game folder","Spielordner auswählen");

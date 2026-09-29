@@ -3,7 +3,7 @@ set -euo pipefail
 cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.."
 out=out/linux
 mkdir -p "$out"
-preview=${AIONCL_PREVIEW_NUMBER:-29}
+preview=${AIONCL_PREVIEW_NUMBER:-30}
 [[ $preview =~ ^[0-9]+$ ]] || { echo 'Invalid Linux preview number.' >&2; exit 1; }
 cat >"$out/LinuxBuildInfo.cs" <<EOF
 namespace AionCL
@@ -20,6 +20,8 @@ resources=(-resource:assets/portal.png,AionCL.portal.png -resource:assets/classi
 mcs -define:LINUX,CAMERA_UI -target:exe -out:"$out/AionCL.Launcher.Linux.exe" "${refs[@]}" "${resources[@]}" "${core[@]}" "$out/LinuxBuildInfo.cs" src/Program.cs src/LauncherUi.cs src/Localization.cs src/UpdateUi.cs linux/LauncherAuth.cs linux/GraphicsUi.cs linux/LauncherUpdater.cs
 mcs -define:LINUX -out:"$out/AionCL.Tests.exe" "${refs[@]}" "${core[@]}" tests/tests.cs tests/RegressionTests.cs
 mono "$out/AionCL.Tests.exe"
+mcs -out:"$out/AionCL.AccountTests.exe" "${refs[@]}" -r:"$out/AionCL.Launcher.Linux.exe" tests/AccountTests.cs
+xvfb-run -a mono "$out/AionCL.AccountTests.exe"
 mcs -out:"$out/AionCL.LinuxTests.exe" "${refs[@]}" -r:"$out/AionCL.Launcher.Linux.exe" linux/Tests.cs
 xvfb-run -a mono "$out/AionCL.LinuxTests.exe"
 mcs -out:"$out/AionCL.GameSmoke.exe" "${refs[@]}" -r:"$out/AionCL.Launcher.Linux.exe" linux/GameSmoke.cs

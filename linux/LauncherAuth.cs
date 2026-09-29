@@ -27,15 +27,42 @@ public sealed class LauncherAuth {
             } catch { return new List<SavedAccount>(); }
         }
     }
+    string SelectionPath { get { return Path.Combine(directory,"selected-account.txt"); } }
+    public string SelectedAccount {
+        get {
+            var accounts=Accounts;
+            try {
+                var selected=File.ReadAllText(SelectionPath,Encoding.UTF8).Trim();
+                foreach(var account in accounts)
+                    if(String.Equals(account.username,selected,StringComparison.OrdinalIgnoreCase))return account.username;
+            } catch(IOException) {} catch(UnauthorizedAccessException) {}
+            return accounts.Count==0 ? null : accounts[0].username;
+        }
+    }
+    void ClearSelection() {
+        if(File.Exists(SelectionPath)) {
+            RejectLink(SelectionPath);
+            File.Delete(SelectionPath);
+        }
+    }
+    public void SelectAccount(string username) {
+        var account=Find(username);
+        if(account==null)return;
+        SecureDirectory();
+        if(File.Exists(SelectionPath))RejectLink(SelectionPath);
+        File.WriteAllText(SelectionPath,account.username,new UTF8Encoding(false));
+        if(Chmod(SelectionPath,Convert.ToUInt32("600",8))!=0)throw new IOException("Cannot restrict account selection permissions.");
+    }
     public SavedAccount Find(string username) {
         foreach(var account in Accounts)
             if(String.Equals(account.username,username,StringComparison.OrdinalIgnoreCase))
                 return new SavedAccount { username=account.username,password=account.password };
         return null;
     }
-    public void ForgetCredentials() { if(File.Exists(credentials)){RejectLink(credentials);File.Delete(credentials);} }
+    public void ForgetCredentials() { ClearSelection(); if(File.Exists(credentials)){RejectLink(credentials);File.Delete(credentials);} }
     public void ForgetCredential(string username) {
         var accounts=Accounts;
+        if(String.Equals(SelectedAccount,username,StringComparison.OrdinalIgnoreCase))ClearSelection();
         accounts.RemoveAll(account=>String.Equals(account.username,username,StringComparison.OrdinalIgnoreCase));
         Write(accounts);
     }

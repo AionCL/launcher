@@ -16,7 +16,7 @@ docker run --rm --user "$(id -u):$(id -g)" -e HOME=/tmp -v "$PWD:/src" aioncl-li
 Ou installer Mono (compilateur `mcs`), libgdiplus, Xvfb, xauth et DejaVu puis
 exécuter `./linux/build.sh`. Le script compile, exécute les régressions du cœur
 et les tests Linux, rend l'interface sous Xvfb puis produit
-`out/AionCL-Launcher-2.5.42-linux-preview.29.tar.gz` et son SHA-256 par défaut. Il produit
+`out/AionCL-Launcher-2.5.42-linux-preview.30.tar.gz` et son SHA-256 par défaut. Il produit
 aussi des paquets `.deb` et `.rpm`, avec contrôle de leur contenu et dépendances.
 Le rendu de contrôle reste dans `out/linux/linux-preview.png`.
 
@@ -229,3 +229,13 @@ Les sources ne sont pas modifiées ; les fichiers sont copiés et vérifiés dan
 client courant. La recherche est annulable et ne bloque pas l'interface. Si le
 pack n'existe dans aucune source locale connue, le launcher demande un dossier
 extrait. Cette version ne télécharge pas automatiquement les packs de voix.
+
+## Comptes enregistrés (preview30, Linux et Windows)
+
+Le bouton « Sauvegarder ces identifiants » ajoute ou met à jour un compte.
+Le menu déroulant remplit les champs et mémorise immédiatement le compte choisi
+pour les prochains démarrages. JOUER utilise les champs sans modifier les mots
+de passe sauvegardés. Supprimer le compte sélectionné restaure le compte restant
+en tête de liste, ou vide les champs si aucun compte ne reste.
+Windows conserve la protection DPAPI par utilisateur ; Linux conserve les
+permissions privées du dossier de configuration.
