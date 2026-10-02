@@ -12,10 +12,6 @@ fi
 for command in curl sha256sum tar pgrep; do
     command -v "$command" >/dev/null || { echo "Missing dependency: $command" >&2; exit 1; }
 done
-if pgrep -x aionclassic.bin >/dev/null; then
-    echo 'Close Aion before installing DXVK.' >&2
-    exit 1
-fi
 
 client=$(realpath -- "$1")
 version=2.6.2

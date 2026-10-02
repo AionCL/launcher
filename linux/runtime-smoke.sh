@@ -7,7 +7,7 @@ trap 'rm -rf -- "$work"' EXIT
 mkdir -p "$work/bin" "$work/helpers" "$work/prefix/drive_c/windows/system32" "$work/client/bin64" "$work/cache/aioncl/directx"
 export PATH="$work/bin:$PATH" XDG_CACHE_HOME="$work/cache" AIONCL_TEST_LOG="$work/wine.log"
 export AIONCL_WINE="$work/bin/custom-wine"
-cp "$base/prepare-linux-runtime.sh" "$base/install-d3dx9.sh" "$work/helpers/"
+cp "$base/prepare-linux-runtime.sh" "$base/install-d3dx9.sh" "$base/install-dxvk.sh" "$base/install-d3dcompiler.sh" "$work/helpers/"
 cat > "$work/bin/custom-wine" <<'EOF'
 #!/bin/sh
 printf '%s\n' "$*" >> "$AIONCL_TEST_LOG"
@@ -18,7 +18,7 @@ exit 99
 EOF
 cat > "$work/bin/pgrep" <<'EOF'
 #!/bin/sh
-exit 1
+exit "${AIONCL_TEST_RUNNING:-1}"
 EOF
 cat > "$work/bin/sha256sum" <<'EOF'
 #!/bin/sh
@@ -37,9 +37,22 @@ while (($#)); do
 done
 printf 'microsoft-dll-fixture' > "$destination/$file"
 EOF
-for installer in install-dxvk.sh install-d3dcompiler.sh; do
- printf '#!/bin/sh\nexit 0\n' > "$work/helpers/$installer"
+cat > "$work/bin/tar" <<'EOF'
+#!/bin/bash
+while (($#)); do
+ case "$1" in
+  -C) destination=$2;shift 2;;
+  *) shift;;
+ esac
 done
+mkdir -p "$destination/dxvk-2.6.2/x64" "$destination/dxvk-2.6.2/x32"
+printf dxvk64 > "$destination/dxvk-2.6.2/x64/d3d9.dll"
+printf dxvk32 > "$destination/dxvk-2.6.2/x32/d3d9.dll"
+EOF
+mkdir -p "$work/cache/aioncl/dxvk" "$work/cache/aioncl/d3dcompiler"
+printf archive-fixture > "$work/cache/aioncl/dxvk/dxvk-2.6.2.tar.gz"
+printf archive-fixture > "$work/cache/aioncl/d3dcompiler/d3dcompiler-47-x64.cab"
+printf wine-compiler > "$work/prefix/drive_c/windows/system32/d3dcompiler_47.dll"
 chmod +x "$work/bin/"* "$work/helpers/"*
 printf archive-fixture > "$work/cache/aioncl/directx/directx_Jun2010_redist.exe"
 printf wine-dll-fixture > "$work/prefix/drive_c/windows/system32/d3dx9_38.dll"
@@ -60,4 +73,30 @@ grep -q '/v d3dx9_38 /t REG_SZ /d builtin /f' "$work/wine.log"
 bash "$work/helpers/prepare-linux-runtime.sh" "$work/prefix" "$work/client" native > "$work/native-mode.log"
 [[ $(cat "$work/client/.aioncl/d3dx9-mode") == native ]]
 if bash "$work/helpers/prepare-linux-runtime.sh" "$work/prefix" "$work/client" invalid >/dev/null 2>&1; then exit 1;fi
-printf 'RUNTIME_SMOKE_PASS native install, custom runner, idempotence, Wine fallback, cache transitions\n'
+# Reuse all production installers with a first client still running.
+export AIONCL_TEST_RUNNING=0
+mkdir -p "$work/client/Shaders/Cache"
+printf live > "$work/client/Shaders/Cache/live"
+bash "$work/helpers/prepare-linux-runtime.sh" "$work/prefix" "$work/client" native > "$work/multiclient.log"
+for marker in DXVK_ALREADY_READY D3DCOMPILER_ALREADY_READY D3DX9_38_ALREADY_READY LINUX_RUNTIME_READY; do
+ grep -q "$marker" "$work/multiclient.log"
+done
+[[ $(cat "$work/client/Shaders/Cache/live") == live ]]
+if bash "$work/helpers/prepare-linux-runtime.sh" "$work/prefix" "$work/client" wine > "$work/blocked-mode.log" 2>&1; then exit 1; fi
+[[ $(cat "$work/client/.aioncl/d3dx9-mode") == native ]]
+# Repairs must still fail without touching libraries or shared caches.
+for entry in 'install-dxvk.sh|client/bin64/d3d9.dll' 'install-d3dcompiler.sh|prefix/drive_c/windows/system32/d3dcompiler_47.dll' 'install-d3dx9.sh|prefix/drive_c/windows/system32/d3dx9_38.dll'; do
+ installer=${entry%%|*}; target="$work/${entry#*|}"
+ cp "$target" "$work/original.dll"
+ printf broken > "$target"
+ if [[ $installer == install-dxvk.sh ]]; then
+  args=("$work/client")
+ else
+  args=("$work/prefix" "$work/client")
+ fi
+ if bash "$work/helpers/$installer" "${args[@]}" > "$work/blocked-$installer.log" 2>&1; then exit 1; fi
+ [[ $(cat "$target") == broken ]]
+ [[ $(cat "$work/client/Shaders/Cache/live") == live ]]
+ mv "$work/original.dll" "$target"
+done
+printf 'RUNTIME_SMOKE_PASS native install, custom runner, idempotence, Wine fallback, cache transitions, second client, blocked live repairs\n'

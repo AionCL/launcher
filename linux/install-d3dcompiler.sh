@@ -14,10 +14,6 @@ for command in curl sha256sum cabextract pgrep; do
     command -v "$command" >/dev/null || { echo "Missing dependency: $command" >&2; exit 1; }
 done
 command -v "$wine_runner" >/dev/null || { echo "Missing Wine runner: $wine_runner" >&2; exit 1; }
-if pgrep -x aionclassic.bin >/dev/null; then
-    echo 'Close Aion before installing its shader compiler.' >&2
-    exit 1
-fi
 
 export WINEPREFIX="$(realpath -- "$1")"
 client=$(realpath -- "$2")

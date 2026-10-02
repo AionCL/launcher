@@ -17,6 +17,13 @@ client=$(realpath -- "$2")
 export WINEPREFIX="$prefix"
 wine_runner=${AIONCL_WINE:-wine}
 command -v "$wine_runner" >/dev/null || { echo "Missing Wine runner: $wine_runner" >&2; exit 1; }
+# Reuse is safe with a running client; mode changes invalidate shared caches.
+state="$client/.aioncl/d3dx9-mode"
+previous=$(cat "$state" 2>/dev/null || true)
+if [[ $previous != "$mode" ]] && pgrep -x aionclassic.bin >/dev/null; then
+    echo 'Close Aion before changing its graphics mode.' >&2
+    exit 1
+fi
 "$wine_runner" reg add 'HKCU\Software\Wine\AppDefaults\aionclassic.bin' /v Version /t REG_SZ /d win7 /f
 "$base/install-dxvk.sh" "$client"
 "$base/install-d3dcompiler.sh" "$prefix" "$client"
@@ -26,8 +33,6 @@ else
     "$wine_runner" reg add 'HKCU\Software\Wine\DllOverrides' /v d3dx9_38 /t REG_SZ /d builtin /f
 fi
 # Rebuild caches only when the mode changes, including the first migration.
-state="$client/.aioncl/d3dx9-mode"
-previous=$(cat "$state" 2>/dev/null || true)
 if [[ $previous != "$mode" ]]; then
     backup="$client/.aioncl/shader-cache-before-d3dx9-$(date +%Y%m%d-%H%M%S)-$$"
     mkdir -p "$backup"

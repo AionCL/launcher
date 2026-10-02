@@ -239,3 +239,11 @@ de passe sauvegardés. Supprimer le compte sélectionné restaure le compte rest
 en tête de liste, ou vide les champs si aucun compte ne reste.
 Windows conserve la protection DPAPI par utilisateur ; Linux conserve les
 permissions privées du dossier de configuration.
+
+## Plusieurs clients simultanés
+
+Après préparation du runtime, il est possible de sélectionner un autre compte
+et de relancer JOUER en gardant le premier client ouvert. Les bibliothèques
+DXVK, D3DCompiler et D3DX déjà conformes sont réutilisées. Une réparation ou
+un changement de mode D3DX demande toujours de fermer les clients pour protéger
+les bibliothèques et caches partagés.
