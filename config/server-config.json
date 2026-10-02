@@ -1,7 +1,7 @@
 {
   "version": 1,
   "serverName": "AionCL Classic 2.4",
-  "loginHost": "aioncl.freeddns.org",
+  "loginHost": "aioncl.com",
   "loginPort": 2106,
   "gamePort": 7777,
   "maintenance": false

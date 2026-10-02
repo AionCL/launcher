@@ -33,7 +33,7 @@ git push -u origin main
 ```powershell
 $url = 'https://raw.githubusercontent.com/AionCL/launcher/main/config/server-config.json'
 $server = Invoke-RestMethod -Uri $url -TimeoutSec 30
-if ($server.version -ne 1 -or $server.loginHost -ne 'aioncl.freeddns.org' -or $server.loginPort -ne 2106 -or $server.gamePort -ne 7777 -or $server.maintenance -isnot [bool]) { throw 'Configuration publique inattendue' }
+if ($server.version -ne 1 -or $server.loginHost -ne 'aioncl.com' -or $server.loginPort -ne 2106 -or $server.gamePort -ne 7777 -or $server.maintenance -isnot [bool]) { throw 'Configuration publique inattendue' }
 $server | ConvertTo-Json
 ```
 
